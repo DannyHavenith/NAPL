@@ -1,31 +1,17 @@
 template <typename sampletype>
 struct function : public creative_block_producer 
 {
+	typedef std::vector<double> prototype_t;
 
-	function( const std::vector< double> proto, const stream_header &h)
+	function( const prototype_t &proto, const stream_header &h)
 		:creative_block_producer( function::buffer_size_stategy( proto.size())),
+		m_prototype( proto),
 		m_pos(0),
 		m_period( proto.size()),
 		m_header(h)
 	{
-		sample_container< sampletype> container( m_block);
-		sample_container< sampletype>::iterator dest = container.begin();
-
-		// for this while loop to work, it is important that the 
-		// m_block size is an exact multiple of the proto size
-		while (dest != container.end())
-		{
-			std::vector<double>::const_iterator source;
-			for (source = proto.begin(); source != proto.end(); ++source, ++dest)
-			{
-				sampletraits<sampletype>::channel_type chan;
-				denormalize_sample( *source, chan);
-
-				//denormalize_sample( sampletraits<sampletype>::expand_to_channels( *source), *dest);
-				*dest =  sampletraits<sampletype>::expand_to_channels( chan);
-			}
-		}
 	}
+
 
 	virtual void GetStreamHeader( stream_header &h)
 	{
@@ -39,6 +25,7 @@ struct function : public creative_block_producer
 
 private:
 
+	prototype_t m_prototype;
 	stream_header m_header;
 	sampleno m_pos;
 	sampleno m_period;
@@ -57,6 +44,25 @@ private:
 		}
 
 		return in_buffer;
+	}
+
+	virtual void InitBlock(sample_block &block)
+	{
+		sample_container< sampletype> container( block);
+		sample_container< sampletype>::iterator dest = container.begin();
+
+		// for this while loop to work, it is important that the 
+		// block size is an exact multiple of the m_prototype size
+		while (dest != container.end())
+		{
+			std::vector<double>::const_iterator source;
+			for (source = m_prototype.begin(); source != m_prototype.end(); ++source, ++dest)
+			{
+				sampletraits<sampletype>::channel_type chan;
+				denormalize_sample( *source, chan);
+				*dest =  sampletraits<sampletype>::expand_to_channels( chan);
+			}
+		}
 	}
 
 	// determine how big the buffer will be.

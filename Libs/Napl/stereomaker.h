@@ -18,15 +18,17 @@ protected:
 		mono_container::iterator left_ptr = left_container.begin();
 		mono_container::iterator right_ptr = right_container.begin();
 
+		block_handle h( this); // releases the block on exit
+		sample_block &block( h.get_block());
 
-		m_block.m_start = m_block.buffer_begin();
+		block.m_start = block.buffer_begin();
 		// nearest multiple of the output size...
-		size_t max_block_size = (m_block.buffer_size()/ sizeof stereo_type) * sizeof stereo_type;
+		size_t max_block_size = (block.buffer_size()/ sizeof stereo_type) * sizeof stereo_type;
 
 		while (right_ptr < right_container.end())
 		{
-			stereo_type *output_ptr = ( stereo_type *)(m_block.buffer_begin());
-			stereo_type *output_end = (stereo_type *)( m_block.buffer_begin() + max_block_size);
+			stereo_type *output_ptr = ( stereo_type *)(block.buffer_begin());
+			stereo_type *output_end = (stereo_type *)( block.buffer_begin() + max_block_size);
 			size_t sample_count = 0;
 			
 			while (right_ptr != right_container.end() && output_ptr != output_end)
@@ -37,8 +39,8 @@ protected:
 				++right_ptr;
 				++sample_count;
 			}
-			m_block.m_end = m_block.m_start + (sample_count * sizeof stereo_type);
-			pC->ReceiveBlock( m_block);
+			block.m_end = block.m_start + (sample_count * sizeof stereo_type);
+			pC->ReceiveBlock( block);
 		}
 	}
 };

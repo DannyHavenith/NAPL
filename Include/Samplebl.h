@@ -6,6 +6,8 @@
 #define _SAMPLEBLOCK_H_
 #include <stddef.h>
 #include "architec.h"
+#include "boost/shared_ptr.hpp"
+#include "boost/utility.hpp"
 
 #define BLOCK_ERROR 1
 typedef int block_result;
@@ -50,6 +52,32 @@ struct byte_buffer
 	size_t m_size;
 };
 
+struct buffer_allocator
+{
+private:
+	long m_buffer_count;
+	buffer_allocator() : m_buffer_count(0){};
+	~buffer_allocator()
+	{
+		std::cerr << "allocated " << m_buffer_count << " buffers" << std::endl;
+	}
+
+public:
+	static buffer_allocator &get_instance()
+	{
+		static buffer_allocator the_instance;
+		return the_instance;
+	}
+
+	byte_buffer *create_buffer( size_t size)
+	{
+		++m_buffer_count;
+		return new byte_buffer( size);
+	}
+
+
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Sample_block contains some contiguous memory with samples
@@ -60,6 +88,7 @@ struct sample_block
 {
 	typedef byte_buffer::byte_type byte_type;
 
+
 	inline sample_block(){};
 
 	inline sample_block( size_t size)
@@ -69,7 +98,7 @@ struct sample_block
 
 	inline void Init( size_t size)
 	{
-		m_buffer_ptr.reset( new byte_buffer( size));
+		m_buffer_ptr.reset( buffer_allocator::get_instance().create_buffer( size));
 		m_start = m_buffer_ptr->get_begin();
 		m_end = m_start + m_buffer_ptr->get_size();
 	}
@@ -95,6 +124,87 @@ struct sample_block
 	// The shared pointer to the actual buffer bytes
 	//
 	boost::shared_ptr< byte_buffer> m_buffer_ptr;
+};
+
+class block_manager
+{
+
+
+public:
+
+	typedef boost::shared_ptr<sample_block> block_ptr_t;
+	typedef std::vector< block_ptr_t> block_list_t;
+
+	block_manager( size_t size)
+		: m_block_size( size)
+	{
+		// nop
+	}
+
+	//
+	// gets a new or re-used block
+	// returns false if the block is new (un-initialized) and true 
+	// if it is a re-used block.
+	//
+	bool get_block( block_ptr_t &result)
+	{
+		if (m_free_blocks.size())
+		{
+			result.swap( m_free_blocks.back());
+			m_free_blocks.pop_back();
+			return true;
+		}
+		else
+		{
+			result.reset( new sample_block( m_block_size));
+			return false;
+		}
+	}
+
+	void release_block( block_ptr_t &block)
+	{
+		m_free_blocks.push_back( block);
+		block.reset();
+	}
+
+	size_t get_block_size() const
+	{
+		return m_block_size;
+	}
+
+private:
+	block_list_t m_free_blocks;
+	size_t m_block_size;
+
+};
+
+class block_handle : public boost::noncopyable
+{
+	block_manager *m_manager_ptr;
+	block_manager::block_ptr_t m_current_block;
+	bool m_initialized;
+
+public:
+	block_handle( block_manager *manager)
+		: m_manager_ptr( manager)
+	{
+		m_initialized = manager->get_block( m_current_block);
+	}
+
+	~block_handle()
+	{
+		m_manager_ptr->release_block( m_current_block);
+	}
+
+	sample_block &get_block()
+	{
+		return *m_current_block;
+	}
+
+	bool is_initialized()
+	{
+		return m_initialized;
+	}
 };
 
 //
@@ -137,22 +247,21 @@ public:
 // block_owner is a base type that represents objects that have their own block
 // and fill it with sample data
 //
-class block_owner
+class block_owner : protected block_manager
 {
 public:
 	block_owner()
+		: block_manager( 1024 * 1024)
 	{
-		InitBlock( 1024 * 1024);
+		
 	}
 
 	explicit block_owner( size_t size)
+		:block_manager( size)
 	{
-		InitBlock( size);
+		
 	}
-protected:
-	sample_block m_block;
 
-	inline void InitBlock( size_t size) { m_block.Init( size);}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -326,10 +435,19 @@ public:
 		unsigned long nReceived;
 		
 		Seek( start);
-		while ( nToGo && (nReceived = FillBlock( m_block, nToGo))) 
+
+		block_handle h( this); // releases the block on exit
+		sample_block &block( h.get_block());
+		if (!h.is_initialized())
+		{
+			InitBlock( block);
+		}
+		
+
+		while ( nToGo && (nReceived = FillBlock( block, nToGo))) 
 		{
 			nToGo -= nReceived;
-			consumer.ReceiveBlock( m_block);
+			consumer.ReceiveBlock( block);
 		}
 
 		if (!nToGo) return 0;
@@ -337,7 +455,12 @@ public:
 	}
 
 protected:
+	// this function is called whenever a block of samples is requested
 	virtual sampleno FillBlock( sample_block &b, sampleno count) = 0;
+
+	// this function is called once for every newly created block
+	virtual void InitBlock( sample_block &b) {};
+
 	block_result m_result;
 };
 

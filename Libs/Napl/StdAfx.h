@@ -21,10 +21,10 @@
 #include <vector>
 #include <ostream>
 #include <iostream>
-using std::string;
 #include <limits>
-#include "boost/shared_ptr.hpp"
+#include <list>
 
+using std::string;
 
 // TODO: reference additional headers your program requires here
 

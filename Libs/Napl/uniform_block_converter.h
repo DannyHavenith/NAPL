@@ -122,7 +122,7 @@ public:
 		//
 		while (num)
 		{
-			sub_block = std::min(  num, m_converter.destination_type_samples( m_block.buffer_size()));
+			sub_block = std::min(  num, m_converter.destination_type_samples( get_block_size()));
 			m_pProducer->RequestBlock( *this, start + offset, sub_block);
 			num -= sub_block;
 			offset += sub_block;
@@ -136,10 +136,14 @@ public:
 
 	virtual void ReceiveBlock( const sample_block &b)
 	{
-		m_block.m_start = m_block.buffer_begin();
+
+		block_handle h( this); // releases the block on exit
+		sample_block &block( h.get_block());
+
+		block.m_start = block.buffer_begin();
 
 		unsigned char *pSrcFrame = b.m_start;
-		unsigned char *pTgtFrame = m_block.m_start;
+		unsigned char *pTgtFrame = block.m_start;
 
 		while (pSrcFrame < b.m_end)
 		{
@@ -149,8 +153,8 @@ public:
 			m_converter.advance_destination( pTgtFrame);
 		}
 
-		m_block.m_end = pTgtFrame;
-		m_pConsumer->ReceiveBlock( m_block);
+		block.m_end = pTgtFrame;
+		m_pConsumer->ReceiveBlock( block);
 
 	}
 
