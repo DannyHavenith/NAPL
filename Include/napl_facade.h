@@ -192,4 +192,6 @@ public:
 	// modulate a sound source with a floating point sound stream...
 	static block_producer_wrapper * amp_modulate(block_producer_wrapper * source, block_producer_wrapper * modulator);
 
+	// convert the samples in the source stream to a different type.
+	static block_producer_wrapper * convert(block_producer_wrapper * source, int samplesize);
 };

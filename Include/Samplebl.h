@@ -784,15 +784,33 @@ protected:
 	sample_mutator m_sample_mutator;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// block_multi_consumers are consumers that have multiple inputs.
-//
-// They need block_connectors to operate properly.
-//
+
+
+/**
+ * \ingroup Napl
+ * \brief a consumer of more than one producer.
+ * block_multi_consumers are consumers that have multiple inputs.
+ * They need more than one block_connector to operate properly.
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-23-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_multi_consumer
 {
 public:
+	/**
+	 * The multi-consumer variant of the ReceiveBlock method has one 
+	 * extra parameter: the 'channel'. This channel identifies the source
+	 * of the data.
+	 * \param &b the parameter block, see also block_consumer
+	 * \param channel the channel, see also block_connector
+	 */
 	virtual void ReceiveBlock( const sample_block &b, short channel) = 0;
 
 protected:
@@ -804,9 +822,22 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// block_connectors provide a standard block_consumer interface for each input
-// of a block_multi_consumer.
 //
+//
+/**
+ * \ingroup Napl
+ * block_connectors provide a standard block_consumer interface for each input
+ * of a block_multi_consumer.
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-24-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_connector: public block_consumer
 {
 public:
@@ -834,6 +865,19 @@ private:
 //
 // A binary_block_processor is a special kind of multi_consumer, having 2 inputs
 //
+/**
+ * \ingroup Napl
+ * a binary_block_processor is a special case of a block_multi_consumer that has 
+ * exactly 2 inputs
+ * \version 1.0
+ * first version
+ *
+ * \date 12-24-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class binary_block_processor: public block_producer, public block_multi_consumer
 {
 public:
@@ -861,6 +905,15 @@ public:
 
 	virtual void MutateHeader( stream_header &result, const stream_header &left, const stream_header &right) = 0;
 
+	/**
+	 * a binary block processor will first send the block request to it's left producer. When it
+	 * receives a block from the left producer, it will ask for the corresponding block of its right
+	 * producer.
+	 * \param &consumer 
+	 * \param start 
+	 * \param num 
+	 * \return 
+	 */
 	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
 	{
 		state_saver<block_consumer *> save( m_pConsumer);
@@ -876,6 +929,13 @@ public:
 		m_left.GetProducer()->Seek( start);
 	};
 
+	/**
+	 * If the block comes from the left-producer (channel 0), this function requests the corresponding 
+	 * block from the right-producer. If the block comes from the right-producer (channel 1) both
+	 * the left- and the right block will be offered to the ProcessBlocks virtual function.
+	 * \param &b 
+	 * \param channel 
+	 */
 	virtual void ReceiveBlock( const sample_block &b, short channel)
 	{
 		// if we receive a block from our zero channel, it's time to request the corresponding
@@ -920,11 +980,20 @@ protected:
 	block_connector m_right;
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// A binary_block_mutator is a binary_block_processor that delegates real 
-// processing to a 'mutator' object that is given as a template parameter.
-//
+
+/**
+ * \ingroup Napl
+ * A binary_block_mutator is a binary_block_processor that delegates real 
+ * processing to a 'mutator' object that is given as a template parameter.
+ * \version 1.0
+ * first version
+ *
+ * \date 12-25-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 template <typename mutator>
 class asymmetric_binary_block_mutator : public binary_block_processor
 {

@@ -621,6 +621,7 @@ inline typename sampletraits< StereoSample< sampletype> >::foreach_channel_type<
 		);
 }
 
+/*
 template<typename sampletype>
 inline void denormalize_sample( double in, sampletype &out)
 {
@@ -639,16 +640,9 @@ inline void denormalize_sample( double in, sampletype &out)
 	}
 
 }
-
-template<>
-inline void denormalize_sample( double in, double &out)
-{
-	out = in;
-}
+*/
 
 
-
-/*
 template<typename sampletype>
 inline void denormalize_sample( typename sampletraits<sampletype>::foreach_channel_type<double>::type in, sampletype &out)
 {
@@ -656,16 +650,23 @@ inline void denormalize_sample( typename sampletraits<sampletype>::foreach_chann
 	typedef sampletraits< typename traits_type::channel_type> channel_traits;
 	
 
-	double temp = channel_traits::get_max() - channel_traits::get_middle();
+	static const double temp = channel_traits::get_max() - channel_traits::get_middle();
+	static const sampletype middle = traits_type::expand_to_channels( channel_traits::get_middle());
+
 	in *= temp;
-	in -= traits_type::expand_to_channels( channel_traits::get_middle());
+	in -= middle;
 	out = static_cast<sampletype>( in);
 	
 
 }
 
-template <>
-inline void denormalize_sample( typename sampletraits<double>::foreach_channel_type<double>::type in, double &out)
+inline void denormalize_sample( double in, double &out)
+{
+	out = in;
+}
+
+/*
+inline void denormalize_sample( sampletraits<double>::foreach_channel_type<double>::type in, double &out)
 {
 	out = in;
 }

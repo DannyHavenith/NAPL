@@ -31,7 +31,7 @@ public:
 	virtual block_producer *GetFunction( const std::vector<double> &prototype, const stream_header &h) = 0;
 	virtual block_mutator *GetChannelExtractor( short channel) = 0;
 	virtual binary_block_processor *GetAmpModulator() = 0;
-	//virtual from_to_factory *GetFromToFactory( const stream_header &to_header) = 0;
+	virtual from_to_factory *GetFromToFactory( const stream_header &to_header) = 0;
 	//virtual block_mutator *GetFFT( int power) = 0;
 };
 
@@ -53,7 +53,7 @@ public:
 	virtual block_producer *GetFunction( const std::vector<double> &prototype, const stream_header &h);
 	virtual block_mutator *GetChannelExtractor( short channel);
 	virtual binary_block_processor *GetAmpModulator();
-	//virtual from_to_factory *GetFromToFactory( const stream_header &from_header);
+	virtual from_to_factory *GetFromToFactory( const stream_header &from_header);
 
 
 //virtual block_mutator *GetFFT( int power);

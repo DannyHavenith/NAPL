@@ -23,6 +23,9 @@
 #include "type_converter.h"
 #include "amp_modulator.h"
 
+
+
+
 template< typename sampletype>
 block_mutator *create_pan( short pan_value, const StereoSample<sampletype> &)
 {
@@ -139,38 +142,7 @@ binary_block_processor * t_sample_object_factory<sampletype>::GetAmpModulator()
 	return new asymmetric_binary_block_mutator< amp_modulator_mutator< double, sampletype> >();
 }
 
-/*
-template< typename sampletype>
-secondary_type_factory *t_sample_object_factory<sampletype>::GetSecondaryFactory( stream_header &h)
-{
 
-}
-*/
-/*
-//
-// Of the FFT mutator, we only have a float, double and short version...
-//
-template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetFFT(int power)
-{
-	return 0;
-}
-
-block_mutator *t_sample_object_factory<short>::GetFFT(int power)
-{
-	return new fft<short>( power);
-}
-
-block_mutator *t_sample_object_factory<float>::GetFFT(int power)
-{
-	return new fft<float>( power);
-}
-
-block_mutator *t_sample_object_factory<double>::GetFFT(int power)
-{
-	return new fft<double>( power);
-}
-*/
 
 sample_object_factory *factory_factory::GetSampleFactory( const stream_header &h)
 {
@@ -238,6 +210,7 @@ sample_object_factory *factory_factory::GetSampleFactory( const stream_header &h
 
 	else return 0;
 }
+
 
 block_producer *GlobalGetEndianConverter( const stream_header &h, block_producer *pP)
 {

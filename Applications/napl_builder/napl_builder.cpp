@@ -70,15 +70,14 @@ std::string escape_chars( std::string raw_str)
 	return raw_str;
 }
 
-// run the script that is contained in 'script'.
-// pass the arguments in argc and argv to the script
 /**
  * run the script that is contained in 'script'.
  * pass the arguments in argc and argv to the script
  * \param script the script string
  * \param argc count of the commandline arguments
  * \param argv[] commandline arguments
- * \return TODO the output of the script
+ * \return the integer returnvalue of the script
+ * \todo the output of the script
  */
 int run_script( string script, int argc, _TCHAR * argv[])
 {
@@ -108,7 +107,7 @@ int run_script( string script, int argc, _TCHAR * argv[])
 	platform::name_list_t::const_iterator i;
 	for (i = cl_arguments.begin(), ++i; i != cl_arguments.end(); ++i)
 	{
-		argument_stub_function += (string(", \"") + escape_chars( *i) + "\"");
+		argument_stub_function += (", \"" + escape_chars( *i) + "\"");
 	}
 	argument_stub_function += "];\nreturn main( args);};";
 
@@ -116,6 +115,7 @@ int run_script( string script, int argc, _TCHAR * argv[])
 	script += argument_stub_function;
 
 
+	// parse the script
 	try
 	{
 		parser.parse( script);
@@ -129,8 +129,10 @@ int run_script( string script, int argc, _TCHAR * argv[])
 		error( string("a runtime error occurred: ") + e.what());
 	}
 
+	//
+	// run the script
+	//
 	int output = -255;
-
 	// find the main function 
 	valueP main_func = parser.global()["__napl_main"];
 	if (main_func)
@@ -158,7 +160,8 @@ int run_script( string script, int argc, _TCHAR * argv[])
 
 /**
  * parse #include-statements that may appear at the beginning of the file and replace them with the 
- * actual contents of the include file
+ * actual contents of the include file. 
+ * This function will recursively expand any includes that occurr in included files as well.
  * \param &target the string to scan for includes.
  * \return true if successfull
  */
@@ -174,7 +177,7 @@ bool parse_includes( std::string &target)
 
 	// define our 'grammar'
 	rule<> comment = comment_p("//");
-	rule<> include = ch_p('#')>> *blank_p  >> "include" >> *blank_p >>  confix_p('"', (*c_escape_ch_p)[push_back_a(includes)], '"');
+	rule<> include = '#' >> *blank_p  >> "include" >> *blank_p >>  confix_p('"', (*c_escape_ch_p)[push_back_a(includes)], '"');
 	rule<> file_header = *((+space_p) | comment | include);
 
 	parse_info<> info = parse( target.c_str(), file_header);
