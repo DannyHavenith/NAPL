@@ -39,7 +39,7 @@ struct typed_converter
 		h.numchannels = sampletraits< destination_type>::get_num_channels();
 
 		// TODO: floats
-		h.samplesize = 8 * sizeof destination_type;
+		h.samplesize = 8 * sizeof destination_type / h.numchannels;
 	}
 };
 

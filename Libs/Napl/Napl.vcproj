@@ -132,6 +132,9 @@
 				RelativePath=".\aiff.cpp">
 			</File>
 			<File
+				RelativePath=".\double_dispatch_factory.cpp">
+			</File>
+			<File
 				RelativePath=".\Filefact.cpp">
 			</File>
 			<File

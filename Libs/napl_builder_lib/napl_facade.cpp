@@ -86,6 +86,7 @@ void napl_facade::init(boost::clipp::context * c)
 	cls.static_function( "iterator", iterator)
 		.signature( "source", "window_size", arg("jump_size") = 0.0);
 	cls.static_function( "amp_modulate", amp_modulate);
+	cls.static_function( "convert", convert);
 
 	//
 	// also add the file reader and -writer to the environment
@@ -494,7 +495,7 @@ file_reader::file_reader( std::string filename)
 // returns true when the file reader is at end-of-file or if it is in some error-state
 bool file_reader::eof(void)
 {
-	return !m_stream;
+	return m_stream.eof();
 }
 
 void file_reader::close(void)
@@ -531,4 +532,26 @@ file_writer * file_writer::create_one(std::string filename)
 file_reader * file_reader::create_one(std::string filename)
 {
 	return new file_reader( filename);
+}
+
+// convert the samples in the source stream to a different type.
+block_producer_wrapper * napl_facade::convert(block_producer_wrapper * source, int samplesize)
+{
+	stream_header source_header;
+	source->producer->GetStreamHeader( source_header);
+
+	stream_header dest_header = source_header;
+	dest_header.samplesize = samplesize;
+
+	from_to_factory *ftf = get_factory( source)->GetFromToFactory( dest_header);
+	
+	block_mutator *converter = ftf->GetConverter();
+	converter->LinkTo( source->producer);
+
+	if (!converter)
+	{
+		throw napl_error( "could not create converter");
+	}
+
+	return new block_producer_wrapper( converter);
 }

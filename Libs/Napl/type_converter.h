@@ -6,7 +6,8 @@ struct type_converter: public typed_converter< type_converter< source_type, dest
 {
 	void do_convert( const source_type *src, destination_type *dest)
 	{
-		*dest = *src;
+		//*dest = static_cast<destination_type>( *src);
+		denormalize_sample( normalize_sample( *src), *dest);
 	}
 };
 
