@@ -34,7 +34,7 @@ samples are 16- or 24-bits, stereo, mono or quad streams.
 
 [endsect]
 
-[section:helloworld Sample Scripts]
+[section:helloworld Hello World]
 
 Without much further ado, let's look at a simple Napl script, that reads an input, delays 
 the sound with 3.5 seconds (or rather, adds 3.5 seconds of silence before the sound) and writes 
@@ -46,7 +46,7 @@ the result:
 		{
 			file = read_file( "input.wav");
 			delayed = delay( file, 3.5, 0);
-			write_file( delayed, "output.wav");	
+			write_file( delayed, "output.aif");	
 		}
 	}
 
@@ -60,6 +60,16 @@ with `args[1]`.
 The main function may or may not return an integer value. If it does, that value will be returned to 
 the caller of the script.
 
+[h2 File Types]
+
+Currently, Napl supports two file formats: wav and aiff. You normally never specify the type of file
+you are going to read or write, Napl will try to determine the type by examining the file extension.
+
+Napl may actually write files that are not in a valid wav or aiff-format. This is the case
+when you create a sample-stream of type 'double' which is not supporteed in most file types. 
+Other packages will nog be able to read Napl-created wav files of type 'double'. Napl itself
+however, will always be able to read the files that it wrote.
+
 [h2 With-statement]
 
 For readability, the example script uses a `with`-statement. This is entirely optional. Instead of 
@@ -67,6 +77,91 @@ using a `with`-statement you can choose to prefix all Napl function calls with /
 
 	file = Napl.read_file( "input.wav");
 	
+[endsect]
+
+[section:examples More Napl Examples]
+
+Let's now move to a more practical example of a Napl-script. The script below will analyze a file to find it's maximum
+and minimum values. It will then determine an amplification factor that will amplify the signal so that it uses it's 
+full dynamic range.
+
+
+	//
+	// calculate an amplification factor
+	// that will keep the samples just within the maximum
+	// allowed range.
+	//
+	function get_amp_factor( source)
+	{
+		analysis = Napl.analyze( source);
+		
+		//
+		// calculate the amplification needed to make full use of the dynamic range
+		//
+		max_sample = Math.max( Math.abs( analysis.max), Math.abs( analysis.min));
+		if (max_sample < 0.000001)
+		{
+			factor = 1;
+		}
+		else
+		{
+			factor = 1/max_sample;
+		}
+
+		return factor;
+	}
+
+	//
+	// amplify (multiply) the source with a constant that 
+	// will keep the samples just within the maximum
+	// allowed range
+	//
+	function normalize( source)
+	{
+		amp = get_amp_factor( source);
+		return Napl.amplify( source, amp);
+	}
+
+
+	function main( args ) 
+	{
+		//
+		// first, get the script arguments 
+		args.shift(); // script name
+		if (args.length < 2)
+		{
+			writeln( "i need two argumens: <inputfile> <outputfile>");
+			return -1;
+		}
+
+		inputfile = args.shift();
+		outputfile = args.shift();
+
+		//
+		// open the file and get the minimum and maximum values
+		//
+		file = Napl.read_file( inputfile);
+		normalized = normalize( file);
+		Napl.write_file( normalized, outputfile);
+		
+		return 1;
+	};
+
+
+
+[endsect]
+
+[section:performance Napl Performance]
+
+Napl was designed with two important criteria in mind: Napl should provide the highest /reasonable/ performance and 
+Napls implementation should be easy to understand and to extend. Surprisingly, these requirements were hardly
+ever in conflict. Please note the word /reasonable/ in the requirements above. In practice, this means that 
+Napl should be able to process samples in the order of time it takes a file-system to read them
+from disk. Of course, in the end, Napls speed will depend on the complexity of the operations involved.
+
+Napl does not, at this time, use processor specific optimizations or assembly code. Napls current optimizations are at 
+the design-level only.
+
 [endsect]
 
 [section:functions Napl Functions]
