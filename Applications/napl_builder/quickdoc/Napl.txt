@@ -6,10 +6,10 @@
     [purpose Napl efficiently processes audio streams.]
     [category The document's category]
     [authors [Havenith, Danny]]
-    [license Currently there is no license to this product]
+    [license It is my intention to eventually let Napl be LGPL-ed, 
+			until that time however, you are NOT granted any implicit license 
+			and NO guarantees will be given AT ALL]
 ]
-
-[/ Napl document version 0.1]
 
 [section Introduction to Napl]
 
@@ -34,7 +34,7 @@ samples are 16- or 24-bits, stereo, mono or quad streams.
 
 [endsect]
 
-[section:helloworld Hello World Sample]
+[section:helloworld Sample Scripts]
 
 Without much further ado, let's look at a simple Napl script, that reads an input, delays 
 the sound with 3.5 seconds (or rather, adds 3.5 seconds of silence before the sound) and writes 
