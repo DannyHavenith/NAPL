@@ -199,6 +199,9 @@
 					RelativePath="..\..\Include\objfact.h">
 				</File>
 				<File
+					RelativePath="..\..\Include\progress.h">
+				</File>
+				<File
 					RelativePath="..\..\Include\reinterpret.h">
 				</File>
 				<File

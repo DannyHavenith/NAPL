@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iterator>
+#include <algorithm>
 #include <tchar.h>
 #include <boost/clipp.hpp>
 #include <boost/javascript.hpp>

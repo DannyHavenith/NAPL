@@ -29,11 +29,14 @@ private:
 
 struct text_based_progress_bar : public progress
 {
-	text_based_progress_bar( std::ostream &strm, int size);
+	text_based_progress_bar( const std::string &text, std::ostream &strm, int size);
 	virtual void step( float progress);
 private:
 	std::ostream &m_stream;
 	int m_size;
+	std::string m_text;
+	bool m_hidden;
+
 public:
 	~text_based_progress_bar(void);
 };

@@ -159,8 +159,26 @@ ever in conflict. Please note the word /reasonable/ in the requirements above. I
 Napl should be able to process samples in the order of time it takes a file-system to read them
 from disk. Of course, in the end, Napls speed will depend on the complexity of the operations involved.
 
-Napl does not, at this time, use processor specific optimizations or assembly code. Napls current optimizations are at 
-the design-level only.
+Napl does not, at this time, use processor specific optimizations or assembly code. Napls current 
+optimizations are at the design-level only.
+
+[h2 Lazy Evaluation]
+Napl will not start processing before it is clear what samples need to be processed. For instance, given 
+the following statement
+
+	output = cut( change_speed( read_file( "input.wav"), 1.5), 0, 2);
+	
+Napl will do absolutely nothing. Only if this statement were followed by the statement:
+
+	write_file( output, "output.wav");
+	
+Napl will start reading the first three seconds of the input file, to be able to provide the first 1.5 seconds 
+for the output file.
+
+In fact, only two functions will actually get Napl started: `write_file( source, filename)` and 
+`analyze( source)`. All other statements will only build a 'Napl-graph', a network of objects that 
+are ready to perform their work if activated.
+
 
 [endsect]
 
