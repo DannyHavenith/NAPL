@@ -52,4 +52,25 @@ platform::name_list_t platform::expand_argument_wildcards(std::string argument)
 	return names;
 }
 
+/**
+ * accept a list of typical argc, argv commandline arguments and
+ * try to expand each argument to a list of filenames.
+ * \param &names [in,out] a name_list_t to which the expanded arguments will be added.
+ * \param argc [in] the number of elements in argv
+ * \param argv[] [out] the initial arguments. some may contain wildcard characters.
+ */
+void platform::expand_wildcards( platform::name_list_t &names, int argc, _TCHAR * argv[])
+{
+	for (int count = 0; count < argc; ++count)
+	{
+		// first expand the argument into a list of filenames, if possible
+		name_list_t expanded = 
+			expand_argument_wildcards( argv[count]);
+
+		// copy the list into the names list
+		std::copy( expanded.begin(), expanded.end(), 
+			std::back_insert_iterator< platform::name_list_t>( names));
+	}
+}
+
 
