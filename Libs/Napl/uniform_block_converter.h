@@ -34,12 +34,39 @@ struct typed_converter
 			reinterpret_cast<destination_type *>(dest_ptr));
 	}
 
+	template<typename type>
+		struct size_code_converter
+		{
+			static int get_size()
+			{
+				return 8 * sizeof type;
+			}
+		};
+	template<>
+		struct size_code_converter<double>
+		{
+			static int get_size()
+			{
+				return -2;
+			}
+		};
+
+	template<>
+		struct size_code_converter<float>
+		{
+			static int get_size()
+			{
+				return -1;
+			}
+		};
+
 	void MutateHeader( stream_header &h)
 	{
 		h.numchannels = sampletraits< destination_type>::get_num_channels();
 
 		// TODO: floats
-		h.samplesize = 8 * sizeof destination_type / h.numchannels;
+
+		h.samplesize = size_code_converter<destination_type>::get_size() / h.numchannels;
 	}
 };
 

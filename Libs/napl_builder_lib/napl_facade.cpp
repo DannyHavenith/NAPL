@@ -490,6 +490,10 @@ std::string file_reader::readln(void)
 file_reader::file_reader( std::string filename)
 	:m_stream( filename.c_str())
 {
+	if (!m_stream)
+	{
+		throw( napl_error( "could not open " + filename + " for reading. Does the file exist?"));
+	}
 }
 
 // returns true when the file reader is at end-of-file or if it is in some error-state

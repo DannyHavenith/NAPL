@@ -125,18 +125,19 @@ public:
 	static file_writer * create_one(std::string filename);
 };
 
+struct napl_error: public std::runtime_error
+{
+	napl_error( const std::string &message)
+		: runtime_error( "NAPL error: " + message)
+	{
+	};
+
+};
+
 class napl_facade: public boost::clipp::object
 {
 
 private:
-	struct napl_error: public std::runtime_error
-	{
-		napl_error( const std::string &message)
-			: runtime_error( "NAPL error: " + message)
-		{
-		};
-
-	};
 	// test the block_producer pointer for NULL. Throw if is.
 	static block_producer_wrapper *check_return(block_producer * producer, const std::string &message);
 	static sample_object_factory * get_factory(block_producer_wrapper * source);
