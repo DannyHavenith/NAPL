@@ -1,0 +1,18 @@
+[article  NAPL 
+    [version 0.1]
+    [id napl]
+    [dirname the_document_dir]
+    [copyright 2000 2004 Danny Havenith]
+    [purpose The document's reason for being]
+    [category The document's category]
+    [authors [Havenith, Danny]]
+    [license Currently there is no license to this product]
+]
+
+[/ Napl document version 0.1]
+
+[section: Introduction Intro]
+Napl is an audio processing language. In fact, Napl is not a language since Napl uses a subset of 
+Javascript as its language. 
+
+[endsect]

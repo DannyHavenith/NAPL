@@ -90,6 +90,41 @@ struct sound_analysis_wrapper : public boost::clipp::object
 
 };
 
+class file_reader: public boost::clipp::object
+{
+public:
+	static void init(boost::clipp::context * c);
+
+
+	// read one line of text
+	std::string readln(void);
+private:
+	std::ifstream m_stream;
+public:
+	file_reader( std::string filename);
+	// returns true when the file reader is at end-of-file or if it is in some error-state
+	bool eof(void);
+	void close(void);
+	static file_reader * create_one(std::string filename);
+};
+
+
+
+class file_writer : public boost::clipp::object
+{
+private:
+	std::ofstream m_stream;
+public:
+	static void init( boost::clipp::context * c);
+
+
+	void write(std::string str);
+	void writeln(std::string str);
+	void close(void);
+	file_writer(std::string filename);
+	static file_writer * create_one(std::string filename);
+};
+
 class napl_facade: public boost::clipp::object
 {
 

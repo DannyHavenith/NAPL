@@ -1,0 +1,15 @@
+function main( args)
+{
+	writer = new FileWriter( "test.txt");
+	writer.writeln('aap');
+	writer.writeln('noot');
+	writer.writeln('mies');
+	writer.close();
+
+	reader = new FileReader( "test.txt");
+	while (!reader.eof())
+	{
+		writeln( "." + reader.readln());
+	}
+	writeln('end');
+}

@@ -1,0 +1,14 @@
+function main(args)
+{
+	args.shift();
+	inputfile = args.shift();
+	//delay = args.shift();
+
+	with (Napl)
+	{
+		source = read_file( inputfile);
+		delayed = change_speed( source, 0.9);
+		ds = make_stereo( source, delayed);
+		write_file( ds, "delayed.wav");
+	}
+}
