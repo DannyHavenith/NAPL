@@ -30,12 +30,16 @@ int napl_system( string command)
 	return system( command.c_str());
 }
 
+/**
+ * Add Napl objects to the JavaScript environment
+ * \param *c  context of the parser
+ */
 void init_napl_context( context *c)
 {
 	napl_facade::init( c);
 	block_producer_wrapper::init( c);
 
-	// add the convenience function 'writeln' 
+	// add the convenience functions 'writeln' and 'system'
 	function(c,"writeln",print);
 	function( c, "system", napl_system);
 }
@@ -43,6 +47,14 @@ void init_napl_context( context *c)
 	
 // run the script that is contained in 'script'.
 // pass the arguments in argc and argv to the script
+/**
+ * run the script that is contained in 'script'.
+ * pass the arguments in argc and argv to the script
+ * \param script the script string
+ * \param argc count of the commandline arguments
+ * \param argv[] commandline arguments
+ * \return TODO the output of the script
+ */
 int run_script( string script, int argc, _TCHAR * argv[])
 {
 	//Create a javascript parser
@@ -105,6 +117,30 @@ int run_script( string script, int argc, _TCHAR * argv[])
 	return output;
 }
 
+
+bool load_script( const std::string filename, std::string &target)
+{
+	bool retval = true;
+
+	std::ifstream instream( filename.c_str());    
+	if (instream)
+	{
+		
+			
+		target = std::string(
+			std::istreambuf_iterator<char>(instream.rdbuf()),
+			std::istreambuf_iterator<char>());
+	}
+	else
+	{
+		error( string( "could not open script file: ") + filename);
+		retval = false;
+	}
+
+	return retval;
+
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	int retval = -1;
@@ -113,21 +149,16 @@ int _tmain(int argc, _TCHAR* argv[])
 		error( string("usage: ") + argv[0] + " <scriptfile> [script args...]");
 	}
 
-	std::ifstream instream( argv[1]);    
 
-	if (instream)
+	std::string script;
+	if (load_script( argv[1], script))
 	{
-
-		std::string script(
-			std::istreambuf_iterator<char>(instream.rdbuf()),
-			std::istreambuf_iterator<char>());
 		retval = run_script( script, argc - 1, argv + 1);
 	}
 	else
 	{
-		error( string( "could not open script file: ") + argv[1]);
-	} 
-
+		retval = -1;
+	}
 
 	return retval;
 }
