@@ -1,0 +1,23 @@
+function show_info( input)
+{
+		writeln( "The sample rate is: " + input.sample_rate);
+		writeln( "The sample size is: " + input.sample_size + " bits");
+		writeln( "The channel count is: " + input.channel_count);
+		writeln( "The frame count is: " + input.frame_count);
+		writeln( "The frame size  is: " + input.frame_size + " bytes");
+}
+
+function main( args)
+{
+	with (Napl)
+	{
+		modulator = read_file( "vinfac.wav");
+		source = read_file( "vinsource.wav");
+		resampled = resample( modulator, 44100);
+		show_info( resampled);
+		mod = amp_modulate( source, resampled);
+//		write_file( mod, "mod1.wav");
+//		write_file( mod, "mod2.wav");
+		write_file( make_stereo( mod, mod), "mod2.wav");
+	}
+}

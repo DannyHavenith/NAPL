@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RythmBuilder", "RythmBuilder.vcproj", "{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Napl", "..\..\Libs\Napl\Napl.vcproj", "{8F16DC73-7180-4203-8EBD-300BF472B52D}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 1
+		SccProjectUniqueName0 = ..\\..\\Libs\\Napl\\Napl.vcproj
+		SccProjectName0 = \u0022$/Sounds/libs/Napl\u0022,\u0020TBAAAAAA
+		SccLocalPath0 = ..\\..\\Libs\\Napl
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+	EndGlobalSection
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.0 = {8F16DC73-7180-4203-8EBD-300BF472B52D}
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Debug.ActiveCfg = Debug|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Debug.Build.0 = Debug|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Release.ActiveCfg = Release|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Release.Build.0 = Release|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Debug.ActiveCfg = Debug|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Debug.Build.0 = Debug|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Release.ActiveCfg = Release|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

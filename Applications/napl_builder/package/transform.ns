@@ -1,0 +1,60 @@
+function get_amp_factor( source)
+{
+	analysis = Napl.analyze( source);
+	
+	//
+	// calculate the amplification needed to make full use of the dynamic range
+	//
+	max_sample = Math.max( Math.abs( analysis.max), Math.abs( analysis.min));
+	if (max_sample < 0.000001)
+	{
+		factor = 1;
+	}
+	else
+	{
+		factor = 1/max_sample;
+	}
+
+	return factor;
+}
+
+function main( args ) 
+{
+	//
+	// first, get the script arguments 
+	args.shift(); // script name
+	if (args.length < 5)
+	{
+		writeln( "i need five argumens: <inputfile1> <inputfile2> <outputfile> <start of cut (sec)> <cut length (sec)>");
+		return -1;
+	}
+	inputfile1 = args.shift();
+	inputfile2 = args.shift();
+	outputfile = args.shift();
+	cut_start = args.shift(); // in seconds
+	cut_length = args.shift(); // in seconds
+	
+	//
+	// open the file and get the minimum and maximum values
+	//
+	file1 = Napl.read_file( inputfile1);
+	file2 = Napl.read_file( inputfile2);
+	mono_source1 = Napl.cut( file1, parseFloat( cut_start), parseFloat( cut_length));
+	mono_source2 = Napl.cut( file2, parseFloat( cut_start), parseFloat( cut_length));
+	
+//	stereo_source = Napl.make_stereo( mono_source1, mono_source2);
+
+	factor = get_amp_factor( mono_source1 );
+	writeln( "amplification factor: " + factor);
+
+	//
+	// now amplify, truncate and write the result
+	//
+	Napl.write_file( Napl.truncate( Napl.amplify( mono_source1, factor), 2), "temp.wav");
+	
+	system( "rar a temp.wav");
+//	system( "ren temp.rar "+outfile);
+	system( "del temp.wav");
+
+	return 1;
+};

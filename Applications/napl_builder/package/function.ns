@@ -1,0 +1,48 @@
+function create_sin( samplerate, frequency, seconds)
+{
+	sinus = new Array( );
+
+	period = samplerate/frequency;
+	step = 2 * Math.PI / period;
+	for (var i = 0; i < period - 1; ++i)
+	{
+		sinus[i] = ( Math.sin( step * i));
+	}
+
+	return Napl.func( sinus, 1, 16, samplerate, samplerate * seconds);
+}
+
+function main( args)
+{
+	frequency = 440;
+	seconds = 1;
+	outfile = "sinus.wav";
+
+	args.shift();
+
+	if (args.length)
+	{
+		outfile = args.shift();		
+	}
+
+	if (args.length)
+	{
+		semitone = parseFloat( args.shift());
+		frequency = Math.pow( 2, semitone/12) * 440;		
+	}
+
+	writeln( "frequency = " + frequency);
+
+	if (args.length)
+	{
+		writeln( "seconds argument = " + args[0]);
+		seconds = parseFloat( args.shift());	
+		writeln( "interpreted as " + seconds);	
+	}
+
+	with (Napl)
+	{
+		writeln( "writing...");
+		write_file( create_sin( 44100, frequency, seconds), outfile);	
+	}
+}

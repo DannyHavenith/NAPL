@@ -1,0 +1,31 @@
+function create_sin( samplerate, bitsize, frequency, seconds)
+{
+	sinus = new Array( );
+
+	period = samplerate/frequency;
+	step = 2 * Math.PI / period;
+	for (var i = 0; i < period - 1; ++i)
+	{
+		sinus[i] = ( Math.sin( step * i));
+	}
+
+	return Napl.func( sinus, 1, bitsize, samplerate, samplerate * seconds);
+}
+
+function main( args)
+{
+	with (Napl)
+	{
+		input = read_file( args[1]);
+		fc = input.frame_count;
+		sr = input.sample_rate;
+		
+		
+		//
+		// samplesize -2 betekent doubles
+		//
+		sinus = create_sin( sr, -2, 10, fc/sr);
+		
+		write_file( amp_modulate( input, sinus), args[2]);
+	}
+}

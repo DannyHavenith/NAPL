@@ -1,0 +1,52 @@
+function get_amp_factor( source)
+{
+	analysis = Napl.analyze( source);
+	
+	//
+	// calculate the amplification needed to make full use of the dynamic range
+	//
+	max_sample = Math.max( Math.abs( analysis.max), Math.abs( analysis.min));
+	if (max_sample < 0.000001)
+	{
+		factor = 1;
+	}
+	else
+	{
+		factor = 1/max_sample;
+	}
+
+	return factor;
+}
+
+function main( args ) 
+{
+	//
+	// first, get the script arguments 
+	args.shift(); // script name
+	if (args.length < 5)
+	{
+		writeln( "i need five argumens: <inputfile> <outputfile> <samplesize in bytes> <start of cut (sec)> <cut length (sec)>");
+		return -1;
+	}
+	inputfile = args.shift();
+	outputfile = args.shift();
+	samplesize = args.shift(); // in bytes
+	cut_start = args.shift(); // in seconds
+	cut_length = args.shift(); // in seconds
+	
+	//
+	// open the file and get the minimum and maximum values
+	//
+	file = Napl.read_file( inputfile);
+	part = Napl.cut( file, parseFloat( cut_start), parseFloat( cut_length));
+	
+	factor = get_amp_factor( part);
+	writeln( "amplification factor: " + factor);
+	
+	//
+	// now amplify, truncate and write the result
+	//
+	Napl.write_file( Napl.truncate( Napl.amplify( part, factor), 2), outputfile);
+	
+	return 1;
+};

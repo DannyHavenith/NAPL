@@ -1,0 +1,135 @@
+digraph G {
+overlap = false
+spline = true
+filefactory [shape=box,style=filled,color=lightpink];
+ChunkID [shape=box,style=filled,color=lightpink];
+arch_endian_converter [shape=box,style=filled,color=lightpink];
+big_endian_file [shape=box,style=filled,color=lightslateblue];
+big_endian_file [shape=box,style=filled,color=lightslateblue];
+big_endian_file [shape=box,style=filled,color=lightslateblue];
+big_endian_file [shape=box,style=filled,color=lightslateblue];
+big_endian_streamable [shape=box,style=filled,color=lightpink];
+endian_non_converter [shape=box,style=filled,color=lightpink];
+file_block_producer [shape=box,style=filled,color=lightpink];
+file_type [shape=box,style=filled,color=lightpink];
+little_endian_file [shape=box,style=filled,color=lightslateblue];
+little_endian_file [shape=box,style=filled,color=lightslateblue];
+little_endian_file [shape=box,style=filled,color=lightslateblue];
+little_endian_file [shape=box,style=filled,color=lightslateblue];
+little_endian_streamable [shape=box,style=filled,color=lightpink];
+streamable [shape=box,style=filled,color=lightpink];
+direction [shape=box,style=filled,color=lightskyblue];
+output [shape=box,style=filled,color=lightskyblue];
+input [shape=box,style=filled,color=lightskyblue];
+nil_sink [shape=box,style=filled,color=lightslateblue];
+factory_factory [shape=box,style=filled,color=lightpink];
+sample_object_factory [shape=box,style=filled,color=lightpink];
+sample_analyzer [shape=box,style=filled,color=lightslateblue];
+sound_analysis [shape=box,style=filled,color=lightslateblue];
+binary_block_processor [shape=box,style=filled,color=lightpink];
+block_connector [shape=box,style=filled,color=lightpink];
+block_consumer [shape=box,style=filled,color=lightpink];
+block_multi_consumer [shape=box,style=filled,color=lightpink];
+block_mutator [shape=box,style=filled,color=lightpink];
+block_owner [shape=box,style=filled,color=lightpink];
+block_producer [shape=box,style=filled,color=lightpink];
+block_sink [shape=box,style=filled,color=lightpink];
+creative_block_producer [shape=box,style=filled,color=lightpink];
+sample_block [shape=box,style=filled,color=lightslateblue];
+stream_header [shape=box,style=filled,color=lightslateblue];
+cut_mutator [shape=box,style=filled,color=lightpink];
+paste_mutator [shape=box,style=filled,color=lightpink];
+truncator [shape=box,style=filled,color=lightpink];
+truncation_exception [shape=box,style=filled,color=lightskyblue];
+AIFFFile [shape=box,style=filled,color=lightslateblue];
+ChunkHeader [shape=box,style=filled,color=lightslateblue];
+CommonChunk [shape=box,style=filled,color=lightslateblue];
+SoundDataChunk [shape=box,style=filled,color=lightslateblue];
+aiff_block_sink [shape=box,style=filled,color=lightpink];
+extended [shape=box,style=filled,color=lightslateblue];
+mut_endian_converter [shape=box,style=filled,color=lightslateblue];
+delay_base [shape=box,style=filled,color=lightslateblue];
+general_resampler [shape=box,style=filled,color=lightpink];
+FormatChunk [shape=box,style=filled,color=lightslateblue];
+WAVDataChunk [shape=box,style=filled,color=lightslateblue];
+WAVFile [shape=box,style=filled,color=lightslateblue];
+WAVHeader [shape=box,style=filled,color=lightslateblue];
+wav_block_sink [shape=box,style=filled,color=lightpink];
+big_endian_file [shape=box,style=filled,color=lightslateblue];
+little_endian_file [shape=box,style=filled,color=lightslateblue];
+t_sample_object_factory [shape=box,style=filled,color=lightpink];
+binary_block_mutator [shape=box,style=filled,color=lightpink];
+mut_add [shape=box,style=filled,color=lightpink];
+sample_container [shape=box,style=filled,color=lightslateblue];
+state_saver [shape=box,style=filled,color=lightslateblue];
+uniform_block_mutator [shape=box,style=filled,color=lightpink];
+analyze_mutator [shape=box,style=filled,color=lightpink];
+typed_information [shape=box,style=filled,color=lightskyblue];
+typed_analyzer [shape=box,style=filled,color=lightslateblue];
+constant_producer [shape=box,style=filled,color=lightpink];
+endian_converter [shape=box,style=filled,color=lightpink];
+mut_endian_converter [shape=box,style=filled,color=lightslateblue];
+delay [shape=box,style=filled,color=lightslateblue];
+fft [shape=box,style=filled,color=lightslateblue];
+function [shape=box,style=filled,color=lightslateblue];
+stereo_pan [shape=box,style=filled,color=lightpink];
+stereo_pan_mutator [shape=box,style=filled,color=lightpink];
+resampler [shape=box,style=filled,color=lightpink];
+stereo_maker [shape=box,style=filled,color=lightslateblue];
+mut_xfade [shape=box,style=filled,color=lightslateblue];
+xfader [shape=box,style=filled,color=lightslateblue];
+filefactory ;
+ChunkID -> streamable;
+arch_endian_converter ;
+big_endian_streamable -> streamable;
+big_endian_streamable -> big_endian_file;
+big_endian_streamable -> big_endian_file;
+big_endian_streamable -> big_endian_file;
+endian_non_converter ;
+file_block_producer -> creative_block_producer;
+file_type ;
+little_endian_streamable -> streamable;
+subgraph clusterstreamable{
+style=filled;
+color=lightgrey;
+streamable -> direction;
+}
+subgraph clusterstreamable{
+style=filled;
+color=lightgrey;
+streamable -> output;
+}
+subgraph clusterstreamable{
+style=filled;
+color=lightgrey;
+streamable -> input;
+}
+streamable ;
+factory_factory ;
+sample_object_factory ;
+binary_block_processor -> block_producer;
+binary_block_processor -> block_multi_consumer;
+block_connector -> block_consumer;
+block_consumer ;
+block_multi_consumer ;
+block_mutator -> block_consumer;
+block_mutator -> block_producer;
+block_owner ;
+block_producer ;
+block_sink -> block_consumer;
+creative_block_producer -> block_producer;
+creative_block_producer -> block_owner;
+cut_mutator -> block_mutator;
+paste_mutator -> block_mutator;
+subgraph clustertruncator{
+style=filled;
+color=lightgrey;
+truncator -> truncation_exception;
+}
+truncator -> block_mutator;
+truncator -> block_owner;
+aiff_block_sink -> block_sink;
+general_resampler -> block_mutator;
+general_resampler -> block_owner;
+wav_block_sink -> block_sink;
+t_sample_object_factory -> s

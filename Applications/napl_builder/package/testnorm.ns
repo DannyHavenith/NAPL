@@ -1,0 +1,54 @@
+function step1( args)
+{
+	mono = Napl.read_file( "tellen.wav");
+	stereo = Napl.read_file( "t2.wav");
+	mit = Napl.iterator( mono, 1/441);
+	sit = Napl.iterator( stereo, 1/441);
+	count = 0;
+	
+	man = Napl.analyze( mono);
+	san = Napl.analyze( mono);
+	
+	writeln( "norms "+ man.norm + ", " +san.norm);
+	
+	while (!mit.at_end)
+	{
+		man = Napl.analyze( mit.current());
+		san = Napl.analyze( sit.current());
+
+		if (san.norm < 0)
+		{
+			writeln( "count: " + count + " (" + man.norm + ", " + san.norm + ")");
+			writeln( "*****: " + count + " (" + man.min + ", " + san.min + ")");
+			
+			Napl.write_file( mit.current(), "m.wav");
+			Napl.write_file( sit.current(), "s.wav");
+			
+			return 0;
+		}
+
+		mit.next();
+		sit.next();
+		count++;
+	}
+
+	writeln(" count = " + count);
+	
+}
+
+function main( args)
+{
+	step1( args);
+}
+function step2(args)
+{
+	step = 1 / 441;
+	with (Napl)
+	{
+		mono = read_file( "tellen.wav");
+		stereo = read_file( "t2.wav");
+		
+		write_file( cut( mono, step * 1440, step), "m.wav");
+		write_file( cut( stereo, step * 1440, step), "s.wav");
+	}
+}

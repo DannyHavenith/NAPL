@@ -1,0 +1,26 @@
+function create_const( samplerate, bits, seconds)
+{
+	const_arr = new Array();
+
+	const_arr.push( 1);
+
+	return Napl.func( const_arr, 1, bits, samplerate, samplerate * seconds);
+}
+
+function main( args)
+{
+	seconds = 1;
+	outfile = "constant.wav";
+
+	args.shift();
+
+	if (args.length)
+	{
+		seconds = parseFloat( args.shift());		
+	}
+
+	with (Napl)
+	{
+		write_file( create_const( 44100, 16, seconds), outfile);	
+	}
+}

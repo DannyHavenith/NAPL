@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Napl", "..\..\Libs\Napl\Napl.vcproj", "{8F16DC73-7180-4203-8EBD-300BF472B52D}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Truncator", "Truncator.vcproj", "{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8F16DC73-7180-4203-8EBD-300BF472B52D} = {8F16DC73-7180-4203-8EBD-300BF472B52D}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Debug.ActiveCfg = Debug|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Debug.Build.0 = Debug|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Release.ActiveCfg = Release|Win32
+		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Release.Build.0 = Release|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Debug.ActiveCfg = Debug|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Debug.Build.0 = Debug|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Release.ActiveCfg = Release|Win32
+		{CE9A9FA5-AEEE-400A-90B4-FA42032F543B}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

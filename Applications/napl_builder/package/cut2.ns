@@ -1,0 +1,8 @@
+function main( args)
+{
+	inputfile = args[1];
+	point = parseFloat( args[2]);
+	source = Napl.truncate( Napl.read_file( inputfile), 2);
+	Napl.write_file( Napl.cut( source, 0, point), "first_"+inputfile);
+	Napl.write_file( Napl.cut( source, point), "second_"+inputfile);
+}

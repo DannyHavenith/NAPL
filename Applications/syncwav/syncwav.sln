@@ -1,0 +1,28 @@
+Microsoft Visual Studio Solution File, Format Version 7.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Napl", "..\..\Libs\Napl\Napl.vcproj", "{DC224B68-1BAB-4675-8011-1A4BC8A56153}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syncwav", "syncwav.vcproj", "{0AB3D5C2-7A59-4544-9F59-1E2013DCF1F8}"
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		ConfigName.0 = Debug
+		ConfigName.1 = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+		{0AB3D5C2-7A59-4544-9F59-1E2013DCF1F8}.0 = {DC224B68-1BAB-4675-8011-1A4BC8A56153}
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{DC224B68-1BAB-4675-8011-1A4BC8A56153}.Debug.ActiveCfg = Debug|Win32
+		{DC224B68-1BAB-4675-8011-1A4BC8A56153}.Debug.Build.0 = Debug|Win32
+		{DC224B68-1BAB-4675-8011-1A4BC8A56153}.Release.ActiveCfg = Release|Win32
+		{DC224B68-1BAB-4675-8011-1A4BC8A56153}.Release.Build.0 = Release|Win32
+		{0AB3D5C2-7A59-4544-9F59-1E2013DCF1F8}.Debug.ActiveCfg = Debug|Win32
+		{0AB3D5C2-7A59-4544-9F59-1E2013DCF1F8}.Debug.Build.0 = Debug|Win32
+		{0AB3D5C2-7A59-4544-9F59-1E2013DCF1F8}.Release.ActiveCfg = Release|Win32
+		{0AB3D5C2-7A59-4544-9F59-1E2013DCF1F8}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
