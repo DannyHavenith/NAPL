@@ -1,6 +1,6 @@
 function main( args)
 {
-	file = Napl.read_file( "tellen.wav");
+	file = Napl.read_file( args[1]);
 	it = Napl.iterator( file, 0.05);
 	count = 0;
 	frame_count = file.frame_count;
