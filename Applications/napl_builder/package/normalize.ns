@@ -1,3 +1,8 @@
+//
+// calculate an amplification factor
+// that will keep the samples just within the maximum
+// allowed range.
+//
 function get_amp_factor( source)
 {
 	analysis = Napl.analyze( source);
@@ -18,41 +23,38 @@ function get_amp_factor( source)
 	return factor;
 }
 
+//
+// amplify (multiply) the source with a constant that 
+// will keep the samples just within the maximum
+// allowed range
+//
 function normalize( source)
 {
 	amp = get_amp_factor( source);
 	return Napl.amplify( source, amp);
 }
 
+
 function main( args ) 
 {
 	//
 	// first, get the script arguments 
 	args.shift(); // script name
-	if (args.length < 5)
+	if (args.length < 2)
 	{
-		writeln( "i need five argumens: <inputfile> <outputfile> <samplesize in bytes> <start of cut (sec)> <cut length (sec)>");
+		writeln( "i need two argumens: <inputfile> <outputfile>");
 		return -1;
 	}
+
 	inputfile = args.shift();
 	outputfile = args.shift();
-	samplesize = args.shift(); // in bytes
-	cut_start = args.shift(); // in seconds
-	cut_length = args.shift(); // in seconds
-	
+
 	//
 	// open the file and get the minimum and maximum values
 	//
 	file = Napl.read_file( inputfile);
-	part = Napl.cut( file, parseFloat( cut_start), parseFloat( cut_length));
-	
-	//
-	// now amplify, normalize, make stereo and write the result
-	//
-	norm = Napl.truncate( normalize( part), 2);
-	stereo = Napl.make_stereo( norm, norm);
-
-	Napl.write_file( stereo, outputfile);
+	normalized = normalize( file);
+	Napl.write_file( normalized, outputfile);
 	
 	return 1;
 };

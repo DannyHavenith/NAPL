@@ -1,5 +1,6 @@
 function main( args)
 {
+
 	analysis = Napl.analyze( Napl.read_file( args[1]));
 	writeln( "min: " + analysis.min);
 	writeln( "max: " + analysis.max);
