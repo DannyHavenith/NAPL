@@ -68,6 +68,8 @@ void napl_facade::init(boost::clipp::context * c)
 	cls.static_function( "truncate", truncate);
 	cls.static_function( "cut", cut)
 		.signature( "sound", "pos",arg("size")=0);
+	cls.static_function( "cut_at_sample", cut_at_sample)
+		.signature( "sound", "pos", arg("size") = 0);
 	cls.static_function( "resample", resample);
 	cls.static_function( "change_speed", change_speed);
 	cls.static_function( "join", join);
@@ -185,6 +187,17 @@ block_producer_wrapper * napl_facade::cut(block_producer_wrapper * source, doubl
 	source->producer->GetStreamHeader( h);
 	start *= h.samplerate;
 	length *= h.samplerate;
+
+	cut_mutator *cutter = new cut_mutator();
+	cutter->LinkTo( source->producer);
+	cutter->SetCut( sampleno( start), sampleno( length));
+
+	return check_return( cutter, "could not cut sample");
+}
+
+// take a piece out of the input sample
+block_producer_wrapper * napl_facade::cut_at_sample(block_producer_wrapper * source, unsigned long start, unsigned long length)
+{
 
 	cut_mutator *cutter = new cut_mutator();
 	cutter->LinkTo( source->producer);
