@@ -59,7 +59,6 @@ private:
 	buffer_allocator() : m_buffer_count(0){};
 	~buffer_allocator()
 	{
-		std::cerr << "allocated " << m_buffer_count << " buffers" << std::endl;
 	}
 
 public:

@@ -77,8 +77,8 @@ void progress_monitor::ReceiveBlock( const sample_block &b)
 
 
 
-text_based_progress_bar::text_based_progress_bar( std::ostream &strm, int size)
-:m_stream( strm), m_size( size)
+text_based_progress_bar::text_based_progress_bar( const std::string &text, std::ostream &strm, int size)
+:m_stream( strm), m_size( size), m_text( text), m_hidden( true)
 {
 	// nop
 }
@@ -88,10 +88,19 @@ void text_based_progress_bar::step( float progress)
 	int filled = int((m_size-2) * progress + 0.4);
 	int togo = m_size - 2 - filled;
 
-	m_stream << char(13) << "[" << std::string( filled, '*') << std::string( togo, ' ') << ']';
+	if (m_hidden && progress < 0.9 && progress > 0.001)
+	{
+		m_hidden = false;
+		m_stream << m_text << std::endl;
+	}
+
+	if (!m_hidden)
+	{
+		m_stream << char(13) << "[" << std::string( filled, '*') << std::string( togo, ' ') << ']';
+	}
 }
 
 text_based_progress_bar::~text_based_progress_bar(void)
 {
-	m_stream << std::endl;
+	if (!m_hidden) m_stream << std::endl;
 }

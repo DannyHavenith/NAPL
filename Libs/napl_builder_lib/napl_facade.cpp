@@ -30,8 +30,7 @@ void napl_facade::write_file(block_producer_wrapper *source, const std::string &
 	block_sink *file = filefactory::GetBlockSink( filename.c_str());
 	if (!file) throw napl_error( "could not open file '" + filename + "' for writing");
 
-	std::cout << "writing to " << filename << std::endl;
-	text_based_progress_bar bar( std::cout, 79);
+	text_based_progress_bar bar( "writing to " + filename, std::cout, 79);
 	progress_monitor mon( &bar);
 
 	mon.LinkTo( source->producer);
@@ -129,14 +128,11 @@ sound_analysis_wrapper * napl_facade::analyze(block_producer_wrapper * source)
 {
 
 	sample_analyzer *an = get_factory( source)->GetAnalyzer();
-	//std::cout << "analyzing samples " << std::endl;
-	//text_based_progress_bar bar( std::cout, 79);
-	//progress_monitor mon( &bar);
+	text_based_progress_bar bar( "analyzing samples", std::cout, 79);
+	progress_monitor mon( &bar);
 
-//	mon.LinkTo( source->producer);
-//	an->LinkTo( &mon);
-	an->LinkTo( source->producer);
-
+	mon.LinkTo( source->producer);
+	an->LinkTo( &mon);
 
 	nil_sink sink;
 	sink.LinkTo( an);

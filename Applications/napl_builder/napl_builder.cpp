@@ -5,6 +5,7 @@
 //#include "sample_analyzer.h"
 #include <boost/spirit/error_handling/exceptions.hpp>
 #include "napl_facade.h"
+#include "platform.h"
 using namespace boost::javascript;
 using namespace boost::clipp;
 
@@ -46,7 +47,32 @@ void init_napl_context( context *c)
 	function( c, "system", napl_system);
 }
 
-	
+void expand_wildcards( platform::name_list_t &names, int argc, _TCHAR * argv[])
+{
+	for (int count = 0; count < argc; ++count)
+	{
+		// first expand the argument into a list of filenames, if possible
+		platform::name_list_t expanded = 
+			platform::expand_argument_wildcards( argv[count]);
+
+		// copy the list into the names list
+		std::copy( expanded.begin(), expanded.end(), 
+			std::back_insert_iterator< platform::name_list_t>( names));
+	}
+}
+
+std::string escape_chars( std::string raw_str)
+{
+	string::size_type p = 0;
+	while (string::npos != (p = raw_str.find_first_of( "\\\"", p)))
+	{
+		raw_str = raw_str.insert( p,"\\");
+		p += 2;
+	}
+
+	return raw_str;
+}
+
 // run the script that is contained in 'script'.
 // pass the arguments in argc and argv to the script
 /**
@@ -64,15 +90,27 @@ int run_script( string script, int argc, _TCHAR * argv[])
     context* c=parser.get_context();
 	init_napl_context( c);	
 
+	platform::name_list_t cl_arguments;
+
+	// the first argument is assumed to be the script name. do not try to expand
+	cl_arguments.push_back( argv[0]);
+	++argv;
+	--argc;
+
+	//
+	// expand all other arguments
+	//
+	expand_wildcards( cl_arguments, argc, argv);
 
 	//
 	// create a function that will call the main()-function with the 
 	// right arguments.
 	//
-	string arguments = string("\nfunction __napl_main(){ \nvar args = [ \"") + argv[0] + "\"";
-	for (int count = 1; count < argc; ++count)
+	string arguments = string("\nfunction __napl_main(){ \nvar args = [ \"") + escape_chars( cl_arguments[0]) + "\"";
+	platform::name_list_t::const_iterator i;
+	for (i = cl_arguments.begin(), ++i; i != cl_arguments.end(); ++i)
 	{
-		arguments += (string(", \"") + argv[count] + "\"");
+		arguments += (string(", \"") + escape_chars( *i) + "\"");
 	}
 	arguments += "];\nreturn main( args);};";
 
