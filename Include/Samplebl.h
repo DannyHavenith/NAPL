@@ -126,12 +126,13 @@ struct sample_block
 	boost::shared_ptr< byte_buffer> m_buffer_ptr;
 };
 
+//
+// block managers create blocks of specific sizes while cacheing returned blocks
+// for later re-use
+//
 class block_manager
 {
-
-
 public:
-
 	typedef boost::shared_ptr<sample_block> block_ptr_t;
 	typedef std::vector< block_ptr_t> block_list_t;
 
@@ -178,6 +179,9 @@ private:
 
 };
 
+// block handles obtain a block from a block manager and
+// return that block when their lifetime is over.
+//
 class block_handle : public boost::noncopyable
 {
 	block_manager *m_manager_ptr;

@@ -39,6 +39,23 @@ void napl_facade::write_file(block_producer_wrapper *source, const std::string &
 	file->Start();
 	delete file;
 }
+void file_reader::init( boost::clipp::context * c)
+{
+	class_<file_reader> cls( "FileReader", c);
+	cls.constructor( arguments< std::string>());
+	cls.function( "readln", readln);
+	cls.function( "eof", eof);
+	cls.function( "close", close);
+}
+
+void file_writer::init( boost::clipp::context * c)
+{
+	class_<file_writer> cls( "FileWriter", c);
+	cls.constructor( arguments< std::string>());
+	cls.function( "writeln", writeln);
+	cls.function( "write", write);
+	cls.function( "close", close);
+}
 
 // expose this class to the scripting engine
 void napl_facade::init(boost::clipp::context * c)
@@ -68,6 +85,12 @@ void napl_facade::init(boost::clipp::context * c)
 	cls.static_function( "iterator", iterator)
 		.signature( "source", "window_size", arg("jump_size") = 0.0);
 	cls.static_function( "amp_modulate", amp_modulate);
+
+	//
+	// also add the file reader and -writer to the environment
+	//
+	file_reader::init( c);
+	file_writer::init( c);
 }
 
 void block_producer_wrapper::init(boost::clipp::context * c)
@@ -445,3 +468,58 @@ block_producer_wrapper * napl_facade::amp_modulate(block_producer_wrapper * sour
 
 }
 
+
+// read one line of text
+std::string file_reader::readln(void)
+{
+	std::string buffer;
+	std::getline( m_stream, buffer);
+	return buffer;
+}
+
+file_reader::file_reader( std::string filename)
+	:m_stream( filename.c_str())
+{
+}
+
+// returns true when the file reader is at end-of-file or if it is in some error-state
+bool file_reader::eof(void)
+{
+	return !m_stream;
+}
+
+void file_reader::close(void)
+{
+	m_stream.close();
+}
+
+void file_writer::write(std::string str)
+{
+	m_stream << str;
+}
+
+void file_writer::writeln(std::string str)
+{
+	write( str);
+	m_stream << std::endl;
+}
+
+void file_writer::close(void)
+{
+	m_stream.close();
+}
+
+file_writer::file_writer(std::string filename)
+:m_stream( filename.c_str())
+{
+}
+
+file_writer * file_writer::create_one(std::string filename)
+{
+	return new file_writer( filename);
+}
+
+file_reader * file_reader::create_one(std::string filename)
+{
+	return new file_reader( filename);
+}
