@@ -1,0 +1,14 @@
+function main( args)
+{
+	x = new Array( );
+	x.push( 3);
+	x.push( 2);
+	x.push( 1);
+	
+	var y = ":";
+	for (var el in x)
+	{
+		y = y + (", " + el);
+	}
+	writeln( y);
+}

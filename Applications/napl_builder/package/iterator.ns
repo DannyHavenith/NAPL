@@ -1,0 +1,19 @@
+function main( args)
+{
+	file = Napl.read_file( "tellen.wav");
+	it = Napl.iterator( file, 0.05);
+	count = 0;
+	frame_count = file.frame_count;
+	sample_rate = file.sample_rate;
+	
+	while (!it.at_end)
+	{
+		count++;
+		mymax = Napl.analyze( it.current());
+		writeln( "norm = " + mymax.norm);
+		it.next();
+	}
+
+	writeln(" count = " + count);
+	
+}

@@ -1,0 +1,38 @@
+function get_filename_from_path( fname)
+{
+	pos = fname.lastIndexOf( "\\");
+
+	writeln( fname + " pos = " + pos);
+
+	ret = String();
+
+
+	if (pos >= 0)
+	{
+		writeln( "slashes");
+		++pos;
+		c = fname.charAt( pos);
+		while (c.length)
+		{
+			ret = ret + c;
+	
+			++pos;
+			c = fname.charAt( pos);
+		}
+	}
+	else
+	{
+		writeln( "no slashes");
+		ret = fname;
+	}
+	
+	writeln( "ret = " + ret);
+	return ret;
+}
+
+function main( args)
+{
+	full_string = "c:\\path\\path\\test.wav";
+
+	writeln( get_filename_from_path( full_string));	
+}

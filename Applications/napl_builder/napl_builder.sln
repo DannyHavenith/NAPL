@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "napl_builder", "napl_builder.vcproj", "{E7534291-7A41-497C-8D87-A474C8880F9C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5406227A-5811-4B0C-9E36-990E2B7A7E8E} = {5406227A-5811-4B0C-9E36-990E2B7A7E8E}
+		{81907898-C4C4-4C35-9138-D798C99E10FE} = {81907898-C4C4-4C35-9138-D798C99E10FE}
+		{AD1727F7-658D-46DB-BE25-3E4DB2D7B45C} = {AD1727F7-658D-46DB-BE25-3E4DB2D7B45C}
+		{3EE637FA-9B42-4986-A6C7-C87667581E20} = {3EE637FA-9B42-4986-A6C7-C87667581E20}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "napl_builder_lib", "..\..\Libs\napl_builder_lib\napl_builder_lib.vcproj", "{81907898-C4C4-4C35-9138-D798C99E10FE}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Napl", "..\..\Libs\Napl\Napl.vcproj", "{5406227A-5811-4B0C-9E36-990E2B7A7E8E}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost_javascript", "..\..\..\..\..\CVS_projects\clipp\libs\javascript\build\VisualStudio\boost_javascript.vcproj", "{AD1727F7-658D-46DB-BE25-3E4DB2D7B45C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost_clipp", "..\..\..\..\..\CVS_projects\clipp\libs\clipp\build\VisualStudio\boost_clipp.vcproj", "{3EE637FA-9B42-4986-A6C7-C87667581E20}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{E7534291-7A41-497C-8D87-A474C8880F9C}.Debug.ActiveCfg = Debug|Win32
+		{E7534291-7A41-497C-8D87-A474C8880F9C}.Debug.Build.0 = Debug|Win32
+		{E7534291-7A41-497C-8D87-A474C8880F9C}.Release.ActiveCfg = Release|Win32
+		{E7534291-7A41-497C-8D87-A474C8880F9C}.Release.Build.0 = Release|Win32
+		{81907898-C4C4-4C35-9138-D798C99E10FE}.Debug.ActiveCfg = Debug|Win32
+		{81907898-C4C4-4C35-9138-D798C99E10FE}.Debug.Build.0 = Debug|Win32
+		{81907898-C4C4-4C35-9138-D798C99E10FE}.Release.ActiveCfg = Release|Win32
+		{81907898-C4C4-4C35-9138-D798C99E10FE}.Release.Build.0 = Release|Win32
+		{5406227A-5811-4B0C-9E36-990E2B7A7E8E}.Debug.ActiveCfg = Debug|Win32
+		{5406227A-5811-4B0C-9E36-990E2B7A7E8E}.Debug.Build.0 = Debug|Win32
+		{5406227A-5811-4B0C-9E36-990E2B7A7E8E}.Release.ActiveCfg = Release|Win32
+		{5406227A-5811-4B0C-9E36-990E2B7A7E8E}.Release.Build.0 = Release|Win32
+		{AD1727F7-658D-46DB-BE25-3E4DB2D7B45C}.Debug.ActiveCfg = Debug|Win32
+		{AD1727F7-658D-46DB-BE25-3E4DB2D7B45C}.Debug.Build.0 = Debug|Win32
+		{AD1727F7-658D-46DB-BE25-3E4DB2D7B45C}.Release.ActiveCfg = Release|Win32
+		{AD1727F7-658D-46DB-BE25-3E4DB2D7B45C}.Release.Build.0 = Release|Win32
+		{3EE637FA-9B42-4986-A6C7-C87667581E20}.Debug.ActiveCfg = Debug|Win32
+		{3EE637FA-9B42-4986-A6C7-C87667581E20}.Debug.Build.0 = Debug|Win32
+		{3EE637FA-9B42-4986-A6C7-C87667581E20}.Release.ActiveCfg = Release|Win32
+		{3EE637FA-9B42-4986-A6C7-C87667581E20}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionItems) = postSolution
+		napl_builder.vsd = napl_builder.vsd
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

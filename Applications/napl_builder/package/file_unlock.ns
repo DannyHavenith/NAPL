@@ -1,0 +1,5 @@
+function main( args)
+{
+	Napl.write_file( Napl.zero( 1, 16, 44100, 10), "silence.wav");
+	system("del silence.wav");
+}

@@ -1,0 +1,23 @@
+function main( args)
+{
+	script = args.shift();// script name
+	if (args.length < 3) 
+	{
+		writeln( "usage: " + script + " <inputfile> <start second> <duration in seconds>");
+	}
+	else
+	{
+		inputfile = args.shift();
+		start = args.shift();
+		duration = args.shift();
+		
+		// open the file
+		source = Napl.read_file( inputfile);
+		
+		// cut it
+		part = Napl.cut( source, parseFloat( start), parseFloat( duration));
+		
+		// and write...
+		Napl.write_file( part, "cut_of_" + inputfile);
+	}
+}

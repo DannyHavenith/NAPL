@@ -1,0 +1,14 @@
+function main( args)
+{
+	scriptname = args.shift();
+	if (args.length < 3)
+	{
+		writeln("usage: " + scriptname + " <input1> <input2> <output>");
+	}
+	with (Napl)
+	{
+		file1 = read_file( args[0]);
+		file2 = read_file( args[1]);
+		write_file( add( file1, file2), args[2]);
+	}
+}

@@ -1,0 +1,54 @@
+function write_chop( source, start, stop)
+{
+	if (stop - start > 0.1)
+	{
+		Napl.write_file( 
+			Napl.cut( source, start, stop-start), 
+			"chop" + start + ".wav");
+	}
+}
+
+function chop( source, treshold)
+{
+	step = 0.1;
+	it = Napl.iterator( source, step);
+	count = 0.0;
+	while (!it.at_end)
+	{
+		// skip silence
+		do
+		{
+			an = Napl.analyze( it.current());
+			it.next();
+			++count;
+		} 
+		while ( !it.at_end && an.norm < treshold);
+
+		start = step * count;
+		it.next();
+		++count;
+
+		if (!it.at_end)
+		{
+			do
+			{
+				an = Napl.analyze( it.current());
+				it.next();
+				++count;
+			} 
+			while ( !it.at_end && an.norm >= treshold);
+			stop = step * count;
+	
+			writeln( "start = " + start + " stop = " + stop);
+			write_chop( source, start, stop);
+	
+			it.next();
+			++count;
+		}
+	}
+}
+
+function main( args)
+{
+	chop( Napl.read_file( "tellen.wav"), 0.02);
+}

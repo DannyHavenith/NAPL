@@ -1,0 +1,15 @@
+function main( args)
+{
+	if (args.length < 2)
+	{
+		seconds = 1;
+	}
+	else
+	{
+		seconds = parseFloat( args[1]);
+	}
+
+	Napl.write_file( 
+		Napl.zero( 1, 16, 44100, seconds), 
+		"silence.wav");
+}

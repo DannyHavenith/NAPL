@@ -1,0 +1,35 @@
+function main( args ) 
+{
+	scriptname = args.shift();
+	if (args.length < 3)
+	{
+		writeln( "usage: " + scriptname + " <inputfile> <inputfile> <outputfile>");
+	}
+	else
+	{
+		inputfile_left = args.shift();
+		inputfile_right = args.shift();
+		outputfile = args.shift();
+
+		file_left = Napl.read_file( inputfile_left);
+		file_right = Napl.read_file( inputfile_right);
+		
+		if (file_left.channel_count >2)
+		{
+			writeln( "left input must be a mono or stereo source");
+			return -1;
+		}
+		
+		if (file_right.channel_count >2)
+		{
+			writeln( "right input must be a mono or stereo source");
+			return -1;
+		}
+
+		stereo_source = Napl.make_stereo( file_left, file_right);
+
+		Napl.write_file( stereo_source, outputfile);
+	}
+	return 1;
+};
+
