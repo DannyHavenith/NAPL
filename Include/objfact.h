@@ -54,7 +54,7 @@ public:
 	virtual block_mutator *GetChannelExtractor( short channel);
 	virtual binary_block_processor *GetAmpModulator();
 	virtual from_to_factory *GetFromToFactory( const stream_header &from_header);
-
+private:
 
 //virtual block_mutator *GetFFT( int power);
 };
