@@ -26,11 +26,11 @@ public:
 
 	virtual block_result RequestBlock( block_consumer &consumer, sampleno /*ignored*/, unsigned long num)
 	{
-		while (num* sizeof( sample_type) > (m_block.m_size))
+		while (num* sizeof( sample_type) > (m_block.buffer_size()))
 		{
-			m_block.m_end = m_block.m_start + sizeof sample_type * (m_block.m_size / sizeof sample_type); 
+			m_block.m_end = m_block.m_start + sizeof sample_type * (m_block.buffer_size() / sizeof sample_type); 
 			consumer.ReceiveBlock( m_block);
-			num -= (m_block.m_size / sizeof( sample_type));
+			num -= (m_block.buffer_size() / sizeof( sample_type));
 		}
 
 		m_block.m_end = m_block.m_start + sizeof( sample_type) * num;

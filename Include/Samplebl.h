@@ -1,6 +1,7 @@
 //
 // sampleblock.h - define sample blocks, producers and consumers
 //
+
 #ifndef _SAMPLEBLOCK_H_
 #define _SAMPLEBLOCK_H_
 #include <stddef.h>
@@ -13,6 +14,42 @@ typedef unsigned long sampleno;
 class block_consumer;
 class block_producer;
 
+
+struct byte_buffer
+{
+	typedef unsigned char byte_type;
+
+	byte_buffer( size_t size)
+		: m_ptr( new byte_type[size]),
+		m_size( size)
+	{
+	}
+
+	byte_buffer()
+		: m_ptr(0), m_size(0)
+	{
+		// nop
+	}
+
+	~byte_buffer()
+	{
+		delete [] m_ptr;
+	}
+
+	byte_type *get_begin()
+	{
+		return m_ptr;
+	}
+
+	size_t get_size()
+	{
+		return m_size;
+	}
+
+	byte_type *m_ptr;
+	size_t m_size;
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Sample_block contains some contiguous memory with samples
@@ -21,6 +58,8 @@ class block_producer;
 //
 struct sample_block
 {
+	typedef byte_buffer::byte_type byte_type;
+
 	inline sample_block(){};
 
 	inline sample_block( size_t size)
@@ -30,28 +69,32 @@ struct sample_block
 
 	inline void Init( size_t size)
 	{
-		m_begin = m_start = new unsigned char[ size];
-		m_size = size;
-		m_end = m_start + m_size;
+		m_buffer_ptr.reset( new byte_buffer( size));
+		m_start = m_buffer_ptr->get_begin();
+		m_end = m_start + m_buffer_ptr->get_size();
 	}
 
-	inline ~sample_block()
+
+	byte_type *buffer_begin()
 	{
-		delete m_begin;
+		return m_buffer_ptr->get_begin();
 	}
 
+	size_t buffer_size()
+	{
+		return m_buffer_ptr->get_size();
+	}
+	
 	// the members that are used by consumers
 	// this defines a 'window' on the samples that is 
 	// actually seen by consumers.
-	unsigned char *m_start;
-	unsigned char *m_end;
+	byte_type *m_start;
+	byte_type *m_end;
 
-	// the members that might be used by producers
-	// the buffer might be larger than the start & end members
-	// indicate. The members below give the actual size of the 
-	// reserved memory area.
-	size_t m_size;
-	unsigned char *m_begin;
+	//
+	// The shared pointer to the actual buffer bytes
+	//
+	boost::shared_ptr< byte_buffer> m_buffer_ptr;
 };
 
 //

@@ -46,8 +46,8 @@ private:
 	virtual sampleno FillBlock( sample_block &b, sampleno requested)
 	{
 		sampleno offset = m_pos % m_period;
-		b.m_start = b.m_begin + offset * sizeof sampletype;
-		b.m_end = b.m_begin + b.m_size;
+		b.m_start = b.buffer_begin() + offset * sizeof sampletype;
+		b.m_end = b.buffer_begin() + b.buffer_size();
 
 		sampleno in_buffer = (b.m_end - b.m_start) / sizeof sampletype;
 		if (in_buffer > requested)

@@ -19,14 +19,14 @@ protected:
 		mono_container::iterator right_ptr = right_container.begin();
 
 
-		m_block.m_start = m_block.m_begin;
+		m_block.m_start = m_block.buffer_begin();
 		// nearest multiple of the output size...
-		size_t max_block_size = (m_block.m_size/ sizeof stereo_type) * sizeof stereo_type;
+		size_t max_block_size = (m_block.buffer_size()/ sizeof stereo_type) * sizeof stereo_type;
 
 		while (right_ptr < right_container.end())
 		{
-			stereo_type *output_ptr = ( stereo_type *)(m_block.m_begin);
-			stereo_type *output_end = (stereo_type *)( m_block.m_begin + max_block_size);
+			stereo_type *output_ptr = ( stereo_type *)(m_block.buffer_begin());
+			stereo_type *output_end = (stereo_type *)( m_block.buffer_begin() + max_block_size);
 			size_t sample_count = 0;
 			
 			while (right_ptr != right_container.end() && output_ptr != output_end)

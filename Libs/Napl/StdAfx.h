@@ -23,6 +23,7 @@
 #include <iostream>
 using std::string;
 #include <limits>
+#include "boost/shared_ptr.hpp"
 
 
 // TODO: reference additional headers your program requires here
