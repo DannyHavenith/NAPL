@@ -1,0 +1,8 @@
+function main( args)
+{
+	inputfile = args[1];
+	point = parseInt( args[2]);
+	source = Napl.read_file( inputfile);
+	Napl.write_file( Napl.cut_at_sample( source, 0, point), "first_"+inputfile);
+	Napl.write_file( Napl.cut_at_sample( source, point), "second_"+inputfile);
+}

@@ -156,6 +156,8 @@ public:
 	static block_producer_wrapper * truncate(block_producer_wrapper * source, int byte_size);
 	// take a piece out of the input sample
 	static block_producer_wrapper * cut(block_producer_wrapper * source, double start, double length);
+	static block_producer_wrapper * cut_at_sample(block_producer_wrapper * source, unsigned long start, unsigned long length);
+
 	static block_producer_wrapper * resample( block_producer_wrapper *source, unsigned short new_rate);
 	// changes the speed (and pitch) of the sound without altering the samplerate
 	static block_producer_wrapper * change_speed(block_producer_wrapper * source, double factor);
