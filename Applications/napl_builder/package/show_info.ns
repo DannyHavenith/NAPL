@@ -1,3 +1,5 @@
+#include "includes\\show_info.inc"
+
 function main( args ) 
 {
 	args.shift();
@@ -7,12 +9,7 @@ function main( args )
 		writeln( "--------------------------------------");
 
 		input = Napl.read_file( arg);
-
-		writeln( "The sample rate is: " + input.sample_rate);
-		writeln( "The sample size is: " + input.sample_size + " bits");
-		writeln( "The channel count is: " + input.channel_count);
-		writeln( "The frame count is: " + input.frame_count);
-		writeln( "The frame size  is: " + input.frame_size + " bytes");
+		show_info( input);
 	}
 	return 1;
 };

@@ -1,0 +1,9 @@
+// start with a comment
+
+
+#include "includes\test_includes.inc"
+
+function main( args)
+{
+	included_function();
+}

@@ -16,6 +16,7 @@
 #include <boost/javascript.hpp>
 #include <boost/clipp/clipp_stream.hpp>
 #include <boost/javascript/date.hpp>
+#include <boost/spirit.hpp>
 #include "napl.h"
 
 // TODO: reference additional headers your program requires here
