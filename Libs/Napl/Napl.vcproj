@@ -266,6 +266,9 @@
 					RelativePath=".\Resample.h">
 				</File>
 				<File
+					RelativePath=".\sample_factory_instantiator.h">
+				</File>
+				<File
 					RelativePath=".\Samplety.h">
 				</File>
 				<File

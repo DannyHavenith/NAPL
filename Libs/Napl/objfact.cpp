@@ -23,6 +23,8 @@
 #include "type_converter.h"
 #include "amp_modulator.h"
 
+#include "sample_factory_instantiator.h"
+
 
 
 
@@ -143,72 +145,9 @@ binary_block_processor * t_sample_object_factory<sampletype>::GetAmpModulator()
 }
 
 
-
 sample_object_factory *factory_factory::GetSampleFactory( const stream_header &h)
 {
-	if ( 2 == h.numchannels)
-	{
-		// stereo samples
-		if ( 16 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_s16>();
-		}
-		else if ( 8 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_s8>();
-		}
-		else if (24 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_s24>();
-		}
-		else if (-2 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_sd>();
-		}
-		else return 0;
-	}
-	else if ( 1 == h.numchannels)
-	{
-		if ( 16 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_m16>();
-		}
-		else if ( 8 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_m8>();
-		}
-		else if (24 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_m24>();
-		}
-		else if (-2 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_md>();
-		}
-		else return 0;
-	}
-	else if ( 4 == h.numchannels)
-	{
-		if ( 16 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_q16>();
-		}
-		else if ( 8 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_q8>();
-		}
-		else if (24 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_q24>();
-		}
-		else if (-2 == h.samplesize)
-		{
-			return new t_sample_object_factory< sampletype_qd>();
-		}
-		else return 0;
-	}
-
-	else return 0;
+	return sample_factory_instantiator<t_sample_object_factory, sample_object_factory>::instantiate( h);
 }
 
 
