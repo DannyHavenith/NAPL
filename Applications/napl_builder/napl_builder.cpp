@@ -14,6 +14,8 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+bool load_script( const std::string filename, std::string &target);
+
 void error( string message)
 {
 	cerr << message << endl;
@@ -118,6 +120,58 @@ int run_script( string script, int argc, _TCHAR * argv[])
 }
 
 
+/**
+ * parse #include-statements that may appear at the beginning of the file and replace them with the 
+ * actual contents of the include file
+ * \param &target the string to scan for includes.
+ * \return true if successfull
+ */
+bool parse_includes( std::string &target)
+{
+	using namespace boost::spirit;
+
+	//
+	// store a list (vector) of all filenames to include
+	//
+	std::vector< std::string> includes;
+	typedef std::vector< std::string>::const_iterator iterator_t;
+
+	// define our 'grammar'
+	rule<> comment = comment_p("//");
+	rule<> include = ch_p('#')>> *blank_p  >> "include" >> *blank_p >>  confix_p('"', (*c_escape_ch_p)[push_back_a(includes)], '"');
+	rule<> file_header = *((+space_p) | comment | include);
+
+	parse_info<> info = parse( target.c_str(), file_header);
+
+	// the vector 'includes' is now supposed to have an ordered list of 
+	// files to include (it may be empty). Load the include files and
+	// add them to the string 'header'
+	std::string header;
+	for ( iterator_t i = includes.begin(); i != includes.end(); ++i)
+	{
+		std::string include_script;
+		if (!load_script( *i, include_script)) return false;
+		header += include_script;
+		header += "\n";
+	}
+
+	//
+	// the string must now consist of the included text
+	// and anything not parsed by the parser.
+	//
+	target = header + info.stop;
+
+	return true;
+}
+
+/**
+ * load a script file into the target string
+ * this function will also recursively check for '#include' statements
+ * and add the included files at the appropriate locations
+ * \param filename (in) name of the script file to load
+ * \param &target (out) string that receives the fully loaded script
+ * \return 
+ */
 bool load_script( const std::string filename, std::string &target)
 {
 	bool retval = true;
@@ -130,6 +184,8 @@ bool load_script( const std::string filename, std::string &target)
 		target = std::string(
 			std::istreambuf_iterator<char>(instream.rdbuf()),
 			std::istreambuf_iterator<char>());
+
+		retval = parse_includes( target);
 	}
 	else
 	{
