@@ -122,7 +122,7 @@ public:
 		//
 		while (num)
 		{
-			sub_block = std::min(  num, m_converter.destination_type_samples( m_block.m_size));
+			sub_block = std::min(  num, m_converter.destination_type_samples( m_block.buffer_size()));
 			m_pProducer->RequestBlock( *this, start + offset, sub_block);
 			num -= sub_block;
 			offset += sub_block;
@@ -136,7 +136,7 @@ public:
 
 	virtual void ReceiveBlock( const sample_block &b)
 	{
-		m_block.m_start = m_block.m_begin;
+		m_block.m_start = m_block.buffer_begin();
 
 		unsigned char *pSrcFrame = b.m_start;
 		unsigned char *pTgtFrame = m_block.m_start;

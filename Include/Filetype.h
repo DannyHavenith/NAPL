@@ -51,14 +51,14 @@ protected:
 
 	virtual sampleno FillBlock( sample_block &b, sampleno count)
 	{
-		if (count * m_nBytesPerSample > b.m_size) 
+		if (count * m_nBytesPerSample > b.buffer_size()) 
 		{
-			count = sampleno( b.m_size / m_nBytesPerSample);
+			count = sampleno( b.buffer_size() / m_nBytesPerSample);
 		}
 		b.m_end = b.m_start + count * m_nBytesPerSample;
 
 
-		sampleno nRead = static_cast<sampleno>( fread( b.m_begin, m_nBytesPerSample, count, m_pFile));
+		sampleno nRead = static_cast<sampleno>( fread( b.buffer_begin(), m_nBytesPerSample, count, m_pFile));
 
 		return nRead;
 	}

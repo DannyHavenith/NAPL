@@ -194,8 +194,8 @@ private:
 	inline void InitSendBlock()
 	{
 
-		m_block.m_size = (m_block.m_size/sizeof sampletype) * sizeof sampletype;
-		m_pEndOutput = (sampletype *)(m_block.m_end = m_block.m_begin + m_block.m_size);
+		m_block.m_buffer_ptr->m_size = (m_block.buffer_size()/sizeof sampletype) * sizeof sampletype;
+		m_pEndOutput = (sampletype *)(m_block.m_end = m_block.buffer_begin() + m_block.buffer_size());
 		m_pOutputSample = (sampletype *)m_block.m_start;
 	}
 

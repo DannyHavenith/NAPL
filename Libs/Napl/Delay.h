@@ -98,9 +98,9 @@ struct delay_base : public block_mutator, protected block_owner
 
 	void send_delay_samples( size_t num_samples, block_consumer &consumer)
 	{
-		m_block.m_end = m_block.m_begin + m_block.m_size;
+		m_block.m_end = m_block.buffer_begin() + m_block.buffer_size();
 		//m_block.m_start = m_block.m_begin;
-		const size_t samples_in_block = m_block.m_size / m_samplesize;
+		const size_t samples_in_block = m_block.buffer_size() / m_samplesize;
 		while (num_samples > samples_in_block)
 		{
 			consumer.ReceiveBlock( m_block);
@@ -109,7 +109,7 @@ struct delay_base : public block_mutator, protected block_owner
 
 		if (num_samples)
 		{
-			m_block.m_end = m_block.m_begin + (num_samples * m_samplesize);
+			m_block.m_end = m_block.buffer_begin() + (num_samples * m_samplesize);
 			consumer.ReceiveBlock( m_block);
 		}
 	}
