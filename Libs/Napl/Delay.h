@@ -96,21 +96,34 @@ struct delay_base : public block_mutator, protected block_owner
 		}
 	}
 
+	void init_block( sample_block &block)
+	{
+		memset( block.buffer_begin(), 0, block.buffer_size());
+	}
+
 	void send_delay_samples( size_t num_samples, block_consumer &consumer)
 	{
-		m_block.m_end = m_block.buffer_begin() + m_block.buffer_size();
-		//m_block.m_start = m_block.m_begin;
-		const size_t samples_in_block = m_block.buffer_size() / m_samplesize;
+		block_handle h( this); // releases the block on exit
+		sample_block &block( h.get_block());
+
+		if (!h.is_initialized())
+		{
+			init_block( block);
+		}
+
+		block.m_end = block.buffer_begin() + block.buffer_size();
+
+		const size_t samples_in_block = block.buffer_size() / m_samplesize;
 		while (num_samples > samples_in_block)
 		{
-			consumer.ReceiveBlock( m_block);
+			consumer.ReceiveBlock( block);
 			num_samples -= samples_in_block;
 		}
 
 		if (num_samples)
 		{
-			m_block.m_end = m_block.buffer_begin() + (num_samples * m_samplesize);
-			consumer.ReceiveBlock( m_block);
+			block.m_end = block.buffer_begin() + (num_samples * m_samplesize);
+			consumer.ReceiveBlock( block);
 		}
 	}
 
@@ -136,18 +149,6 @@ struct delay: public delay_base
 	delay( double delay_seconds, double post_seconds = 0)
 		:delay_base( delay_seconds, sizeof sampletype, post_seconds)
 	{
-		InitBlock();
-		// nop
 	};
 
-	void InitBlock()
-	{
-		sample_container< sampletype> container( m_block);
-		sample_container< sampletype>::iterator it;
-
-		for (it = container.begin(); it != container.end(); ++it)
-		{
-			*it = sampletraits<sampletype>::get_middle();
-		}
-	}
 };
