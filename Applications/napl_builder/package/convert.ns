@@ -1,0 +1,20 @@
+function main( args)
+{
+
+	args.shift();
+
+	if (args.length < 2)
+	{
+		writeln( "usage: convert.ns <inputfile> <samplesize>");
+		return -1;
+	}
+
+	writeln( "continuing");
+	with (Napl)
+	{
+		source = read_file( args[0]);
+		converted = convert( source, parseInt( args[1]));
+		write_file( converted, "converted_" + args[0]);
+	}	
+
+}
