@@ -1,9 +1,9 @@
-[article  NAPL 
+[book  NAPL 
     [version 0.1]
     [id napl]
     [dirname the_document_dir]
     [copyright 2000 2004 Danny Havenith]
-    [purpose The document's reason for being]
+    [purpose Napl efficiently processes audio streams.]
     [category The document's category]
     [authors [Havenith, Danny]]
     [license Currently there is no license to this product]
@@ -11,8 +11,160 @@
 
 [/ Napl document version 0.1]
 
-[section: Introduction Intro]
-Napl is an audio processing language. In fact, Napl is not a language since Napl uses a subset of 
-Javascript as its language. 
+[section Introduction to Napl]
+
+Napl is an audio processing language. It consists of two parts:
+
+* a set of audio processing components
+* a script language that enables a user to combine several components 
+  into a complex operation on an audio stream
+
+For a script language, Napl uses Clipp's JavaScript library, so the language should be familiar to you
+if you've written JavaScript before. Among the components you will find such operations as:
+
+* cutting a section out of a sample stream or joining two sections
+* resampling a sample to a new samplerate with linear interpolation
+* iterating over small subsections of a stream
+* analyzing stream characteristics, such as average, max and min values
+* generating a stream out of an array of floating point values
+
+An important aspect of Napl is that on the JavaScript level, it is totally independent 
+of the type of sample-data. Cutting, resampling, analyzing, all is done regardless whether the 
+samples are 16- or 24-bits, stereo, mono or quad streams.
 
 [endsect]
+
+[section:helloworld Hello World Sample]
+
+Without much further ado, let's look at a simple Napl script, that reads an input, delays 
+the sound with 3.5 seconds (or rather, adds 3.5 seconds of silence before the sound) and writes 
+the result:
+
+	function main( args)
+	{
+		with (Napl)
+		{
+			file = read_file( "input.wav");
+			delayed = delay( file, 3.5, 0);
+			write_file( delayed, "output.wav");	
+		}
+	}
+
+[h2 Main Function]
+
+In contrast to JavaScript, Napl requires a main function. It is declared as `function main( args)`. 
+The arguments to the script, /args/ are any arguments that were given on the commandline. Napl follows
+the C-style convention where `args[0]` refers to the name of the script and the actual arguments start 
+with `args[1]`.
+
+The main function may or may not return an integer value. If it does, that value will be returned to 
+the caller of the script.
+
+[h2 With-statement]
+
+For readability, the example script uses a `with`-statement. This is entirely optional. Instead of 
+using a `with`-statement you can choose to prefix all Napl function calls with /Napl/. For Instance:
+
+	file = Napl.read_file( "input.wav");
+	
+[endsect]
+
+[section:functions Napl Functions]
+
+The hello world-sample introduced the Napl functions `delay`, `read_file` and `write_file`. Let's 
+look at the other available Napl functions.
+
+[table Napl functions
+	[ [function] [description]]
+
+	 [[stream read_file(string filename)]
+		[read sound data from a wav- or aiff file]
+	 ]
+	 [[       write_file(stream source, string filename)]
+		[write sound data to a wav or aiff file]
+	 ]
+
+	 [[stream amplify(stream source, double factor)]
+		[multiply each sample in the stream with a constant factor]
+	 ]
+
+	 [[stream truncate(stream source, int byte_size)]
+		[*deprecated* do not use this function]
+	 ]
+
+	 [[stream cut(stream source, double start, double length)]
+		[maintain only a part of a stream. start and length are in seconds.]
+	 ]
+
+	 [[stream resample( stream source, unsigned short new_rate)]
+		[resample a stream to a new samplerate, using linear interpolation.]
+	 ]
+
+	 [[stream change_speed(stream source, double factor)]
+		[make a stream run faster or slower, while maintaining the samplerate.]
+	 ]
+
+	 [[stream join(stream first_source, stream second_source)]
+		[concatenate the two sources]
+	 ]
+
+	 [[stream make_stereo(stream left_channel, stream right_channel)]
+		[make a stereo stream out of two mono-streams or a quad stream out of two stereo streams]
+	 ]
+
+	 [[stream cross_fade(stream first_source, stream second_source)]
+		[make a smooth transition from the first source to the second]
+	 ]
+
+	 [[stream negate(stream source)]
+		[invert all samples in the stream]
+	 ]
+
+	 [[stream delay(stream source, double before, double after)]
+		[add silence before and after a stream]
+	 ]
+
+	 [[stream pan(stream stereo_source, double pan_value)]
+		[stereo-pan, a pan_value of -1 means that only the left channel will be heard, +1 means only the right value is heard]
+	 ]
+
+	 [[analysis analyze(stream source)]
+		[analyze a stream and return an analysis object]
+	 ]
+
+	 [[stream add(stream source1, stream source2)]
+		[add each sample of stream 2 to the corresponding sample of stream 1]
+	 ]
+
+	 [[stream zero(int channels, int samplesize, unsigned long samplerate, double seconds)]
+		[create a 'silence' stream with the specified parameters]
+	 ]
+
+	 [[stream zero( stream prototype)]
+		[create a silence stream with the same characteristics as the prototype]
+	 ]
+
+	 [[stream function(Array prototype, unsigned short channel_count, int sample_size, unsigned long sample_rate, unsigned long frame_count)]
+		[create a stream of which the waveform is described by an array of floating point values between -1 and 1]
+	 ]
+
+	 [[stream reinterpret(stream source, unsigned long samplerate, unsigned short channels = 0, short bits = 0)]
+		[completely reinterpret the samples in a stram]
+	 ]
+
+	 [[stream extract_channel(stream source, short channel)]
+		[extract a channel from a multi-channel stream]
+	 ]
+
+	 [[iterator iterator(stream source, double window_size, double jump_size = window_size)]
+		[create an iterator on a sample stream]
+	 ]
+
+	 [[stream amp_modulate(stream source, stream modulator)]
+		[modulate a sample stream with a stream of doubles]
+	 ]
+]
+
+
+[endsect]
+
