@@ -17,6 +17,20 @@ class block_consumer;
 class block_producer;
 
 
+/**
+ * \ingroup Napl
+ * Simple buffer that consists of a pointer to a block of bytes and 
+ * a size.
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 struct byte_buffer
 {
 	typedef unsigned char byte_type;
@@ -52,6 +66,20 @@ struct byte_buffer
 	size_t m_size;
 };
 
+/**
+ * \ingroup Napl
+ * Buffer allocation singleton. 
+ * The current implementations will simply create new file buffers.
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 struct buffer_allocator
 {
 private:
@@ -77,12 +105,21 @@ public:
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// Sample_block contains some contiguous memory with samples
-//
-// sample_blocks get shifted around from one processor to the other.
-//
+/**
+ * \ingroup Napl
+ * A sample block acts as a 'shared pointer' to a byte buffer.
+ * Additionally a sample block may define a 'window' on the byte buffer,
+ * allowing clients to only access part of the buffer.
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 struct sample_block
 {
 	typedef byte_buffer::byte_type byte_type;
@@ -125,10 +162,20 @@ struct sample_block
 	boost::shared_ptr< byte_buffer> m_buffer_ptr;
 };
 
-//
-// block managers create blocks of specific sizes while cacheing returned blocks
-// for later re-use
-//
+/**
+ * \ingroup Napl
+ * block managers create blocks of specific sizes while cacheing returned blocks
+ * for later re-use
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_manager
 {
 public:
@@ -178,9 +225,21 @@ private:
 
 };
 
-// block handles obtain a block from a block manager and
-// return that block when their lifetime is over.
-//
+
+/**
+ * \ingroup Napl
+ * block handles obtain a block from a block manager and
+ * return that block when their lifetime is over. 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_handle : public boost::noncopyable
 {
 	block_manager *m_manager_ptr;
@@ -210,9 +269,20 @@ public:
 	}
 };
 
-//
-// this class acts as a wrapper to make sample blocks behave more like 
-// a standard container class
+/**
+ * \ingroup Napl
+ * this template acts as a wrapper to make sample blocks behave more like 
+ * a standard container class
+ *
+ * \version 1.0
+ * first version
+ * 
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 template <class sample_type>
 struct sample_container
 {
@@ -245,11 +315,20 @@ public:
 	}
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// block_owner is a base type that represents objects that have their own block
-// and fill it with sample data
-//
+/**
+ * \ingroup Napl
+ * block_owner is a base type that represents objects that have their own block
+ * and fill it with sample data 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_owner : protected block_manager
 {
 public:
@@ -267,18 +346,27 @@ public:
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// stream_header gives information about the sample streams that flow from one
-// processor to the other.
-//
+/**
+ * \ingroup Napl
+ * stream_header gives information about the sample streams that flow from one
+ * processor to the other. 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 struct stream_header
 {
-	unsigned long samplerate; // frames per second
-	short samplesize; // bits per sample, negative values have special meanings.
-	unsigned short numchannels; // samples per frame
+	unsigned long samplerate; ///< frames per second
+	short samplesize; ///< bits per sample, negative values have special meanings.
+	unsigned short numchannels; ///< samples per frame
 	unsigned long numframes;
-	unsigned short architecture; // endian-nes and interleaving of samples
+	unsigned short architecture; ///< endian-nes and interleaving of samples
 
 	// 
 	// frame size in bytes
@@ -297,20 +385,55 @@ struct stream_header
 	}
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// A block_producer is an object that can produce sample_blocks on demand
-// processors typically expose a block_producer side and a block_consumer side
-// the consumer side is exposed to producers and vice versa.
-//
+
+/**
+ * \ingroup Napl
+ * A block_producer is an object that can produce sample_blocks on demand
+ * processors typically expose a block_producer side and a block_consumer side
+ * the consumer side is exposed to producers and vice versa. 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_producer
 {
 public:
+	/**
+	 * Request samples from the producer.
+	 * Normally, a producer should react on this request by calling the consumers
+	 * ReceiveBlock-method with the requested sample data.
+	 * It is left to the producers discretion to divide the sample data over more than
+	 * one block and call the consumers ReceiveBlock method consecutively.
+	 * \param &consumer [in] The consumer in which to call ReceiveBlock
+	 * \param start [in] zero-based index of first sample
+	 * \param num  [in] number of samples to retreive.
+	 * \return Either returns BLOCK_ERROR when something failed, or zero if successfull
+	 */
 	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num) = 0;
+
+	/**
+	 * Get the stream metadata, such as samplerate, samplesize, etc.
+	 * \param &h [out] The header to fill with metadata for this producer. See also stream_header
+	 */
 	virtual void GetStreamHeader( stream_header &h) = 0;
 
+
+	/**
+	 * DEPRECATED: Seek to a sample offset.
+	 * \param start offset
+	 */
 	virtual void Seek( sampleno start) = 0;
 
+	/**
+	 * Notify a producer that it should be expecting calls from this consumer
+	 * \param *pC [in] The consumer to which this producer is linked.
+	 */
 	virtual void LinkToConsumer( block_consumer *pC)
 	{
 		m_pConsumer = pC;
@@ -327,30 +450,62 @@ protected:
 extern block_producer *GlobalGetEndianConverter( const stream_header &h, block_producer *pP);
 
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// block_consumers receive blocks with sample data from block_producers.
-// They can be linked to producers.
-//
+/**
+ * \ingroup Napl
+ * block_consumers receive blocks with sample data from block_producers.
+ * They can be linked to producers. 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_consumer
 {
 public:
+	/**
+	 * normal c'tor, nothing fancy
+	 */
 	block_consumer()
 	{};
 
+	/**
+	 * construct and link to a producer
+	 * \param *p [in] producer to link to
+	 */
 	block_consumer( block_producer *p)
 	{
 		LinkTo( p);
 	}
 
+	/**
+	 * Explicitly link to a producer.
+	 * The default implementation will also check the architecture
+	 * of the producer and add an endian-converter if needed.
+	 * \param *p [in] producer to link to
+	 */
 	virtual void LinkTo( block_producer *p)
 	{
 		m_pProducer = CheckArchitecture( p);
 		NotifyProducer();
 	}
 
+	/**
+	 * Receive a block of sample data.
+	 * Producers will react on a RequestBlock-call by calling the consumers
+	 * ReceiveBlock a number of times with blocks of data.
+	 * Implement this function for your specific producer implementation.
+	 * \param &b [in] a block of data.
+	 */
 	virtual void ReceiveBlock( const sample_block &b) = 0;
 
+	/**
+	 * Notify a producer that it was linked to this consumer
+	 */
 	virtual void NotifyProducer()
 	{
 		if (m_pProducer)
@@ -364,6 +519,13 @@ protected:
 	//
 	virtual unsigned long GetArchitecture() { return LOCAL_ARCHITECTURE;}
 
+	/**
+	 * Check a producers architecture (specifically: endiannes) and 
+	 * create a endian-converter if needed.
+	 * \param *pP [in] the producer to check
+	 * \return eiter the original producer pointer, or a pointer to an endian-converter that
+	 * has been linked to the producer.
+	 */
 	virtual block_producer *CheckArchitecture( block_producer *pP)
 	{
 		stream_header h;
@@ -385,37 +547,67 @@ protected:
 
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// A block_sink is a consumer that does not have a producer side. A sample 
-// stream ends here.
-//
-// subclasses override the 'Start' function to start the whole chain
-//
+/**
+ * \ingroup Napl
+ * A block_sink is a consumer that does not have a producer side. A sample 
+ * stream ends here.
+ *
+ * subclasses override the 'Start' function to start the whole chain 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_sink : public block_consumer
 {
 public:
+	/**
+	 * Start retrieving data from a producer.
+	 */
 	virtual void Start() = 0;
 };
 
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// A block_mutator is an object that exposes both a consumer and a producer side
-//
+/**
+ * \ingroup Napl
+ *  A block_mutator is an object that exposes both a consumer and a producer side 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class block_mutator: public block_consumer, public block_producer
 {
 };
 
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// creative_block_producers have their own block. They fill it and send it to
-// the consumer.
-//
-// subclasses override the 'FillBlock' function to provide real functionality
-//
+/**
+ * \ingroup Napl
+ *
+ * creative_block_producers have their own block. They fill it and send it to
+ * the consumer.
+ *
+ * subclasses override the 'FillBlock' function to provide real functionality
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 class creative_block_producer : public block_producer, protected block_owner
 {
 public:
@@ -431,6 +623,15 @@ public:
 		// nop
 	}
 
+	/**
+	 * Request a block of data.
+	 * This implementation of the RequestBlock method will call the 'FillBlock' virtual function, 
+	 * which enables derived classes to fill the blocks with actual sample data.
+	 * \param &consumer 
+	 * \param start 
+	 * \param num 
+	 * \return 
+	 */
 	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
 	{
 
@@ -458,18 +659,44 @@ public:
 	}
 
 protected:
-	// this function is called whenever a block of samples is requested
+
+	/**
+	 * Fill a block with new sample data.
+	 * Implement this virtual method in a concrete creative block producer.
+	 *
+	 * \param &b [out] block to fill with data
+	 * \param count requested sampledata
+	 * \return 
+	 */
 	virtual sampleno FillBlock( sample_block &b, sampleno count) = 0;
 
-	// this function is called once for every newly created block
+
+	/**
+	 * Initialize a newly created block.
+	 * This method is called once for each block that is newly created. Implement this method
+	 * if you want to perform a specific action to initialize newly created blocks. An example of
+	 * such an initialization-action could be filling the block with zeros.
+	 * \param &b [in,out] the block to be initialized.
+	 */
 	virtual void InitBlock( sample_block &b) {};
 
 	block_result m_result;
 };
 
-//
-// helper class that can save the state of some member during
-// a function call and restore that state after the function call
+/**
+ * \ingroup Napl
+ * helper class that can save the state of some member during
+ * a function call and restore that state after the function call*  
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 template<typename T>
 struct state_saver
 {
@@ -489,11 +716,20 @@ struct state_saver
 	}
 };
 
-////////////////////////////////////////////////////////////////////////////////
-//
-// uniform_block_mutators perform some operation on each sample in the sample stream.
-// the operation and the sample type is determined by the sample_mutator parameter.
-//
+/**
+ * \ingroup Napl
+ * uniform_block_mutators perform some operation on each sample in the sample stream.
+ * the operation and the sample type is determined by the sample_mutator parameter. 
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-22-2004
+ *
+ * \author Danny
+ *
+ *
+ */
 template< class sample_mutator, class interface_type = block_mutator>
 class uniform_block_mutator: public interface_type
 {
@@ -511,6 +747,14 @@ public:
 		m_sample_mutator.MutateHeader( h);
 	}
 
+	/**
+	 * This implementation delegates the block request to the linked producer.
+	 * \see block_producer::RequestBlock( block_consumer &c, sampleno start, unsigned long num)
+	 * \param &c 
+	 * \param start 
+	 * \param num 
+	 * \return 
+	 */
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
 	{ 
 		// this is not quite thread-safe. This object keeps the requesting consumer in it's

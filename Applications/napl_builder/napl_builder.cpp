@@ -28,6 +28,11 @@ void print( string x)
 	std::cout << x << endl;
 }
 
+/**
+ * Run a command on the command line.
+ * \param command [in] the command to be executed
+ * \return whatever the command returned.
+ */
 int napl_system( string command)
 {
 	return system( command.c_str());
@@ -47,20 +52,12 @@ void init_napl_context( context *c)
 	function( c, "system", napl_system);
 }
 
-void expand_wildcards( platform::name_list_t &names, int argc, _TCHAR * argv[])
-{
-	for (int count = 0; count < argc; ++count)
-	{
-		// first expand the argument into a list of filenames, if possible
-		platform::name_list_t expanded = 
-			platform::expand_argument_wildcards( argv[count]);
 
-		// copy the list into the names list
-		std::copy( expanded.begin(), expanded.end(), 
-			std::back_insert_iterator< platform::name_list_t>( names));
-	}
-}
-
+/**
+ * escape any special characters by prefixing them with '\'.
+ * \param raw_str [in] the raw, unescaped string
+ * \return the escaped string
+ */
 std::string escape_chars( std::string raw_str)
 {
 	string::size_type p = 0;
@@ -100,22 +97,23 @@ int run_script( string script, int argc, _TCHAR * argv[])
 	//
 	// expand all other arguments
 	//
-	expand_wildcards( cl_arguments, argc, argv);
+	platform::expand_wildcards( cl_arguments, argc, argv);
 
 	//
 	// create a function that will call the main()-function with the 
 	// right arguments.
 	//
-	string arguments = string("\nfunction __napl_main(){ \nvar args = [ \"") + escape_chars( cl_arguments[0]) + "\"";
+	string argument_stub_function = 
+		string("\nfunction __napl_main(){ \nvar args = [ \"") + escape_chars( cl_arguments[0]) + "\"";
 	platform::name_list_t::const_iterator i;
 	for (i = cl_arguments.begin(), ++i; i != cl_arguments.end(); ++i)
 	{
-		arguments += (string(", \"") + escape_chars( *i) + "\"");
+		argument_stub_function += (string(", \"") + escape_chars( *i) + "\"");
 	}
-	arguments += "];\nreturn main( args);};";
+	argument_stub_function += "];\nreturn main( args);};";
 
 	// add this function at the end of the script.
-	script += arguments;
+	script += argument_stub_function;
 
 
 	try

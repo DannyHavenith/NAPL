@@ -3,8 +3,25 @@ struct progress
 	virtual void step( float progress) = 0;
 };
 
-// does not actually mutate blocks but just monitors the progress in 
-// the chain.
+/**
+ * \ingroup Napl
+ *
+ * a progress monitor does not actually mutate the sample stream. It is inserted into
+ * a Napl graph and sends progress notifications to a class that adheres to the 'progress'
+ * interface.
+ *
+ * \version 1.0
+ * first version
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ * \todo 
+ *
+ * \bug 
+ *
+ */
 struct progress_monitor : public block_mutator
 {
 	progress_monitor( progress* progress_ptr);
@@ -27,6 +44,24 @@ private:
 	sampleno m_current_position;
 };
 
+/**
+ * \ingroup Napl
+ *
+ * A default implementation of the progress interface. 
+ * This class shows progress as a text line consisting of
+ * asterisk ('*') characters.
+ *
+ * \version 1.0
+ *
+ * \date 12-21-2004
+ *
+ * \author Danny
+ *
+ * \todo 
+ *
+ * \bug 
+ *
+ */
 struct text_based_progress_bar : public progress
 {
 	text_based_progress_bar( const std::string &text, std::ostream &strm, int size);
