@@ -141,6 +141,21 @@
 				RelativePath=".\IEEE754.cpp">
 			</File>
 			<File
+				RelativePath=".\lame_wrapper.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\objfact.cpp">
 			</File>
 			<File
@@ -196,6 +211,9 @@
 					RelativePath="..\..\Include\napl.h">
 				</File>
 				<File
+					RelativePath="..\..\Include\napl_error.h">
+				</File>
+				<File
 					RelativePath="..\..\Include\nil_sink.h">
 				</File>
 				<File
@@ -217,7 +235,7 @@
 					RelativePath="..\..\Include\simpops.h">
 				</File>
 				<File
-					RelativePath="..\..\Include\truncator.h">
+					RelativePath="..\..\Include\truncate.h">
 				</File>
 			</Filter>
 			<Filter
@@ -234,6 +252,9 @@
 				</File>
 				<File
 					RelativePath=".\analyzer.h">
+				</File>
+				<File
+					RelativePath=".\BladeMP3EncDLL.h">
 				</File>
 				<File
 					RelativePath="constant_producer.h">
@@ -258,6 +279,9 @@
 				</File>
 				<File
 					RelativePath="IEEE754 .H">
+				</File>
+				<File
+					RelativePath=".\lame_wrapper.h">
 				</File>
 				<File
 					RelativePath="pan_impl.h">
