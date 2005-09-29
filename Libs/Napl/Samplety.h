@@ -502,9 +502,16 @@ public:
 		return *this;
 	}
 
-	inline const StereoSample< MonoSample> operator+( const StereoSample< MonoSample> &rhs) const
+	template< typename other_type>
+	inline const StereoSample< MonoSample> operator+( const StereoSample< other_type> &rhs) const
 	{
 		return StereoSample< MonoSample>( *this) += rhs;
+	}
+
+	template< typename other_type>
+	inline const StereoSample< MonoSample> operator-( const StereoSample< other_type> &rhs) const
+	{
+		return StereoSample< MonoSample>( *this) -= rhs;
 	}
 
 	template< typename scalar_type>

@@ -7,7 +7,7 @@
 #include "objfact.h"
 #include "convendi.h"
 #include "samplety.h"
-
+#include "truncate.h"
 #include "uniform_block_converter.h"
 #include "resample.h"
 #include "xfade.h"
@@ -26,7 +26,7 @@
 #include "sample_factory_instantiator.h"
 
 
-
+int test = truncate<unsigned char>( sampletype_m16(300));
 
 template< typename sampletype>
 block_mutator *create_pan( short pan_value, const StereoSample<sampletype> &)

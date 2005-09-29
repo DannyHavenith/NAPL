@@ -64,7 +64,8 @@ void napl_facade::init(boost::clipp::context * c)
 	cls.static_function( "write_file", write_file);
 	cls.static_function( "analyze", analyze);
 	cls.static_function( "amplify", amplify);
-	cls.static_function( "truncate", truncate);
+	cls.static_function( "cross_fade", cross_fade);
+
 	cls.static_function( "cut", cut)
 		.signature( "sound", "pos",arg("size")=0);
 	cls.static_function( "cut_at_sample", cut_at_sample)
@@ -93,11 +94,13 @@ void napl_facade::init(boost::clipp::context * c)
 	//
 	file_reader::init( c);
 	file_writer::init( c);
+
+	
 }
 
 void block_producer_wrapper::init(boost::clipp::context * c)
 {
-	class_<block_producer_wrapper> cls( "block_producer", c);
+	class_<block_producer_wrapper> cls( "sound", c);
 	cls.read( "sample_rate", get_samplerate);
 	cls.read( "sample_size", get_samplesize);
 	cls.read( "channel_count", get_numchannels);
@@ -160,21 +163,6 @@ block_producer_wrapper * napl_facade::amplify(block_producer_wrapper *source, do
 
 	return check_return( amp,
 		"could not create an amplifier");
-}
-
-// low-level truncation of samples: this will just remove the least significant bytes from each sample
-block_producer_wrapper * napl_facade::truncate(block_producer_wrapper * source, int byte_size)
-{
-	stream_header h;
-	source->producer->GetStreamHeader( h);
-	if (h.frame_size() < byte_size) 
-	{
-		throw napl_error( "cannot truncate if source framesize is smaller than the destination size");
-	}
-
-	block_mutator *trunc = new truncator( byte_size);
-	trunc->LinkTo( source->producer);
-	return new block_producer_wrapper( trunc);
 }
 
 // take a piece out of the input sample

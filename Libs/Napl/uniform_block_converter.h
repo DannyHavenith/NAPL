@@ -63,10 +63,10 @@ struct typed_converter
 	void MutateHeader( stream_header &h)
 	{
 		h.numchannels = sampletraits< destination_type>::get_num_channels();
+		typedef typename sampletraits< destination_type>::channel_type channel_type;
 
-		// TODO: floats
 
-		h.samplesize = size_code_converter<destination_type>::get_size() / h.numchannels;
+		h.samplesize = size_code_converter<channel_type>::get_size();
 	}
 };
 
