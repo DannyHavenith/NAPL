@@ -67,7 +67,7 @@ you are going to read or write, Napl will try to determine the type by examining
 
 Napl may actually write files that are not in a valid wav or aiff-format. This is the case
 when you create a sample-stream of type 'double' which is not supporteed in most file types. 
-Other packages will nog be able to read Napl-created wav files of type 'double'. Napl itself
+Other packages will not be able to read Napl-created wav files of type 'double'. Napl itself
 however, will always be able to read the files that it wrote.
 
 [h2 With-statement]
@@ -201,9 +201,6 @@ look at the other available Napl functions.
 		[multiply each sample in the stream with a constant factor]
 	 ]
 
-	 [[stream truncate(stream source, int byte_size)]
-		[*deprecated* do not use this function]
-	 ]
 
 	 [[stream cut(stream source, double start, double length)]
 		[maintain only a part of a stream. start and length are in seconds.]
