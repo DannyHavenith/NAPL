@@ -11,5 +11,5 @@
 #include "simpops.h" // cut and paste
 #include "nil_sink.h"
 #include "progress.h"
-#include "truncator.h"
 #include "reinterpret.h"
+#include "napl_error.h"

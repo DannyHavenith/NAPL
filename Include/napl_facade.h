@@ -125,14 +125,6 @@ public:
 	static file_writer * create_one(std::string filename);
 };
 
-struct napl_error: public std::runtime_error
-{
-	napl_error( const std::string &message)
-		: runtime_error( "NAPL error: " + message)
-	{
-	};
-
-};
 
 class napl_facade: public boost::clipp::object
 {
@@ -153,8 +145,6 @@ public:
 	// write the source to a file
 	static void write_file(block_producer_wrapper *source, const std::string &filename);
 	static block_producer_wrapper * amplify(block_producer_wrapper *source, double factor);
-	// low-level truncation of samples: this will just remove the least significant bytes from each sample
-	static block_producer_wrapper * truncate(block_producer_wrapper * source, int byte_size);
 	// take a piece out of the input sample
 	static block_producer_wrapper * cut(block_producer_wrapper * source, double start, double length);
 	static block_producer_wrapper * cut_at_sample(block_producer_wrapper * source, unsigned long start, unsigned long length);

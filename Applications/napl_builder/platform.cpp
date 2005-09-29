@@ -6,7 +6,7 @@ using std::string;
 
 /**
  * Try to expand a command line argument to a list of file names.
- * if expansion failes, we assume that the argument was not meant to be a filename
+ * if expansion fails, we assume that the argument was not meant to be a filename
  * and we return the original argument.
  *
  * \param argument the original argument that may or may not contain wildcards
