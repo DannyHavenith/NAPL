@@ -6,3 +6,11 @@ function show_info( input)
 	writeln( "The frame count is: " + input.frame_count);
 	writeln( "The frame size  is: " + input.frame_size + " bytes");
 };
+
+function show_analysis( analysis)
+{
+	writeln( "min: " + analysis.min);
+	writeln( "max: " + analysis.max);
+	writeln( "avg: " + analysis.avg);
+	writeln( "norm:" + analysis.norm);
+};
