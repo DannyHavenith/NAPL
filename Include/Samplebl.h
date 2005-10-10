@@ -431,7 +431,9 @@ public:
 	virtual void Seek( sampleno start) = 0;
 
 	/**
-	 * Notify a producer that it should be expecting calls from this consumer
+	 * Notify a producer that it should be expecting calls from this consumer.
+	 * Please note that this is a hint only. One producer may have multiple consumers.
+	 * Do not rely on the m_pConsumer member to point to the one and only consumer.
 	 * \param *pC [in] The consumer to which this producer is linked.
 	 */
 	virtual void LinkToConsumer( block_consumer *pC)
@@ -1063,6 +1065,23 @@ public:
 	}
 };
 
+template<>
+class mut_add<double>
+{
+public:
+	typedef double sample_type;
+
+	static inline void MutateHeader( stream_header &, const stream_header &, const stream_header &)
+	{
+		// this mutator does not alter the header
+	}
+
+	static inline const sample_type Mutate( 
+		const sample_type &left, const sample_type &right)
+	{
+		return left + right;
+	}
+};
 
 
 

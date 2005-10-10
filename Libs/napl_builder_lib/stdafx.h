@@ -17,5 +17,6 @@
 #include <boost/clipp/clipp_stream.hpp>
 #include <boost/javascript/date.hpp>
 #include "napl.h"
+#include <boost/shared_ptr.hpp>
 
 // TODO: reference additional headers your program requires here

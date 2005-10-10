@@ -188,6 +188,17 @@ template <> struct sampletraits< float> : public builtin_type_sampletraits< floa
 	{
 		return -input;
 	}
+
+	static inline sampletype get_min()
+	{
+		return -1.0;
+	}
+
+	static inline sampletype get_max()
+	{
+		return 1.0;
+	}
+
 };
 
 template <> struct sampletraits< double>: public builtin_type_sampletraits< double, double>
@@ -196,6 +207,18 @@ template <> struct sampletraits< double>: public builtin_type_sampletraits< doub
 	{
 		return -input;
 	}
+
+	static inline sampletype get_min()
+	{
+		return -1.0;
+	}
+
+	static inline sampletype get_max()
+	{
+		return 1.0;
+	}
+
+
 };
 
 
@@ -255,7 +278,7 @@ public:
 
 	static char ms_from_int( int in)
 	{
-		return (in/65536) & 0xff;
+		return (in>>16) & 0xff;
 	}
 
 	operator int() const
