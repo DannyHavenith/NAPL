@@ -11,7 +11,6 @@ struct block_producer_wrapper: public boost::clipp::object
 	}
 
 	block_producer_wrapper()
-		:producer(0)
 	{
 	}
 

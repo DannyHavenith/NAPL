@@ -44,6 +44,8 @@ int napl_system( string command)
  */
 void init_napl_context( context *c)
 {
+	boost::clipp::valueP p( boost::clipp::wrap( 10, c));
+
 	napl_facade::init( c);
 	block_producer_wrapper::init( c);
 
@@ -238,6 +240,7 @@ bool load_script( const std::string filename, std::string &target)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+
 	int retval = -1;
 	if (argc < 2)
 	{

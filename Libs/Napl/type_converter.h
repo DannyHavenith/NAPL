@@ -27,7 +27,7 @@ private:
 	template< typename channel_type>
 	static void round( double_type source, destination_type &dest)
 	{
-		dest = source + dest_traits::expand_to_channels( 0.5); 
+		dest = source;// + dest_traits::expand_to_channels( (source > 0.0)?0.5:-0.5); 
 	}
 
 	template<>
