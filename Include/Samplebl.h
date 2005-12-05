@@ -37,7 +37,15 @@ struct byte_buffer
 
 	byte_buffer( size_t size)
 		: m_ptr( new byte_type[size]),
-		m_size( size)
+		m_size( size),
+		m_is_owner( true)
+	{
+	}
+
+	byte_buffer( byte_type *ptr, size_t size)
+		: m_ptr( ptr),
+		m_size( size),
+		m_is_owner( false)
 	{
 	}
 
@@ -49,7 +57,10 @@ struct byte_buffer
 
 	~byte_buffer()
 	{
-		delete [] m_ptr;
+		if (m_is_owner) 
+		{
+			delete [] m_ptr;
+		}
 	}
 
 	byte_type *get_begin()
@@ -64,6 +75,7 @@ struct byte_buffer
 
 	byte_type *m_ptr;
 	size_t m_size;
+	bool m_is_owner;
 };
 
 /**
@@ -123,18 +135,24 @@ public:
 struct sample_block
 {
 	typedef byte_buffer::byte_type byte_type;
+	typedef boost::shared_ptr< byte_buffer> buffer_ptr_type;
 
 
 	inline sample_block(){};
 
 	inline sample_block( size_t size)
 	{
-		Init( size);
+		Init( buffer_ptr_type( buffer_allocator::get_instance().create_buffer( size)));
 	}
 
-	inline void Init( size_t size)
+	inline sample_block( buffer_ptr_type buffer)
 	{
-		m_buffer_ptr.reset( buffer_allocator::get_instance().create_buffer( size));
+		Init( buffer);
+	}
+
+	inline void Init( buffer_ptr_type buffer)
+	{
+		m_buffer_ptr =  buffer;
 		m_start = m_buffer_ptr->get_begin();
 		m_end = m_start + m_buffer_ptr->get_size();
 	}
@@ -159,7 +177,7 @@ struct sample_block
 	//
 	// The shared pointer to the actual buffer bytes
 	//
-	boost::shared_ptr< byte_buffer> m_buffer_ptr;
+	buffer_ptr_type m_buffer_ptr;
 };
 
 /**
@@ -362,6 +380,28 @@ public:
  */
 struct stream_header
 {
+
+	stream_header( 
+		unsigned long rate,
+		short size,
+		unsigned short channels,
+		unsigned long frames,
+		unsigned short arch
+		)
+		: samplerate( rate),
+		samplesize( size),
+		numchannels( channels),
+		numframes( frames),
+		architecture( arch)
+	{
+		// nop
+	}
+
+	stream_header()
+	{
+		// nop
+	}
+
 	unsigned long samplerate; ///< frames per second
 	short samplesize; ///< bits per sample, negative values have special meanings.
 	unsigned short numchannels; ///< samples per frame

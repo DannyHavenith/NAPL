@@ -3,6 +3,8 @@
 #pragma warning( disable:4786)
 
 #include <assert.h>
+#include <vector>
+#include <string>
 #include "processor_visitor.h"
 #include "samplebl.h"
 #include "filefact.h"

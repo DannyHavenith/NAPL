@@ -9,6 +9,7 @@
 #include "aiff.h"
 #include "wav.h"
 #include "string.h"
+#include "raw_file.h"
 #include "filefact.h"
 
 block_producer *filefactory::GetBlockProducer( const char *filename)
@@ -47,15 +48,23 @@ block_sink *filefactory::GetBlockSink( const char *filename)
 
 file_type *filefactory::GetFileType( const char *filename)
 {
+	static AIFFFile aiff_file_inst;
+	static raw_file raw_file_inst;
+	static WAVFile wav_file_inst;
+
 	if (strchr( filename, '.'))
 	{
 		if (!strcmpi( strchr( filename, '.'), ".aif"))
 		{
-			return new AIFFFile();
+			return &aiff_file_inst;
+		}
+		else if (!strcmpi( strchr( filename, '.'), ".raw"))
+		{
+			return &raw_file_inst;
 		}
 		else
 		{
-			return new WAVFile();
+			return &wav_file_inst;
 		}
 	}
 	else return 0;
