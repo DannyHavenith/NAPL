@@ -46,6 +46,10 @@ struct sample_factory_instantiator
 			{
 				return new to_instantiate< sampletype_md>();
 			}
+			else if (-1 == h.samplesize)
+			{
+				return new to_instantiate< sampletype_mf>();
+			}
 			else return 0;
 		}
 		else if ( 4 == h.numchannels)

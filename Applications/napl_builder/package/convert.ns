@@ -5,8 +5,17 @@ function main( args)
 
 	if (args.length < 2)
 	{
-		writeln( "usage: convert.ns <inputfile> <samplesize>");
+		writeln( "usage: convert.ns <inputfile> <samplesize> [outputfile]");
 		return -1;
+	}
+
+	if (args.length <3)
+	{
+		outputfile = "converted" + args[0];
+	}
+	else
+	{
+		outputfile = args[2];
 	}
 
 	writeln( "continuing");
@@ -14,7 +23,7 @@ function main( args)
 	{
 		source = read_file( args[0]);
 		converted = convert( source, parseInt( args[1]));
-		write_file( converted, "converted_" + args[0]);
+		write_file( converted, outputfile);
 	}	
 
 }

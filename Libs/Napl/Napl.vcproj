@@ -156,10 +156,19 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\memory_producer.cpp">
+			</File>
+			<File
+				RelativePath=".\memory_writer.cpp">
+			</File>
+			<File
 				RelativePath=".\objfact.cpp">
 			</File>
 			<File
 				RelativePath=".\progress.cpp">
+			</File>
+			<File
+				RelativePath=".\raw_file.cpp">
 			</File>
 			<File
 				RelativePath=".\StdAfx.cpp">
@@ -205,6 +214,12 @@
 					RelativePath="..\..\Include\Filetype.h">
 				</File>
 				<File
+					RelativePath="..\..\Include\memory_producer.h">
+				</File>
+				<File
+					RelativePath=".\memory_writer.h">
+				</File>
+				<File
 					RelativePath="..\..\Include\ms_config.h">
 				</File>
 				<File
@@ -226,6 +241,9 @@
 					RelativePath="..\..\Include\reinterpret.h">
 				</File>
 				<File
+					RelativePath="..\..\Include\Resample.h">
+				</File>
+				<File
 					RelativePath="..\..\Include\sample_analyzer.h">
 				</File>
 				<File
@@ -233,6 +251,9 @@
 				</File>
 				<File
 					RelativePath="..\..\Include\simpops.h">
+				</File>
+				<File
+					RelativePath="..\..\Include\Smputils.h">
 				</File>
 				<File
 					RelativePath="..\..\Include\truncate.h">
@@ -257,7 +278,7 @@
 					RelativePath=".\BladeMP3EncDLL.h">
 				</File>
 				<File
-					RelativePath="constant_producer.h">
+					RelativePath=".\constant_producer.h">
 				</File>
 				<File
 					RelativePath=".\Convendi.h">
@@ -287,16 +308,13 @@
 					RelativePath="pan_impl.h">
 				</File>
 				<File
-					RelativePath=".\Resample.h">
+					RelativePath=".\raw_file.h">
 				</File>
 				<File
 					RelativePath=".\sample_factory_instantiator.h">
 				</File>
 				<File
 					RelativePath=".\Samplety.h">
-				</File>
-				<File
-					RelativePath=".\Smputils.h">
 				</File>
 				<File
 					RelativePath=".\StdAfx.h">

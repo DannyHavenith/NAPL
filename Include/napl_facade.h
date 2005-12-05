@@ -14,10 +14,11 @@ struct block_producer_wrapper: public boost::clipp::object
 	{
 	}
 
+	/*
 	operator block_producer *()
 	{
 		return producer;
-	}
+	}*/
 
 	// expose this class to the scripting engine
 	static void init(boost::clipp::context * c);
@@ -27,6 +28,11 @@ struct block_producer_wrapper: public boost::clipp::object
 	unsigned short get_numchannels(){ return get_header().numchannels;}; // samples per frame
 	unsigned long get_numframes(){ return get_header().numframes;};
 	inline unsigned short get_frame_size(){ return get_header().frame_size();};
+
+	~block_producer_wrapper()
+	{
+		delete producer;
+	}
 
 private:
 	stream_header &get_header()

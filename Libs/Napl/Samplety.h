@@ -22,6 +22,7 @@ typedef unsigned char sampletype_m8;
 typedef short sampletype_m16;
 typedef long accumulatortype;
 typedef double sampletype_md;
+typedef float sampletype_mf;
 
 //
 // sampletraits give some info about a given sampletype
@@ -613,6 +614,8 @@ typedef struct StereoSample<sampletype_m8> sampletype_s8;
 typedef struct StereoSample<sampletype_m16> sampletype_s16;
 typedef struct StereoSample<sampletype_m24> sampletype_s24;
 typedef struct StereoSample<sampletype_md> sampletype_sd;
+typedef struct StereoSample<sampletype_mf> sampletype_sf;
+
 
 //
 // define quad types
@@ -621,7 +624,7 @@ typedef struct StereoSample<sampletype_s8> sampletype_q8;
 typedef struct StereoSample<sampletype_s16> sampletype_q16;
 typedef struct StereoSample<sampletype_s24> sampletype_q24;
 typedef struct StereoSample<sampletype_sd> sampletype_qd;
-
+typedef struct StereoSample<sampletype_sf> sampletype_qf;
 
 template<typename sampletype>
 inline double normalize_sample( const sampletype &input)
