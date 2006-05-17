@@ -14,12 +14,14 @@ public:
 	virtual block_mutator *GetConverter() = 0;
 };
 
+class general_resampler;
+
 class sample_object_factory
 {
 public:
 	virtual binary_block_processor *GetXFader() = 0;
 	virtual binary_block_processor *GetStereoMaker() = 0;
-	virtual block_mutator *GetResampler( unsigned long outfreq, unsigned long infreq, bool lie) = 0;
+	virtual general_resampler *GetResampler( unsigned long outfreq, unsigned long infreq, bool lie) = 0;
 	virtual block_mutator *GetNegator() = 0;
 	virtual block_mutator *GetEndianConverter() = 0;
 	virtual binary_block_processor *GetAdder() = 0;
@@ -39,7 +41,7 @@ template< typename sampletype>
 class t_sample_object_factory : public sample_object_factory 
 {
 public:
-	virtual block_mutator *GetResampler(  unsigned long outfreq, unsigned long infreq, bool lie);
+	virtual general_resampler *GetResampler(  unsigned long outfreq, unsigned long infreq, bool lie);
 	virtual binary_block_processor *GetStereoMaker();
 	virtual block_mutator *GetEndianConverter();
 	virtual binary_block_processor *GetXFader();

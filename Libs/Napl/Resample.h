@@ -7,7 +7,7 @@
 
 #include "samplebl.h" // include sample block definitions
 #include "smputils.h"
-
+#include "general_resampler.h"
 ////////////////////////////////////////////////////////////////////////////////
 //
 // The resample object resamples a sample stream. It converts from one sampling
@@ -16,12 +16,6 @@
 // The resampler uses a heavily mutilated Bressenham's algorithm to get a close
 // aproximation of the original sound data.
 //
-class general_resampler : public block_mutator, public block_owner
-{
-public:
-	virtual void Init(unsigned long outfreq, unsigned long infreq, bool lie) = 0;
-};
-
 
 template <typename sampletype>
 class resampler: public general_resampler
