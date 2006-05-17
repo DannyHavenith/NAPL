@@ -51,3 +51,5 @@ template from_to_factory *t_sample_object_factory<sampletype_sd>::GetFromToFacto
 template from_to_factory *t_sample_object_factory<sampletype_md>::GetFromToFactory( const stream_header &h);
 template from_to_factory *t_sample_object_factory<sampletype_qd>::GetFromToFactory( const stream_header &h);
 template from_to_factory *t_sample_object_factory<sampletype_mf>::GetFromToFactory( const stream_header &h);
+template from_to_factory *t_sample_object_factory<sampletype_sf>::GetFromToFactory( const stream_header &h);
+template from_to_factory *t_sample_object_factory<sampletype_qf>::GetFromToFactory( const stream_header &h);

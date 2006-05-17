@@ -214,10 +214,13 @@
 					RelativePath="..\..\Include\Filetype.h">
 				</File>
 				<File
+					RelativePath="..\..\Include\general_resampler.h">
+				</File>
+				<File
 					RelativePath="..\..\Include\memory_producer.h">
 				</File>
 				<File
-					RelativePath=".\memory_writer.h">
+					RelativePath="..\..\Include\memory_writer.h">
 				</File>
 				<File
 					RelativePath="..\..\Include\ms_config.h">
@@ -241,9 +244,6 @@
 					RelativePath="..\..\Include\reinterpret.h">
 				</File>
 				<File
-					RelativePath="..\..\Include\Resample.h">
-				</File>
-				<File
 					RelativePath="..\..\Include\sample_analyzer.h">
 				</File>
 				<File
@@ -251,9 +251,6 @@
 				</File>
 				<File
 					RelativePath="..\..\Include\simpops.h">
-				</File>
-				<File
-					RelativePath="..\..\Include\Smputils.h">
 				</File>
 				<File
 					RelativePath="..\..\Include\truncate.h">
@@ -311,10 +308,16 @@
 					RelativePath=".\raw_file.h">
 				</File>
 				<File
+					RelativePath=".\Resample.h">
+				</File>
+				<File
 					RelativePath=".\sample_factory_instantiator.h">
 				</File>
 				<File
 					RelativePath=".\Samplety.h">
+				</File>
+				<File
+					RelativePath=".\Smputils.h">
 				</File>
 				<File
 					RelativePath=".\StdAfx.h">

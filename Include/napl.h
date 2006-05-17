@@ -9,6 +9,7 @@
 #include "samplebl.h"
 #include "filefact.h"
 #include "sample_analyzer.h"
+#include "general_resampler.h"
 #include "objfact.h"
 #include "simpops.h" // cut and paste
 #include "nil_sink.h"

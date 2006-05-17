@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "processor_visitor.h"
 #include "sample_analyzer.h"
+#include "general_resampler.h"
 #include "objfact.h"
 #include "convendi.h"
 #include "samplety.h"
@@ -26,30 +27,32 @@
 #include "sample_factory_instantiator.h"
 
 
-int test = truncate<unsigned char>( sampletype_m16(300));
-
 template< typename sampletype>
-block_mutator *create_pan( short pan_value, const StereoSample<sampletype> &)
+block_mutator *create_pan( short pan_value, const StereoSample<sampletype> *)
 {
 	return new stereo_pan< sampletype>( pan_value);
 };
 
-block_mutator *create_pan( short pan_value, const sampletype_m24 &)
+block_mutator *create_pan( short pan_value, const sampletype_m24 *)
 {
 	return 0;
 };
 
-block_mutator *create_pan( short pan_value, const sampletype_m16 &)
+block_mutator *create_pan( short pan_value, const sampletype_m16 *)
 {
 	return 0;
 };
 
-block_mutator *create_pan( short pan_value, const sampletype_m8 &)
+block_mutator *create_pan( short pan_value, const sampletype_m8 *)
 {
 	return 0;
 };
 
-block_mutator *create_pan( short pan_value, const sampletype_md &)
+block_mutator *create_pan( short pan_value, const sampletype_md *)
+{
+	return 0;
+};
+block_mutator *create_pan( short pan_value, const sampletype_mf *)
 {
 	return 0;
 };
@@ -71,8 +74,7 @@ block_mutator *t_sample_object_factory<sampletype>::GetChannelExtractor( short c
 template< typename sampletype>
 block_mutator *t_sample_object_factory<sampletype>::GetPan( short pan_value)
 {
-	sampletype p;
-	return create_pan( pan_value, p);
+	return create_pan( pan_value, (sampletype *)0);
 }
 
 template< typename sampletype>
@@ -82,7 +84,7 @@ block_producer *t_sample_object_factory<sampletype>::GetConstant( stream_header 
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetResampler( 
+general_resampler *t_sample_object_factory<sampletype>::GetResampler( 
 	unsigned long outfreq, 
 	unsigned long infreq, 
 	bool lie)
