@@ -100,7 +100,6 @@ void wav_block_sink::ReceiveBlock( const sample_block &b)
 wav_block_sink::~wav_block_sink()
 {
 	fclose( m_pFile);
-	delete m_FileObj;
 }
 
 block_sink *WAVFile::MakeBlockSink( const char *filename)

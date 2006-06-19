@@ -94,6 +94,10 @@ protected:
 	{
 		return endian_convert((unsigned short) (in >> 16)) | (endian_convert((unsigned short) in) << 16);
 	}
+	inline static long long endian_convert( long long in)
+	{
+		return endian_convert((unsigned long) (in >> 32)) | (endian_convert((unsigned long) in) << 32);
+	}
 };
 
 
@@ -371,63 +375,6 @@ class ChunkID : public streamable
 	ChunkID(long l): m_ChunkID(l){};
 };
 
-//
-// big_endian_streamable is the base class for all files that write themselves
-// in big-endian form to a file.
-//
-// the long list of 'big_endian_file' parent classes is a patch: there used to 
-// be one template member 'stream' that could write any type to file. Since not
-// all compilers support member templates, I had to explicitly inherit the 'stream'
-// members from templatized classes.
-//
-class big_endian_streamable : public streamable,
-	public big_endian_file<unsigned char>,
-	public big_endian_file<unsigned short>,
-	public big_endian_file<unsigned long>
-
-{
-public:
-	big_endian_streamable(){;}
-
-protected:
-
-	/* This only worked for compilers supporting member templates.
-
-	template< class T>
-	static inline bool stream( FILE *f, T &t, const streamable::direction &d)
-	{
-		return big_endian_file< T >::stream( f, t, d);
-	}
-	*/
-
-
-};
-
-//
-// See the explanation near the big_endian_streamable class for an explanation of the
-// long list of parent types.
-//
-class little_endian_streamable : public streamable
-
-{
-public:
-	little_endian_streamable(){;}
-
-protected:
-
-	/*
-	   again: this is a member template, which is not supported on all
-	   compilers
-
-	template< class T, class direction>
-	static inline bool stream( FILE *f, T &t, direction d)
-	{
-		return little_endian_file< T >::stream( f, t, d);
-	}
-	*/
-
-};
-
 template <typename T>
 bool be_stream( FILE *fp, T &o, const streamable::direction &d)
 {
@@ -439,33 +386,5 @@ bool le_stream( FILE *fp, T &o, const streamable::direction &d)
 {
 	return little_endian_file< T>::stream( fp, o, d);
 }
-
-/*
-*** The patch below was ment to solve the problem of compilers that do not
-*** implement member templates yet. It didn't quite work, so i'm keeping
-*** the original situation.
-***
-*** following code commented out:
-
-namespace big_endian_streamable
-{
-	template< class T, class direction>
-	inline bool stream( FILE *f, T &t, direction d)
-	{
-		return big_endian_file< T >::stream( f, t, d);
-	}
-}
-
-namespace little_endian_streamable
-{
-	template< class T, class direction>
-	static inline bool stream( FILE *f, T &t, direction d)
-	{
-		return little_endian_file< T >::stream( f, t, d);
-	}
-}
-
-*** end of commented code
-*/
 
 #endif

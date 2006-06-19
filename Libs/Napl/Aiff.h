@@ -17,7 +17,7 @@
 #define HEADER_SSND IDword( 'S','S','N','D')
 
 // ChunkHeader represents the part that starts each AIFF-chunk
-struct ChunkHeader : public big_endian_streamable
+struct ChunkHeader : public streamable
 {
 	ChunkID ckID;
 	unsigned long ckSize;
@@ -50,7 +50,7 @@ private:
 	
 };
 
-struct  CommonChunk : public big_endian_streamable
+struct  CommonChunk : public streamable
 {
 	ChunkHeader header;
 	unsigned short	numChannels;
@@ -95,7 +95,7 @@ struct  CommonChunk : public big_endian_streamable
 };
 
 
-struct SoundDataChunk : public big_endian_streamable
+struct SoundDataChunk : public streamable
 {
 	ChunkHeader header;
 	unsigned long offset;
@@ -129,7 +129,7 @@ struct SoundDataChunk : public big_endian_streamable
 };
 
 
-struct AIFFFile : public big_endian_streamable, public file_type
+struct AIFFFile : public streamable, public file_type
 {
 	ChunkHeader header;
 	ChunkID		ID;
