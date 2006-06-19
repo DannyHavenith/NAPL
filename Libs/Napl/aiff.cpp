@@ -68,7 +68,6 @@ void aiff_block_sink::ReceiveBlock( const sample_block &b)
 aiff_block_sink::~aiff_block_sink()
 {
 	fclose( m_pFile);
-	delete m_FileObj;
 }
 
 unsigned long aiff_block_sink::GetArchitecture() 

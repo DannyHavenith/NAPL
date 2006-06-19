@@ -17,7 +17,7 @@
 
 
 // WAVHeader represents the part that starts each WAV-chunk
-struct WAVHeader : public little_endian_streamable
+struct WAVHeader : public streamable
 {
 	ChunkID ckID;
 	unsigned long ckSize;
@@ -30,7 +30,7 @@ struct WAVHeader : public little_endian_streamable
 	}
 };
 
-struct FormatChunk: public little_endian_streamable
+struct FormatChunk: public streamable
 {
 	WAVHeader header;
 	unsigned short format;
@@ -71,7 +71,7 @@ struct FormatChunk: public little_endian_streamable
 };
 
 
-struct WAVDataChunk: public little_endian_streamable
+struct WAVDataChunk: public streamable
 {
 	WAVHeader header;
 	unsigned long dataoffset;
@@ -86,7 +86,7 @@ struct WAVDataChunk: public little_endian_streamable
 	}
 };
 
-struct WAVFile : public little_endian_streamable, public file_type
+struct WAVFile : public streamable, public file_type
 {
 	WAVHeader header;
 	ChunkID		ID;
