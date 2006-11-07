@@ -1,0 +1,11 @@
+#include "includes\ramp.inc"
+#include "includes\show_info.inc"
+
+function main( args)
+{
+	ramp = create_ramp( 44100, 500, 16);
+	twice = Napl.add( ramp, ramp);
+
+	show_analysis( Napl.analyze( ramp));
+	show_analysis( Napl.analyze( twice));	
+}

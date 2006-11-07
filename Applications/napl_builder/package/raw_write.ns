@@ -1,0 +1,5 @@
+function main(args)
+{
+	tst = Napl.read_file( "tstsnd\\tellen.wav");
+	Napl.write_file( tst, "tellen.raw");
+}
