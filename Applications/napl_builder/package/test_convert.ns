@@ -1,0 +1,26 @@
+#include "includes\show_info.inc"
+
+function create_ramp( samplerate, samples, bits)
+{
+	ramp = new Array();
+	for (i = 0; i <= samples; ++i)
+	{
+	    ramp[i] = -1 + 2.0 * i / samples;
+	}
+
+	return Napl.func( ramp, 1, bits, samplerate, samples);
+}
+
+function main( args)
+{
+		ramp = create_ramp( 44100, 65536, 16);
+		d_ramp = Napl.convert( ramp, 24);
+		//Napl.write_file( d_ramp, "ramp24.wav");
+		r_ramp = Napl.negate( Napl.convert( d_ramp, 16));
+		//Napl.write_file(r_ramp, "converted_ramp.wav");
+		//Napl.write_file(ramp, "original_ramp.wav");
+		zero = Napl.add( ramp, r_ramp);
+		//Napl.write_file( zero, "ramp_diff.wav");
+		an = Napl.analyze( zero);
+		show_analysis( an);
+}

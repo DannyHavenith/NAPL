@@ -1,0 +1,8 @@
+function main( args)
+{
+	test = Napl.zero( 2, 16, 44100, 2);
+	for (i = 0; i < 36000; ++i)
+	{
+		Napl.analyze( Napl.delay( test, 0.01, 0));	
+	}
+}
