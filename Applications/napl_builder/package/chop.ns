@@ -48,7 +48,11 @@ function chop( source, treshold)
 	}
 }
 
+//
+// chop.ns
+// cut a sound file into pieces based on silences found in the file
+//
 function main( args)
 {
-	chop( Napl.read_file( "tellen.wav"), 0.02);
+	chop( Napl.read_file( "tstsnd\\tellen.wav"), 0.02);
 }
