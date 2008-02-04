@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "note_table.h"
+#include "RythmTextGrammar.hpp"
 
 using std::vector;
 using std::map;

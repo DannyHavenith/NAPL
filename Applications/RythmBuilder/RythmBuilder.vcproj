@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\lib\napl"
+				AdditionalIncludeDirectories="..\..\include;..\..\lib\napl;H:\no_backup\boost_src\spirit2_2;H:\no_backup\boost_src\boost_svn_head"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -70,11 +70,12 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="..\..\include;..\..\lib\napl"
+				AdditionalIncludeDirectories="..\..\include;..\..\lib\napl;H:\no_backup\boost_src\spirit2_2;H:\no_backup\boost_src\boost_svn_head"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
-				RuntimeLibrary="4"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -142,6 +143,9 @@
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
 				RelativePath="note_table.h">
+			</File>
+			<File
+				RelativePath=".\RythmTextGrammar.hpp">
 			</File>
 			<File
 				RelativePath="stdafx.h">
