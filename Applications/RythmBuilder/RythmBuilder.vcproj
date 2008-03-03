@@ -21,9 +21,10 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include;..\..\lib\napl;H:\no_backup\boost_src\spirit2_2;H:\no_backup\boost_src\boost_svn_head"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="FALSE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="3"
+				TreatWChar_tAsBuiltInType="TRUE"
 				UsePrecompiledHeader="3"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -34,6 +35,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/RythmBuilder.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="H:\no_backup\boost_src\boost_svn_head\stage\lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/RythmBuilder.pdb"
 				SubSystem="1"
@@ -86,6 +88,7 @@
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/RythmBuilder.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="H:\no_backup\boost_src\boost_svn_head\stage\lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -120,7 +123,16 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm">
 			<File
-				RelativePath="RythmBuilder.cpp">
+				RelativePath=".\Instrument.cpp">
+			</File>
+			<File
+				RelativePath=".\instrument_factory.cpp">
+			</File>
+			<File
+				RelativePath=".\RythmBuilder.cpp">
+			</File>
+			<File
+				RelativePath=".\RythmParser.cpp">
 			</File>
 			<File
 				RelativePath="stdafx.cpp">
@@ -137,18 +149,33 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\track_builder.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc">
 			<File
+				RelativePath=".\Instrument.h">
+			</File>
+			<File
+				RelativePath=".\instrument_factory.h">
+			</File>
+			<File
 				RelativePath="note_table.h">
+			</File>
+			<File
+				RelativePath=".\RythmParser.h">
 			</File>
 			<File
 				RelativePath=".\RythmTextGrammar.hpp">
 			</File>
 			<File
 				RelativePath="stdafx.h">
+			</File>
+			<File
+				RelativePath=".\track_builder.h">
 			</File>
 		</Filter>
 		<Filter
