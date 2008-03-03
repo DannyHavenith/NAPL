@@ -7,7 +7,6 @@
 
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include <tchar.h>
-#include <boost/tokenizer.hpp>
 #include <vector>
 #include <map>
 #include <iostream>
