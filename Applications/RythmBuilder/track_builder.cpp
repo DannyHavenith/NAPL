@@ -97,7 +97,10 @@ namespace
 }
 
 track_builder::track_builder( const boost::filesystem::path &instrument_path)
-    : note_seconds(1.0/120.0), instruments( instrument_path), last_measure_index(0)
+    : note_seconds(1.0/120.0), 
+    instruments( instrument_path), 
+    last_measure_index(0),
+    current_note_seconds( 0.0)
 {
 
 };
@@ -248,8 +251,13 @@ void track_builder::repeat( int count)
 
 void track_builder::push_note()
 {
-    if (!current_note_name.empty())
+    if (current_note_seconds > .001)
     {
+        //
+        // this will ask for a note with an empty name
+        // (current_note_name == "")
+        // if there is only silence to push
+        // (for instance when the bar starts with silence)
         current_bar.push_back( 
             current_instrument->get_note( 
                 current_note_name, 
@@ -258,6 +266,7 @@ void track_builder::push_note()
             );
 
     }
+
     current_note_name.clear();
     current_note_seconds = 0.0;
 }
