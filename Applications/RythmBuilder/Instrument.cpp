@@ -91,6 +91,21 @@ instrument::block_producer_ptr instrument::create_note( const std::string &name,
     return new_note;
 }
 
+void instrument::add_silence()
+{
+    if (!notes.empty())
+    {
+        // get details like samplerate and framesize 
+        // of the first note and use those to create a silence with the 
+        // same attributes.
+        stream_header h;
+        notes.begin()->second->GetStreamHeader( h);
+        notes[""] = block_producer_ptr(
+            factory_factory::GetSampleFactory( h)->GetConstant( h));
+
+    }
+}
+
 instrument::instrument(const boost::filesystem::path &p)
 {
     using namespace boost::filesystem;
@@ -123,6 +138,9 @@ instrument::instrument(const boost::filesystem::path &p)
             aliases[ what[1]] = *i;
         }
     }
+
+    // add the entry "" to the notes table that contains a silence
+    add_silence();
 
     // now that all wavs have been found, we can try to add the aliases.
     typedef alias_map_t::value_type alias_t;

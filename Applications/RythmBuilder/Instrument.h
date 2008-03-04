@@ -28,6 +28,7 @@ private:
     typedef boost::shared_ptr< block_producer> block_producer_ptr;
     void add_wav( const boost::filesystem::path &path, const std::string &name);
     block_producer_ptr create_note( const std::string &name, double seconds);
+    void add_silence();
 
 private:
     typedef std::map< std::string, block_producer_ptr> note_table_t;
