@@ -40,7 +40,8 @@ public:
     void end_track();
     void end_bar();
 
-    track_builder( const boost::filesystem::path &instrument_path);
+
+    track_builder( instrument_factory &instruments_);
 
     ~track_builder(void)
     {
@@ -66,7 +67,7 @@ private:
     std::string track_name;
     std::string section_name;
     int last_measure_index;
-    instrument_factory instruments;
+    instrument_factory &instruments;
     boost::shared_ptr<instrument> current_instrument;
 
 };

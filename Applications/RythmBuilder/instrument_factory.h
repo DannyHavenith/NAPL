@@ -2,6 +2,7 @@
 #define __INSTRUMENT_FACTORY_H__
 
 #include <string>
+#include <set>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
 class instrument;
@@ -13,6 +14,7 @@ public:
 
     instrument_factory( const boost::filesystem::path &p);
     boost::shared_ptr< instrument> get_instrument( const std::string &instrument_name);
+    std::set< std::string> get_note_names();
 
 private:
     typedef std::map< std::string, boost::shared_ptr< instrument> > instrument_map;
