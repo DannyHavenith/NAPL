@@ -2,6 +2,7 @@
 #define __INSTRUMENT_H__
 
 #include <string>
+#include <set>
 #include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
@@ -18,10 +19,10 @@ public:
 
     block_producer *get_note( const std::string &name, double seconds);
 
-    template< typename ContainerType>
-    void get_note_names( ContainerType &c)
+    std::set<std::string>
+    get_note_names( )
     {
-        c = map_keys( notes);
+        return  map_keys( notes);
     }
 
 private:

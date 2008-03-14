@@ -96,9 +96,9 @@ namespace
 
 }
 
-track_builder::track_builder( const boost::filesystem::path &instrument_path)
+track_builder::track_builder( instrument_factory &instruments_)
     : note_seconds(1.0/120.0), 
-    instruments( instrument_path), 
+    instruments( instruments_), 
     last_measure_index(0),
     current_note_seconds( 0.0)
 {

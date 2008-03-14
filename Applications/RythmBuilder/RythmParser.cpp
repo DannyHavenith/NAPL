@@ -14,11 +14,11 @@ bool ParseRythm(  const boost::filesystem::path &instrument_path, const std::str
     using namespace boost::assign;
     using namespace std;
 
-    track_builder builder( instrument_path);
+    instrument_factory f( instrument_path);
 
-    rythm_grammar_def<std::string::const_iterator> def(
-            list_of<string>("do")("ta")("ch")("tu"), builder
-        );
+    track_builder builder( f);
+
+    rythm_grammar_def<std::string::const_iterator> def( f.get_note_names(), builder);
 
 
     string::const_iterator iter = content.begin();
