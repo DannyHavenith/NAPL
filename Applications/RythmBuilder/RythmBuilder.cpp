@@ -13,6 +13,11 @@
 
 using namespace std;
 
+boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe_path)
+{
+    // implementation for windows only:
+    return exe_path.branch_path() / "instruments";
+}
 
 int main(int argc, char* argv[])
 {
@@ -41,7 +46,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        r = ParseRythm(  "./instruments", storage);
+        r = ParseRythm(  find_instrument_path( argv[0]), storage);
     }
     catch (std::exception &e)
     {
