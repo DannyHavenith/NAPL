@@ -77,7 +77,7 @@ struct rythm_grammar_def: boost::spirit::qi::grammar_def<Iterator, boost::spirit
         bar     =    opt_bar_header >>  notes;
 
         BOOST_SPIRIT_DEBUG_NODE( opt_bar_header);
-        opt_bar_header = (-(string_ [_a = _1] >> -('(' >> string_[_b = _1] >> ')') >> ':'))
+        opt_bar_header = -char_(':') >> (-(string_ [_a = _1] >> -('(' >> string_[_b = _1] >> ')') >> ':'))
                                                     [bind( &track_builder::start_bar,
                                                             ref( builder),
                                                             _a,
