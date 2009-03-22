@@ -1,0 +1,2 @@
+SConscript('SConscript', build_dir='release', duplicate=0, exports={'MODE':'release'})
+SConscript('SConscript', build_dir='debug', duplicate=0, exports={'MODE':'debug'})

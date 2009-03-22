@@ -6,7 +6,8 @@
 #include "filefact.h"
 
 //#include "convendi.h" // endian converters
-#include <iostream.h>
+#include <iostream>
+using namespace std;
 
 int main( int argc, char *argv[])
 {
@@ -44,7 +45,7 @@ int main( int argc, char *argv[])
 		);
 
 	general_resampler *my_resampler;
-	
+
 	producer = filefactory::GetBlockProducer( infilename);
 	sink = filefactory::GetBlockSink( outfilename);
 
@@ -59,7 +60,7 @@ int main( int argc, char *argv[])
 			if (my_resampler)
 			{
 				my_resampler->Init( outfreq, infreq, lie);
-				
+
 
 				my_resampler->LinkTo( producer);
 				sink->LinkTo( my_resampler);

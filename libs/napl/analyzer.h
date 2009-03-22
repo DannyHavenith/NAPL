@@ -1,12 +1,12 @@
 // implementation of the sample analyzer template.
 
 
-template< typename sampletype>
-class analyze_mutator 
+template< typename sample_t>
+class analyze_mutator
 {
 public:
 
-	typedef sampletype sample_type;
+	typedef sample_t sample_type;
 	typedef typename sampletraits<sample_type>::channel_type channel_type;
 	struct typed_information
 	{
@@ -25,8 +25,8 @@ public:
 		operator sound_analysis() const
 		{
 			sound_analysis result;
-			result.avg = normalize_sample( channel_type(average_of_channels( sum)/count)); 
-			result.norm= normalize_sample( channel_type(average_of_channels( sum_abs)/count)); 
+			result.avg = normalize_sample( channel_type(average_of_channels( sum)/count));
+			result.norm= normalize_sample( channel_type(average_of_channels( sum_abs)/count));
 			result.max = normalize_sample( max_of_channels( max));
 			result.min = normalize_sample( min_of_channels( min));
 			return result;
@@ -38,12 +38,12 @@ public:
 		}
 
 
-		typename sampletraits<sample_type>::foreach_channel_type<double>::type sum;
-		typename sampletraits<sample_type>::foreach_channel_type<double>::type sum_abs;
+		typename sampletraits<sample_type>::template foreach_channel_type<double>::type sum;
+		typename sampletraits<sample_type>::template foreach_channel_type<double>::type sum_abs;
 		sample_type max;
 		sample_type min;
 		sampleno count;
-		inline double get_average() { return sum/count};
+		inline double get_average() { return sum/count;}
 	};
 
 	typedef typed_information result_information_type;
@@ -53,12 +53,12 @@ public:
 		// nop
 	}
 
-	void Mutate( const sampletype *sample)
+	void Mutate( const sample_t *sample)
 	{
 		state.max = max_sample( state.max, *sample);
 		state.min = min_sample( state.min, *sample);
 		state.sum += *sample;
-		state.sum_abs += abs( sampletraits<sampletype>::foreach_channel_type<double>::type( *sample));
+		state.sum_abs += abs( typename sampletraits<sample_t>::template foreach_channel_type<double>::type( *sample));
 		++state.count;
 	}
 
@@ -87,8 +87,8 @@ private:
 	template <typename sampletype>
 		inline static double average_of_channels( const StereoSample< sampletype> &sample)
 	{
-		typedef sampletraits<sampletype>::accumulator_type accu_type;
-		return (double( average_of_channels( sample.m_left)) + 
+		typedef typename sampletraits<sampletype>::accumulator_type accu_type;
+		return (double( average_of_channels( sample.m_left)) +
 				double( average_of_channels( sample.m_right)))/2;
 	}
 
@@ -123,13 +123,14 @@ private:
 template< typename sample_type>
 struct typed_analyzer : public uniform_block_mutator< analyze_mutator< sample_type>, sample_analyzer >
 {
+	typedef uniform_block_mutator< analyze_mutator< sample_type>, sample_analyzer > parent_type;
 	virtual sound_analysis GetResult()
 	{
-		return m_sample_mutator.GetResult();
+		return parent_type::m_sample_mutator.GetResult();
 	}
 
 	virtual void Reset()
 	{
-		m_sample_mutator.Reset();
+		parent_type::m_sample_mutator.Reset();
 	}
 };

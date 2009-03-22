@@ -19,7 +19,7 @@ class block_producer;
 
 /**
  * \ingroup Napl
- * Simple buffer that consists of a pointer to a block of bytes and 
+ * Simple buffer that consists of a pointer to a block of bytes and
  * a size.
  *
  * \version 1.0
@@ -57,7 +57,7 @@ struct byte_buffer
 
 	~byte_buffer()
 	{
-		if (m_is_owner) 
+		if (m_is_owner)
 		{
 			delete [] m_ptr;
 		}
@@ -80,7 +80,7 @@ struct byte_buffer
 
 /**
  * \ingroup Napl
- * Buffer allocation singleton. 
+ * Buffer allocation singleton.
  * The current implementations will simply create new file buffers.
  *
  * \version 1.0
@@ -167,9 +167,9 @@ struct sample_block
 	{
 		return m_buffer_ptr->get_size();
 	}
-	
+
 	// the members that are used by consumers
-	// this defines a 'window' on the samples that is 
+	// this defines a 'window' on the samples that is
 	// actually seen by consumers.
 	byte_type *m_start;
 	byte_type *m_end;
@@ -208,7 +208,7 @@ public:
 
 	//
 	// gets a new or re-used block
-	// returns false if the block is new (un-initialized) and true 
+	// returns false if the block is new (un-initialized) and true
 	// if it is a re-used block.
 	//
 	bool get_block( block_ptr_t &result)
@@ -247,7 +247,7 @@ private:
 /**
  * \ingroup Napl
  * block handles obtain a block from a block manager and
- * return that block when their lifetime is over. 
+ * return that block when their lifetime is over.
  *
  * \version 1.0
  * first version
@@ -289,12 +289,12 @@ public:
 
 /**
  * \ingroup Napl
- * this template acts as a wrapper to make sample blocks behave more like 
+ * this template acts as a wrapper to make sample blocks behave more like
  * a standard container class
  *
  * \version 1.0
  * first version
- * 
+ *
  * \date 12-21-2004
  *
  * \author Danny
@@ -329,14 +329,14 @@ public:
 
 	const_iterator end() const
 	{
-		return begin() + ((m_block.m_end - m_block.m_start)/sizeof sample_type);
+		return begin() + ((m_block.m_end - m_block.m_start)/sizeof( sample_type));
 	}
 };
 
 /**
  * \ingroup Napl
  * block_owner is a base type that represents objects that have their own block
- * and fill it with sample data 
+ * and fill it with sample data
  *
  * \version 1.0
  * first version
@@ -353,13 +353,13 @@ public:
 	block_owner()
 		: block_manager( 1024 * 1024)
 	{
-		
+
 	}
 
 	explicit block_owner( size_t size)
 		:block_manager( size)
 	{
-		
+
 	}
 
 };
@@ -367,7 +367,7 @@ public:
 /**
  * \ingroup Napl
  * stream_header gives information about the sample streams that flow from one
- * processor to the other. 
+ * processor to the other.
  *
  * \version 1.0
  * first version
@@ -381,7 +381,7 @@ public:
 struct stream_header
 {
 
-	stream_header( 
+	stream_header(
 		unsigned long rate,
 		short size,
 		unsigned short channels,
@@ -408,7 +408,7 @@ struct stream_header
 	unsigned long numframes;
 	unsigned short architecture; ///< endian-nes and interleaving of samples
 
-	// 
+	//
 	// frame size in bytes
 	inline unsigned short frame_size() const
 	{
@@ -430,7 +430,7 @@ struct stream_header
  * \ingroup Napl
  * A block_producer is an object that can produce sample_blocks on demand
  * processors typically expose a block_producer side and a block_consumer side
- * the consumer side is exposed to producers and vice versa. 
+ * the consumer side is exposed to producers and vice versa.
  *
  * \version 1.0
  * first version
@@ -495,7 +495,7 @@ extern block_producer *GlobalGetEndianConverter( const stream_header &h, block_p
 /**
  * \ingroup Napl
  * block_consumers receive blocks with sample data from block_producers.
- * They can be linked to producers. 
+ * They can be linked to producers.
  *
  * \version 1.0
  * first version
@@ -562,7 +562,7 @@ protected:
 	virtual unsigned long GetArchitecture() { return LOCAL_ARCHITECTURE;}
 
 	/**
-	 * Check a producers architecture (specifically: endiannes) and 
+	 * Check a producers architecture (specifically: endiannes) and
 	 * create a endian-converter if needed.
 	 * \param *pP [in] the producer to check
 	 * \return eiter the original producer pointer, or a pointer to an endian-converter that
@@ -591,10 +591,10 @@ protected:
 
 /**
  * \ingroup Napl
- * A block_sink is a consumer that does not have a producer side. A sample 
+ * A block_sink is a consumer that does not have a producer side. A sample
  * stream ends here.
  *
- * subclasses override the 'Start' function to start the whole chain 
+ * subclasses override the 'Start' function to start the whole chain
  *
  * \version 1.0
  * first version
@@ -617,7 +617,7 @@ public:
 
 /**
  * \ingroup Napl
- *  A block_mutator is an object that exposes both a consumer and a producer side 
+ *  A block_mutator is an object that exposes both a consumer and a producer side
  *
  * \version 1.0
  * first version
@@ -667,19 +667,19 @@ public:
 
 	/**
 	 * Request a block of data.
-	 * This implementation of the RequestBlock method will call the 'FillBlock' virtual function, 
+	 * This implementation of the RequestBlock method will call the 'FillBlock' virtual function,
 	 * which enables derived classes to fill the blocks with actual sample data.
-	 * \param &consumer 
-	 * \param start 
-	 * \param num 
-	 * \return 
+	 * \param &consumer
+	 * \param start
+	 * \param num
+	 * \return
 	 */
 	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
 	{
 
 		unsigned long nToGo = num;
 		unsigned long nReceived;
-		
+
 		Seek( start);
 
 		block_handle h( this); // releases the block on exit
@@ -688,9 +688,9 @@ public:
 		{
 			InitBlock( block);
 		}
-		
 
-		while ( nToGo && (nReceived = FillBlock( block, nToGo))) 
+
+		while ( nToGo && (nReceived = FillBlock( block, nToGo)))
 		{
 			nToGo -= nReceived;
 			consumer.ReceiveBlock( block);
@@ -708,7 +708,7 @@ protected:
 	 *
 	 * \param &b [out] block to fill with data
 	 * \param count requested sampledata
-	 * \return 
+	 * \return
 	 */
 	virtual sampleno FillBlock( sample_block &b, sampleno count) = 0;
 
@@ -728,7 +728,7 @@ protected:
 /**
  * \ingroup Napl
  * helper class that can save the state of some member during
- * a function call and restore that state after the function call*  
+ * a function call and restore that state after the function call*
  *
  * \version 1.0
  * first version
@@ -761,7 +761,7 @@ struct state_saver
 /**
  * \ingroup Napl
  * uniform_block_mutators perform some operation on each sample in the sample stream.
- * the operation and the sample type is determined by the sample_mutator parameter. 
+ * the operation and the sample type is determined by the sample_mutator parameter.
  *
  * \version 1.0
  * first version
@@ -779,49 +779,51 @@ public:
 
 	virtual void Seek( sampleno start)
 	{
-		m_pProducer->Seek( start);
+		interface_type::m_pProducer->Seek( start);
 	}
 
 	// just relay the header request to our producer.
 	virtual void GetStreamHeader( stream_header &h)
 	{
-		m_pProducer->GetStreamHeader( h);
+		interface_type::m_pProducer->GetStreamHeader( h);
 		m_sample_mutator.MutateHeader( h);
 	}
 
 	/**
 	 * This implementation delegates the block request to the linked producer.
 	 * \see block_producer::RequestBlock( block_consumer &c, sampleno start, unsigned long num)
-	 * \param &c 
-	 * \param start 
-	 * \param num 
-	 * \return 
+	 * \param &c
+	 * \param start
+	 * \param num
+	 * \return
 	 */
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
-	{ 
+	{
 		// this is not quite thread-safe. This object keeps the requesting consumer in it's
 		// state until the next call to RequestBlock
 		//
 		// each thread should have it's own mutator...
-		state_saver<block_consumer *> save( m_pConsumer);
-		m_pConsumer = &c;
+		state_saver<block_consumer *> save( interface_type::m_pConsumer);
+		interface_type::m_pConsumer = &c;
 
 		// relay the block request
-		return m_pProducer->RequestBlock( *this, start, num);
+		return interface_type::m_pProducer->RequestBlock( *this, start, num);
 	}
 
 	virtual void ReceiveBlock( const sample_block &b)
 	{
-		sample_mutator::sample_type *pSample = reinterpret_cast<sample_mutator::sample_type *>( b.m_start);
+		typedef typename sample_mutator::sample_type sample_type;
+		sample_type
+			*pSample = reinterpret_cast<sample_type *>( b.m_start);
 
 		// give our mutator the opportunity to change each sample
-		while (pSample < reinterpret_cast<sample_mutator::sample_type *>( b.m_end))
+		while (pSample < reinterpret_cast<sample_type *>( b.m_end))
 			m_sample_mutator.Mutate( pSample++);
 
 		// pass the changed block.
-		m_pConsumer->ReceiveBlock( b);
+		interface_type::m_pConsumer->ReceiveBlock( b);
 	}
-	
+
 protected:
 	sample_mutator m_sample_mutator;
 };
@@ -847,7 +849,7 @@ class block_multi_consumer
 {
 public:
 	/**
-	 * The multi-consumer variant of the ReceiveBlock method has one 
+	 * The multi-consumer variant of the ReceiveBlock method has one
 	 * extra parameter: the 'channel'. This channel identifies the source
 	 * of the data.
 	 * \param &b the parameter block, see also block_consumer
@@ -856,8 +858,8 @@ public:
 	virtual void ReceiveBlock( const sample_block &b, short channel) = 0;
 
 protected:
-	// 
-	// The GetMcPtr() - function enables derived classes to use a pointer to 
+	//
+	// The GetMcPtr() - function enables derived classes to use a pointer to
 	// 'this' in their base member initialisation.
 	inline block_multi_consumer *GetMcPtr() { return this;}
 };
@@ -909,7 +911,7 @@ private:
 //
 /**
  * \ingroup Napl
- * a binary_block_processor is a special case of a block_multi_consumer that has 
+ * a binary_block_processor is a special case of a block_multi_consumer that has
  * exactly 2 inputs
  * \version 1.0
  * first version
@@ -951,10 +953,10 @@ public:
 	 * a binary block processor will first send the block request to it's left producer. When it
 	 * receives a block from the left producer, it will ask for the corresponding block of its right
 	 * producer.
-	 * \param &consumer 
-	 * \param start 
-	 * \param num 
-	 * \return 
+	 * \param &consumer
+	 * \param start
+	 * \param num
+	 * \return
 	 */
 	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
 	{
@@ -972,11 +974,11 @@ public:
 	};
 
 	/**
-	 * If the block comes from the left-producer (channel 0), this function requests the corresponding 
+	 * If the block comes from the left-producer (channel 0), this function requests the corresponding
 	 * block from the right-producer. If the block comes from the right-producer (channel 1) both
 	 * the left- and the right block will be offered to the ProcessBlocks virtual function.
-	 * \param &b 
-	 * \param channel 
+	 * \param &b
+	 * \param channel
 	 */
 	virtual void ReceiveBlock( const sample_block &b, short channel)
 	{
@@ -990,8 +992,8 @@ public:
 				m_leftBlock = b;
 			}
 			sampleno sample_count = (sampleno)((b.m_end - b.m_start) / m_leftFrameSize);
-			m_right.RequestBlock( 
-				m_currentLeft, 
+			m_right.RequestBlock(
+				m_currentLeft,
 				sample_count);
 			m_currentLeft += sample_count;
 		}
@@ -1003,7 +1005,7 @@ public:
 			m_leftBlock.m_start += ((b.m_end - b.m_start)/m_rightFrameSize) * m_leftFrameSize;
 		}
 	}
-	
+
 	virtual void LinkTo( block_producer *pLeft, block_producer *pRight)
 	{
 		m_left.LinkTo( pLeft);
@@ -1025,7 +1027,7 @@ protected:
 
 /**
  * \ingroup Napl
- * A binary_block_mutator is a binary_block_processor that delegates real 
+ * A binary_block_mutator is a binary_block_processor that delegates real
  * processing to a 'mutator' object that is given as a template parameter.
  * \version 1.0
  * first version
@@ -1075,16 +1077,17 @@ struct symmetric_mutator_adapter : public symmetric_mutator
 };
 
 template< typename symmetric_mutator>
-struct binary_block_mutator : 
+struct binary_block_mutator :
 	public asymmetric_binary_block_mutator< symmetric_mutator_adapter< symmetric_mutator> >
 {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// mut_add is a typical mutator that uses the binary_block_mutator to add two 
+// mut_add is a typical mutator that uses the binary_block_mutator to add two
 // sample streams together.
 //
+template< typename T> struct sampletraits;
 template <typename sampletype>
 class mut_add
 {
@@ -1096,10 +1099,12 @@ public:
 		// this mutator does not alter the header
 	}
 
-	static inline const sampletype Mutate( 
+	static inline const sampletype Mutate(
 		const sampletype &left, const sampletype &right)
 	{
-		typedef sampletraits<sampletype>::accumulator_gen<void>::type accumulatortype;
+		typedef
+			typename sampletraits<sampletype>::
+				template accumulator_gen<void>::type accumulatortype;
 		return (sampletype)((accumulatortype(left) + accumulatortype(right)) /
 						short(2));
 	}
@@ -1116,7 +1121,7 @@ public:
 		// this mutator does not alter the header
 	}
 
-	static inline const sample_type Mutate( 
+	static inline const sample_type Mutate(
 		const sample_type &left, const sample_type &right)
 	{
 		return left + right;

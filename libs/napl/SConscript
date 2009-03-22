@@ -1,0 +1,17 @@
+sources = Split("""aiff.cpp
+	double_dispatch_factory.cpp
+	filefact.cpp
+	ieee754.cpp
+	memory_producer.cpp
+	memory_writer.cpp
+	objfact.cpp
+	progress.cpp
+	raw_file.cpp
+	stdafx.cpp
+	wav.cpp
+	""")
+
+env = Environment()
+env.Append(CPPPATH = ['/usr/include/', '/usr/include/C++/4.3/', '../../../include/'])
+target = env.Library( 'napl', sources)
+Default( target)

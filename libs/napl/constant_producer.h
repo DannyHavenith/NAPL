@@ -7,7 +7,7 @@ private:
 	void init_block( sample_block &block)
 	{
 		sample_container< sample_type> cont( block);
-		sample_container< sample_type>::iterator i;
+		typename sample_container< sample_type>::iterator i;
 		for (i = cont.begin(); i != cont.end(); ++i)
 		{
 			*i = sampletraits< sample_type>::get_middle();
@@ -33,7 +33,7 @@ public:
 
 		while (num* sizeof( sample_type) > (block.buffer_size()))
 		{
-			block.m_end = block.m_start + sizeof sample_type * (block.buffer_size() / sizeof sample_type); 
+			block.m_end = block.m_start + sizeof( sample_type) * (block.buffer_size() / sizeof(sample_type));
 			consumer.ReceiveBlock( block);
 			num -= (block.buffer_size() / sizeof( sample_type));
 		}
@@ -44,7 +44,7 @@ public:
 		return 0;
 	}
 
-	virtual void GetStreamHeader( stream_header &h) 
+	virtual void GetStreamHeader( stream_header &h)
 	{
 		h = m_header;
 	}

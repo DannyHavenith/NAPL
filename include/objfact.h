@@ -37,28 +37,35 @@ public:
 	//virtual block_mutator *GetFFT( int power) = 0;
 };
 
-template< typename sampletype>
-class t_sample_object_factory : public sample_object_factory 
+struct t_sample_object_factory
 {
-public:
-	virtual general_resampler *GetResampler(  unsigned long outfreq, unsigned long infreq, bool lie);
-	virtual binary_block_processor *GetStereoMaker();
-	virtual block_mutator *GetEndianConverter();
-	virtual binary_block_processor *GetXFader();
-	virtual block_mutator *GetNegator();
-	virtual binary_block_processor *GetAdder();
-	virtual block_mutator *GetDelay( double delay_seconds, double post_seconds = 0);
-	virtual block_mutator *GetPan( short pan_value);
-	virtual block_producer *GetConstant( stream_header h);
-	virtual sample_analyzer *GetAnalyzer();
-	virtual block_mutator *GetAmplifier( double factor);
-	virtual block_producer *GetFunction( const std::vector<double> &prototype, const stream_header &h);
-	virtual block_mutator *GetChannelExtractor( short channel);
-	virtual binary_block_processor *GetAmpModulator();
-	virtual from_to_factory *GetFromToFactory( const stream_header &from_header);
-private:
+	template<typename sampletype>
+	class apply: public sample_object_factory
+	{
+	public:
+		virtual general_resampler *GetResampler(unsigned long outfreq,
+				unsigned long infreq, bool lie);
+		virtual binary_block_processor *GetStereoMaker();
+		virtual block_mutator *GetEndianConverter();
+		virtual binary_block_processor *GetXFader();
+		virtual block_mutator *GetNegator();
+		virtual binary_block_processor *GetAdder();
+		virtual block_mutator *GetDelay(double delay_seconds,
+				double post_seconds = 0);
+		virtual block_mutator *GetPan(short pan_value);
+		virtual block_producer *GetConstant(stream_header h);
+		virtual sample_analyzer *GetAnalyzer();
+		virtual block_mutator *GetAmplifier(double factor);
+		virtual block_producer *GetFunction(
+				const std::vector<double> &prototype, const stream_header &h);
+		virtual block_mutator *GetChannelExtractor(short channel);
+		virtual binary_block_processor *GetAmpModulator();
+		virtual from_to_factory *GetFromToFactory(
+				const stream_header &from_header);
+	private:
 
-//virtual block_mutator *GetFFT( int power);
+		//virtual block_mutator *GetFFT( int power);
+	};
 };
 
 class factory_factory

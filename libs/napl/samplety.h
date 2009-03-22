@@ -12,8 +12,8 @@
 
 #ifndef _SAMPLE_TYPES_H_
 #define _SAMPLE_TYPES_H_
-#include <limits.h> // for SHRT_MIN etc.
-#include <float.h> // for float limits
+#include <limits> // for SHRT_MIN etc.
+//#include <float.h> // for float limits
 
 //
 // define mono sampletypes
@@ -43,7 +43,7 @@ struct sampletraits
 	template <typename other_type>
 	struct channel_gen
 	{
-		typedef typename sampletype::channel_gen<other_type>::type type;
+		typedef typename sampletype:: template channel_gen<other_type>::type type;
 	};
 
 	typedef typename channel_gen<void>::type channel_type;
@@ -89,14 +89,14 @@ struct sampletraits
 		return sampletype::get_num_channels();
 	}
 
-	template <typename operator_type> 
+	template <typename operator_type>
 	static inline void apply_to_all_channels( operator_type &op, sampletype &sample)
 	{
 		sampletype::apply_to_all_channels( op, sample);
 	}
 };
 
-template <typename simple_type, typename accumulatortype> 
+template <typename simple_type, typename accumulatortype>
 struct builtin_type_sampletraits
 {
 
@@ -107,7 +107,7 @@ struct builtin_type_sampletraits
 	template <typename other_type>
 	struct channel_gen
 	{
-		typedef typename channel_type type;
+		typedef channel_type type;
 	};
 
 	template< typename destination_type>
@@ -134,7 +134,7 @@ struct builtin_type_sampletraits
 		return source;
 	}
 
-	template <typename operator_type> 
+	template <typename operator_type>
 	static inline void apply_to_all_channels( operator_type &op, sampletype &sample)
 	{
 		op(sample);
@@ -266,7 +266,7 @@ public:
 		return source;
 	}
 
-	template <typename operator_type> 
+	template <typename operator_type>
 	static inline void apply_to_all_channels( operator_type &op, sampletype_m24 &sample)
 	{
 		op(sample);
@@ -287,10 +287,10 @@ public:
 		return (static_cast<int>(ms_part) << 16 ) + ls_part;
 	}
 
-	inline sampletype_m24( int rhs) 
+	inline sampletype_m24( long rhs)
 		:ls_part( ls_from_int( rhs)),
 		ms_part( ms_from_int( rhs))
-	{ 
+	{
 		/*nop*/
 	};
 
@@ -307,7 +307,7 @@ public:
 	{
 		// nop
 	}
-	inline sampletype_m24() 
+	inline sampletype_m24()
 	{
 		/*nop*/
 	};
@@ -326,7 +326,7 @@ public:
 
 	inline const sampletype_m24 operator+( const sampletype_m24 &rhs) const
 	{
-		return (int)rhs + (int)*this;
+		return (long)rhs + (long)*this;
 	}
 
 	inline sampletype_m24 &operator+=( const sampletype_m24 &rhs)
@@ -337,19 +337,19 @@ public:
 
 	inline const sampletype_m24 &operator*=( const long mult)
 	{
-		*this = ((int) *this) * mult;
+		*this = ((long) *this) * mult;
 		return *this;
 	}
 
 	inline const sampletype_m24 &operator*=( float fmult)
 	{
-		*this = (int)(((int) *this) * fmult);
+		*this = (long)(((long) *this) * fmult);
 		return *this;
 	}
 
 	inline const sampletype_m24 &operator*=( double fmult)
 	{
-		*this = (int)(((int) *this) * fmult);
+		*this = (long)(((long) *this) * fmult);
 		return *this;
 	}
 
@@ -372,7 +372,7 @@ public:
 
 	inline const sampletype_m24 operator/( const short &rhs) const
 	{
-		return ((int)( *this)) / rhs;
+		return ((long)( *this)) / rhs;
 	}
 
 
@@ -393,7 +393,7 @@ public:
 
 	static inline sampletype_m24 negate( const sampletype_m24 &rhs)
 	{
-		return -((int)rhs);
+		return -((long)rhs);
 	}
 
 	static inline short get_num_channels()
@@ -419,22 +419,22 @@ public:
 	template <typename other>
 	struct accumulator_gen
 	{
-		typedef typename StereoSample< typename sampletraits<MonoSample>::accumulator_gen<other>::type> type;
+		typedef StereoSample< typename sampletraits<MonoSample>::template accumulator_gen<other>::type> type;
 	};
 
 	template< typename other>
 	struct channel_gen
 	{
-		typedef typename sampletraits<MonoSample>::channel_gen<other>::type type;
+		typedef typename sampletraits<MonoSample>::template channel_gen<other>::type type;
 	};
-	
+
 	typedef MonoSample monosample;
 	typedef StereoSample<MonoSample> this_type;
 
 	template <typename numeric_type>
 	struct foreach_channel_type
 	{
-		typedef StereoSample<typename sampletraits<MonoSample>::foreach_channel_type<numeric_type>::type> type;
+		typedef StereoSample<typename sampletraits<MonoSample>::template foreach_channel_type<numeric_type>::type> type;
 	};
 
 	template< typename destination_type>
@@ -446,8 +446,8 @@ public:
 		}
 		else
 		{
-			sampletraits<MonoSample>::extract_channel( 
-				sample.m_right, 
+			sampletraits<MonoSample>::extract_channel(
+				sample.m_right,
 				destination,
 				channel - sampletraits<MonoSample>::get_num_channels());
 		}
@@ -461,7 +461,7 @@ public:
 
 
 
-	template <typename operator_type> 
+	template <typename operator_type>
 	static inline void apply_to_all_channels( operator_type &op, this_type &sample)
 	{
 		sampletraits<MonoSample>::apply_to_all_channels( op, sample.m_left);
@@ -472,13 +472,13 @@ public:
 	inline const MonoSample left() const { return m_left;}
 	inline const MonoSample right() const {return m_right;}
 
-	inline StereoSample( const MonoSample &left, const MonoSample &right) 
-		:m_left( left), m_right( right) 
-	{ 
+	inline StereoSample( const MonoSample &left, const MonoSample &right)
+		:m_left( left), m_right( right)
+	{
 		/*nop*/
 	};
 
-	inline StereoSample() 
+	inline StereoSample()
 	{
 		/*nop*/
 	};
@@ -500,8 +500,8 @@ public:
 		: m_left( (MonoSample)s.left()), m_right( (MonoSample)s.right()) {};
 
 	template <typename sampletype>
-		inline operator StereoSample< sampletype>() 
-	{ 
+		inline operator StereoSample< sampletype>()
+	{
 		return StereoSample<sampletype>( (sampletype)m_left, (sampletype)m_right);
 	}
 
@@ -645,10 +645,10 @@ inline double normalize_sample( const double &input)
 }
 
 template<typename sampletype>
-inline typename sampletraits< StereoSample< sampletype> >::foreach_channel_type< double>::type 
+inline typename sampletraits< StereoSample< sampletype> >::template foreach_channel_type< double>::type
 	normalize_sample( const StereoSample<sampletype> &input)
 {
-	return make_stereo_sample( 
+	return make_stereo_sample(
 			normalize_sample( input.m_left),
 			normalize_sample( input.m_right)
 		);
@@ -677,11 +677,11 @@ inline void denormalize_sample( double in, sampletype &out)
 
 
 template<typename sampletype>
-inline void denormalize_sample( typename sampletraits<sampletype>::foreach_channel_type<double>::type in, sampletype &out)
+inline void denormalize_sample( typename sampletraits<sampletype>::template foreach_channel_type<double>::type in, sampletype &out)
 {
 	typedef sampletraits<sampletype> traits_type;
 	typedef sampletraits< typename traits_type::channel_type> channel_traits;
-	
+
 
 	static const double temp = channel_traits::get_max() - channel_traits::get_middle();
 	static const sampletype middle = traits_type::expand_to_channels( channel_traits::get_middle());
@@ -689,7 +689,7 @@ inline void denormalize_sample( typename sampletraits<sampletype>::foreach_chann
 	in *= temp;
 	in -= middle;
 	out = static_cast<sampletype>( in);
-	
+
 
 }
 
