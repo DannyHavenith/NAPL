@@ -14,7 +14,7 @@ public:
 	stereo_pan_mutator( )
 		: m_pan_value( 0)
 	{
-		
+
 	}
 
 	void set_pan( short pan_value)
@@ -33,9 +33,9 @@ public:
 		{
 			p_s->m_right = fixed_damp( 32768 + m_pan_value, p_s->m_right);
 		}
-		else 
+		else
 		{
-			p_s->m_left = fixed_damp( 32767 - m_pan_value, p_s->m_left); 
+			p_s->m_left = fixed_damp( 32767 - m_pan_value, p_s->m_left);
 		}
 	}
 
@@ -51,6 +51,7 @@ class stereo_pan : public uniform_block_mutator< stereo_pan_mutator< mono_type> 
 public:
 	stereo_pan( short pan_value)
 	{
-		m_sample_mutator.set_pan( pan_value);
+		uniform_block_mutator< stereo_pan_mutator< mono_type> >::
+			m_sample_mutator.set_pan( pan_value);
 	};
 };

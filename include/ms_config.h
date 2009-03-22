@@ -9,14 +9,14 @@
 #define LOCAL_ARCHITECTURE ARCHITECTURE_LITTLEENDIAN
 
 // napl needs a 64 bit integer type for some calculations.
-// fill in this type at the left side of this typedef 
+// fill in this type at the left side of this typedef
 //
-// example: 
+// example:
 // typedef long long int64bit; // for GNU c++
 //
-typedef __int64 int64bit; // for microsoft C++
+typedef long long int64bit; // for microsoft C++
 
-// napl uses 'strcmpi' to compare strings, some systems have 
+// napl uses 'strcmpi' to compare strings, some systems have
 // another case-insensitive case compare. If your target system
 // does, uncomment the #define and specify your string compare function
 // (the example uses the GNU strcasecmp)

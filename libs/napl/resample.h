@@ -30,7 +30,7 @@ public:
 	virtual void Init(unsigned long outfreq, unsigned long infreq, bool lie)
 	{
 
-		// if lie is true (sounds weird), we will not tell our consumer that we 
+		// if lie is true (sounds weird), we will not tell our consumer that we
 		// have altered the samplerate.
 		// this results in a faster or slower playing sample.
 		m_outfreq = outfreq;
@@ -60,9 +60,9 @@ public:
 	}
 
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
-	{ 
+	{
 
-	
+
 		state_saver<request_related_state> save( m_state);
 		state_saver<block_consumer *> save2( m_pConsumer);
 		m_state = request_related_state();
@@ -74,7 +74,7 @@ public:
 		m_pConsumer = &c;
 
 		m_state.m_inputAdvance = 1;
-		m_state.m_accumulator = (unsigned long( start) * m_infreq) % m_outfreq;
+		m_state.m_accumulator = (((unsigned long) start) * m_infreq) % m_outfreq;
 
 		// calculate the first and last sample that we need
 		sampleno input_start = static_cast<sampleno>((int64bit( start) * m_infreq) / int64bit( m_outfreq));
@@ -94,9 +94,9 @@ public:
 
 		// pCurrentSample always points to the rightmost sample (= the newest sample)
 		// that is of influence on the output-sample.
-		sampletype *pCurrentSample = 
+		sampletype *pCurrentSample =
 			reinterpret_cast< sampletype *>( b.m_start);
-		sampletype *pEnd= 
+		sampletype *pEnd=
 			reinterpret_cast< sampletype *>( b.m_end);
 
 		m_state.m_requestedSamples -= (pEnd - pCurrentSample);
@@ -105,7 +105,7 @@ public:
 		unsigned long accumulator = m_state.m_accumulator;
 		unsigned long inputAdvance = m_state.m_inputAdvance;
 		sampletype previousSample = m_state.m_previousSample;
-		
+
 		while (true)
 		{
 			if (inputAdvance)
@@ -115,7 +115,7 @@ public:
 				if (pCurrentSample >= pEnd)
 				{
 					// we're past the end of the block now. See if we're exactly at the end
-					// if so, we need to store the last sample for calculations in the next 
+					// if so, we need to store the last sample for calculations in the next
 					// block.
 					if (pCurrentSample == pEnd)
 						m_state.m_previousSample = *(pEnd - 1);
@@ -126,10 +126,10 @@ public:
 						m_state.m_inputAdvance = pCurrentSample - pEnd;
 						m_state.m_accumulator = accumulator;
 					}
-					else 
+					else
 					{
 						// send the last block
-						// 
+						//
 						while (m_state.m_outputSamples)
 						{
 							EmitSample( *(pEnd - 1));
@@ -181,7 +181,7 @@ private:
 	inline void InitSendBlock( sample_block &block)
 	{
 
-		block.m_buffer_ptr->m_size = (block.buffer_size()/sizeof sampletype) * sizeof sampletype;
+		block.m_buffer_ptr->m_size = (block.buffer_size()/sizeof( sampletype)) * sizeof( sampletype);
 		m_state.m_pEndOutput = (sampletype *)(block.m_end = block.buffer_begin() + block.buffer_size());
 		m_state.m_pOutputSample = (sampletype *)block.m_start;
 	}

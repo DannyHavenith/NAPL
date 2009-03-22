@@ -1,8 +1,8 @@
 //
-// given a template, instantiate this template for all known template types and 
+// given a template, instantiate this template for all known template types and
 // provide a mapping from stream-headers to the instantiated template.
 //
-template< template< typename T> class to_instantiate, typename interface_type>
+template< typename instantiate_metafunc, typename interface_type>
 struct sample_factory_instantiator
 {
 	static interface_type *instantiate( const stream_header &h)
@@ -12,23 +12,23 @@ struct sample_factory_instantiator
 			// stereo samples
 			if ( 16 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_s16>();
+				return new typename instantiate_metafunc::template apply< sampletype_s16>();
 			}
 			else if ( 8 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_s8>();
+				return new typename instantiate_metafunc::template apply< sampletype_s8>();
 			}
 			else if (24 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_s24>();
+				return new typename instantiate_metafunc::template apply< sampletype_s24>();
 			}
 			else if (-2 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_sd>();
+				return new typename instantiate_metafunc::template apply< sampletype_sd>();
 			}
 			else if (-1 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_sf>();
+				return new typename instantiate_metafunc::template apply< sampletype_sf>();
 			}
 
 			else return 0;
@@ -37,23 +37,23 @@ struct sample_factory_instantiator
 		{
 			if ( 16 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_m16>();
+				return new typename instantiate_metafunc::template apply< sampletype_m16>();
 			}
 			else if ( 8 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_m8>();
+				return new typename instantiate_metafunc::template apply< sampletype_m8>();
 			}
 			else if (24 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_m24>();
+				return new typename instantiate_metafunc::template apply< sampletype_m24>();
 			}
 			else if (-2 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_md>();
+				return new typename instantiate_metafunc::template apply< sampletype_md>();
 			}
 			else if (-1 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_mf>();
+				return new typename instantiate_metafunc::template apply< sampletype_mf>();
 			}
 			else return 0;
 		}
@@ -61,23 +61,23 @@ struct sample_factory_instantiator
 		{
 			if ( 16 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_q16>();
+				return new typename instantiate_metafunc::template apply< sampletype_q16>();
 			}
 			else if ( 8 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_q8>();
+				return new typename instantiate_metafunc::template apply< sampletype_q8>();
 			}
 			else if (24 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_q24>();
+				return new typename instantiate_metafunc::template apply< sampletype_q24>();
 			}
 			else if (-2 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_qd>();
+				return new typename instantiate_metafunc::template apply< sampletype_qd>();
 			}
 			else if (-1 == h.samplesize)
 			{
-				return new to_instantiate< sampletype_qf>();
+				return new typename instantiate_metafunc::template apply< sampletype_qf>();
 			}
 			else return 0;
 		}

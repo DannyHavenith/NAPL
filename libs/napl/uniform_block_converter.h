@@ -1,3 +1,30 @@
+template<typename type>
+struct size_code_converter
+{
+	static int get_size()
+	{
+		return 8 * sizeof( type);
+	}
+};
+
+template<>
+struct size_code_converter<double>
+	{
+		static int get_size()
+		{
+			return -2;
+		}
+	};
+
+template <>
+struct size_code_converter<float>
+{
+	static int get_size()
+	{
+		return -1;
+	}
+};
+
 template <typename derived_type, typename source_type, typename destination_type>
 struct typed_converter
 {
@@ -9,17 +36,17 @@ struct typed_converter
 
 	sampleno destination_type_samples( size_t bytes)
 	{
-		return bytes/sizeof destination_type;
+		return bytes/sizeof( destination_type);
 	}
 
 	void advance_source( unsigned char *&source_ptr)
 	{
-		source_ptr += sizeof source_type;
+		source_ptr += sizeof( source_type);
 	}
 
 	void advance_destination( unsigned char *&dest_ptr)
 	{
-		dest_ptr += sizeof destination_type;
+		dest_ptr += sizeof( destination_type);
 	}
 
 	derived_type &get_derived()
@@ -29,36 +56,11 @@ struct typed_converter
 
 	void convert( unsigned char *source_ptr, unsigned char *dest_ptr)
 	{
-		get_derived().do_convert( 
+		get_derived().do_convert(
 			reinterpret_cast<source_type *>( source_ptr),
 			reinterpret_cast<destination_type *>(dest_ptr));
 	}
 
-	template<typename type>
-		struct size_code_converter
-		{
-			static int get_size()
-			{
-				return 8 * sizeof type;
-			}
-		};
-	template<>
-		struct size_code_converter<double>
-		{
-			static int get_size()
-			{
-				return -2;
-			}
-		};
-
-	template<>
-		struct size_code_converter<float>
-		{
-			static int get_size()
-			{
-				return -1;
-			}
-		};
 
 	void MutateHeader( stream_header &h)
 	{
@@ -70,14 +72,15 @@ struct typed_converter
 	}
 };
 
+
 //
 // adapter for mutators that originally work inline
 // this adapter ensures that these inline mutators can also be used in converters
 // that copy data from one block to another.
 //
 template< typename mutator>
-struct mutator_adapter : 
-	public typed_converter< mutator_adapter, typename mutator::sample_type, typename mutator::sample_type>,
+struct mutator_adapter :
+	public typed_converter< mutator_adapter<mutator>, typename mutator::sample_type, typename mutator::sample_type>,
 	public mutator
 {
 	typedef typename mutator::sample_type sample_type;
@@ -119,17 +122,17 @@ public:
 
 	virtual void Seek( sampleno start)
 	{
-		m_pProducer->Seek( start);
+		interface_type::m_pProducer->Seek( start);
 	}
 
 	virtual void GetStreamHeader( stream_header &h)
 	{
-		m_pProducer->GetStreamHeader( h);
+		interface_type::m_pProducer->GetStreamHeader( h);
 		m_converter.MutateHeader( h);
 	}
 
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
-	{ 
+	{
 		// this is not quite thread-safe. This object keeps the requesting consumer in it's
 		// state until the next call to RequestBlock
 		//
@@ -137,8 +140,8 @@ public:
 
 		// save our current consumer on the stack.
 		// this at least makes sure that re-entrant calls reply to the right consumer.
-		state_saver<block_consumer *> save( m_pConsumer);
-		m_pConsumer = &c;
+		state_saver<block_consumer *> save( interface_type::m_pConsumer);
+		interface_type::m_pConsumer = &c;
 
 		sampleno sub_block = 0;
 		sampleno offset = 0;
@@ -150,7 +153,7 @@ public:
 		while (num)
 		{
 			sub_block = std::min(  num, m_converter.destination_type_samples( get_block_size()));
-			m_pProducer->RequestBlock( *this, start + offset, sub_block);
+			interface_type::m_pProducer->RequestBlock( *this, start + offset, sub_block);
 			num -= sub_block;
 			offset += sub_block;
 		}
@@ -174,14 +177,14 @@ public:
 
 		while (pSrcFrame < b.m_end)
 		{
-			m_converter.convert( ( pSrcFrame), 
+			m_converter.convert( ( pSrcFrame),
 								( pTgtFrame));
 			m_converter.advance_source( pSrcFrame);
 			m_converter.advance_destination( pTgtFrame);
 		}
 
 		block.m_end = pTgtFrame;
-		m_pConsumer->ReceiveBlock( block);
+		interface_type::m_pConsumer->ReceiveBlock( block);
 
 	}
 

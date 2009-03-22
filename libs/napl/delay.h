@@ -1,10 +1,11 @@
+#include <algorithm>
 struct delay_base : public block_mutator, protected block_owner
 {
 	// maximum blocksize we're willing to spend on a block filled with zeros.
 	enum { delay_block_size = 65536};
 
 	delay_base( double delay_time_seconds, size_t samplesize, double post_seconds = 0)
-		:m_delay_seconds( delay_time_seconds), 
+		:m_delay_seconds( delay_time_seconds),
 		m_samplesize( samplesize),
 		m_post_seconds( post_seconds),
 		m_producer_samples( 0),
@@ -19,8 +20,8 @@ struct delay_base : public block_mutator, protected block_owner
 	virtual void GetStreamHeader( stream_header &h)
 	{
 		m_pProducer->GetStreamHeader( h);
-	
-		
+
+
 		m_delay_samples = static_cast<size_t>(h.samplerate * m_delay_seconds);
 		m_post_size = static_cast<size_t>(h.samplerate * m_post_seconds);
 
@@ -48,7 +49,7 @@ struct delay_base : public block_mutator, protected block_owner
 		assert( false);
 	}
 
-	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num) 
+	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
 	{
 
 		state_saver<block_consumer *> save( m_pConsumer);
@@ -90,7 +91,7 @@ struct delay_base : public block_mutator, protected block_owner
 			}
 			return 0;
 		}
-		else 
+		else
 		{
 			return 0;
 		}
@@ -98,7 +99,8 @@ struct delay_base : public block_mutator, protected block_owner
 
 	void init_block( sample_block &block)
 	{
-		memset( block.buffer_begin(), 0, block.buffer_size());
+		std::fill( block.buffer_begin(), block.buffer_begin() + block.buffer_size(), 0);
+		   //( block.buffer_begin(), 0, block.buffer_size());
 	}
 
 	void send_delay_samples( size_t num_samples, block_consumer &consumer)
@@ -147,7 +149,7 @@ template <typename sampletype>
 struct delay: public delay_base
 {
 	delay( double delay_seconds, double post_seconds = 0)
-		:delay_base( delay_seconds, sizeof sampletype, post_seconds)
+		:delay_base( delay_seconds, sizeof( sampletype), post_seconds)
 	{
 	};
 

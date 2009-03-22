@@ -42,7 +42,10 @@ public:
 			*q-- = c;
 		}
 	}
-	inline int GetResult() { return 0;}
+	inline int GetResult()
+	{
+		return 0;
+	}
 };
 
 // mono 8 is a special case, we convert from unsigned to signed
@@ -78,4 +81,4 @@ class endian_converter: public uniform_block_mutator< mut_endian_converter< samp
 	}
 };
 
-#endif _CONVENDI_H_
+#endif //_CONVENDI_H_

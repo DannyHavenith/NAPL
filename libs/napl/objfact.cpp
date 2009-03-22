@@ -1,5 +1,5 @@
 //
-// 
+//
 //
 #include "stdafx.h"
 #include "processor_visitor.h"
@@ -8,7 +8,7 @@
 #include "objfact.h"
 #include "convendi.h"
 #include "samplety.h"
-#include "truncate.h"
+//#include "truncate.h"
 #include "uniform_block_converter.h"
 #include "resample.h"
 #include "xfade.h"
@@ -60,88 +60,88 @@ block_mutator *create_pan( short pan_value, const sampletype_mf *)
 
 
 template< typename sampletype>
-sample_analyzer *t_sample_object_factory<sampletype>::GetAnalyzer()
+sample_analyzer *t_sample_object_factory::apply<sampletype>::GetAnalyzer()
 {
 	return new typed_analyzer<sampletype>();
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetChannelExtractor( short channel)
+block_mutator *t_sample_object_factory::apply<sampletype>::GetChannelExtractor( short channel)
 {
 	return new channel_extract_mutator<sampletype>( channel);
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetPan( short pan_value)
+block_mutator *t_sample_object_factory::apply<sampletype>::GetPan( short pan_value)
 {
 	return create_pan( pan_value, (sampletype *)0);
 }
 
 template< typename sampletype>
-block_producer *t_sample_object_factory<sampletype>::GetConstant( stream_header h)
+block_producer *t_sample_object_factory::apply<sampletype>::GetConstant( stream_header h)
 {
 	return new constant_producer<sampletype>( h);
 }
 
 template< typename sampletype>
-general_resampler *t_sample_object_factory<sampletype>::GetResampler( 
-	unsigned long outfreq, 
-	unsigned long infreq, 
+general_resampler *t_sample_object_factory::apply<sampletype>::GetResampler(
+	unsigned long outfreq,
+	unsigned long infreq,
 	bool lie)
 {
 	return new resampler< sampletype>( outfreq, infreq, lie);
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetNegator()
+block_mutator *t_sample_object_factory::apply<sampletype>::GetNegator()
 {
 	return new negator< sampletype>();
 }
 
 template< typename input_sample_type>
-binary_block_processor * t_sample_object_factory<input_sample_type>::GetStereoMaker()
+binary_block_processor * t_sample_object_factory::apply<input_sample_type>::GetStereoMaker()
 {
 	return new stereo_maker< input_sample_type>();
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetEndianConverter()
+block_mutator *t_sample_object_factory::apply<sampletype>::GetEndianConverter()
 {
 	return static_cast< block_mutator *> (new endian_converter< sampletype>());
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetDelay( double delay_seconds, double post_seconds)
+block_mutator *t_sample_object_factory::apply<sampletype>::GetDelay( double delay_seconds, double post_seconds)
 {
 	return new delay< sampletype>( delay_seconds, post_seconds);
 }
 
 template< typename sampletype>
-binary_block_processor *t_sample_object_factory<sampletype>::GetXFader()
+binary_block_processor *t_sample_object_factory::apply<sampletype>::GetXFader()
 {
 	return static_cast< binary_block_processor *> ( new xfader< sampletype>());
 }
 
 template< typename sampletype>
-binary_block_processor *t_sample_object_factory<sampletype>::GetAdder()
+binary_block_processor *t_sample_object_factory::apply<sampletype>::GetAdder()
 {
 	return new binary_block_mutator< mut_add<sampletype> >();
 }
 
 template< typename sampletype>
-block_mutator *t_sample_object_factory<sampletype>::GetAmplifier( double factor)
+block_mutator *t_sample_object_factory::apply<sampletype>::GetAmplifier( double factor)
 {
 	return new amplifier<sampletype>( factor);
 }
 
 template< typename sampletype>
-block_producer *t_sample_object_factory<sampletype>::GetFunction( const std::vector<double> &prototype, const stream_header &h)
+block_producer *t_sample_object_factory::apply<sampletype>::GetFunction( const std::vector<double> &prototype, const stream_header &h)
 {
 	return new function<sampletype>( prototype, h);
 }
 
 template< typename sampletype>
-binary_block_processor * t_sample_object_factory<sampletype>::GetAmpModulator()
+binary_block_processor * t_sample_object_factory::apply<sampletype>::GetAmpModulator()
 {
 	return new asymmetric_binary_block_mutator< amp_modulator_mutator< double, sampletype> >();
 }

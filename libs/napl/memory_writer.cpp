@@ -4,7 +4,7 @@
 struct memory_writer_base: public block_consumer
 {
 	memory_writer_base( block_producer *p, void *destination)
-		: m_destination( reinterpret_cast< sample_block::byte_type *>( 
+		: m_destination( reinterpret_cast< sample_block::byte_type *>(
 									destination))
 	{
 		LinkTo( p);
@@ -28,15 +28,15 @@ struct memory_writer : public memory_writer_base
 	{
 	}
 
-	virtual void ReceiveBlock( const sample_block &b) 
+	virtual void ReceiveBlock( const sample_block &b)
 	{
-		m_destination = 
+		m_destination =
 			std::copy( b.m_start, b.m_end, m_destination);
 	}
 };
 
 template< typename sample_type, typename binary_op = std::plus< sample_type> >
-struct memory_adder : public memory_writer_base 
+struct memory_adder : public memory_writer_base
 {
 
 	memory_adder( block_producer *p, sample_type *destination)
@@ -44,12 +44,13 @@ struct memory_adder : public memory_writer_base
 	{
 	}
 
-	virtual void ReceiveBlock( const sample_block &b) 
+	virtual void ReceiveBlock( const sample_block &b)
 	{
+		typedef typename sample_container< sample_type>::const_iterator const_iterator;
 		sample_container< sample_type> container( b);
 		m_destination =reinterpret_cast< sample_block::byte_type *>(
-				std::transform( 
-					sample_container< sample_type>::const_iterator( container.begin()), 
+				std::transform(
+					const_iterator( container.begin()),
 					container.end(),
 					reinterpret_cast< sample_type *>( m_destination),
 					reinterpret_cast< sample_type *>( m_destination),
@@ -60,9 +61,9 @@ struct memory_adder : public memory_writer_base
 	}
 };
 
-void *write_frames_to_memory( block_producer *p, 
-							 void *memory, 
-							 sampleno start, 
+void *write_frames_to_memory( block_producer *p,
+							 void *memory,
+							 sampleno start,
 							 sampleno samples
 							 )
 {

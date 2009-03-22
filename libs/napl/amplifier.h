@@ -10,8 +10,8 @@ private:
 			sample = actual_type( sample * m_factor);
 		}
 
-		template<>
-			void operator()<sampletype_m8>( sampletype_m8 &sample)
+
+		void operator()( sampletype_m8 &sample)
 		{
 			sample = static_cast<sampletype_m8>((static_cast<int>(sample) - sampletraits<sampletype_m8>::get_middle()) * m_factor) + sampletraits<sampletype_m8>::get_middle();
 		}
@@ -65,6 +65,7 @@ struct amplifier : public uniform_block_converter< mutator_adapter< amplifier_mu
 {
 	amplifier( double factor)
 	{
-		m_converter.SetFactor( factor);
+		uniform_block_converter< mutator_adapter< amplifier_mutator< sample_type> > >::
+			m_converter.SetFactor( factor);
 	}
 };
