@@ -5,11 +5,11 @@
 
 #define BOOST_SPIRIT_DEBUG
 #include <exception>
-#include <boost/spirit/qi.hpp>
+//#include <boost/spirit/qi.hpp>
 #include <boost/assign.hpp>
 #include <string>
 
-#include "RythmParser.h"
+#include "rythmparser.h"
 
 using namespace std;
 
@@ -21,8 +21,8 @@ boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe
 
 int main(int argc, char* argv[])
 {
-    
 
+    std::cout << "sizeof unsigned long = " << sizeof(unsigned long) << std::endl;
 
     if (argc != 2) return -1;
 

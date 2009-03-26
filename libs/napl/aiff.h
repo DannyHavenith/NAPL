@@ -20,11 +20,11 @@
 struct ChunkHeader : public streamable
 {
 	ChunkID ckID;
-	unsigned long ckSize;
+	boost::uint32_t ckSize;
 
 	virtual bool Stream( FILE *file, const direction &d);
 
-	ChunkHeader( unsigned long chunkID)
+	ChunkHeader( boost::uint32_t chunkID)
 	{
 		ckID = chunkID;
 	}
@@ -47,18 +47,18 @@ struct extended : public streamable
 
 private:
 	double value;
-	
+
 };
 
 struct  CommonChunk : public streamable
 {
 	ChunkHeader header;
-	unsigned short	numChannels;
-	unsigned long numSampleFrames;
-	unsigned short	sampleSize;
+	boost::uint16_t	numChannels;
+	boost::uint32_t numSampleFrames;
+	boost::uint16_t	sampleSize;
 	extended sampleRate;
 
-	CommonChunk() : header( HEADER_COMM) 
+	CommonChunk() : header( HEADER_COMM)
 	{
 		header.ckSize = 18;
 	};
@@ -66,7 +66,7 @@ struct  CommonChunk : public streamable
 	void GetStreamHeader( stream_header &h)
 	{
 		h.samplesize = sampleSize;
-		h.samplerate = static_cast< unsigned long>( sampleRate);
+		h.samplerate = static_cast< boost::uint32_t>( sampleRate);
 		h.numframes = numSampleFrames;
 		h.numchannels = numChannels;
 		h.architecture = ARCHITECTURE_AIFF;
@@ -85,7 +85,7 @@ struct  CommonChunk : public streamable
 
 	bool Stream( FILE *file, const direction &d)
 	{
-		return 
+		return
 			be_stream( file, header, d) &&
 			be_stream( file, numChannels, d) &&
 			be_stream( file, numSampleFrames, d) &&
@@ -98,11 +98,11 @@ struct  CommonChunk : public streamable
 struct SoundDataChunk : public streamable
 {
 	ChunkHeader header;
-	unsigned long offset;
-	unsigned long blocksize;
-	unsigned long dataoffset;
+	boost::uint32_t offset;
+	boost::uint32_t blocksize;
+	boost::uint32_t dataoffset;
 
-	SoundDataChunk(): header( HEADER_SSND) 
+	SoundDataChunk(): header( HEADER_SSND)
 	{
 		offset = 0;
 		blocksize = 0;
@@ -110,7 +110,7 @@ struct SoundDataChunk : public streamable
 
 	inline bool Stream( FILE *file, const direction &d)
 	{
-		if ( 
+		if (
 			be_stream( file, header, d) &&
 			be_stream( file, offset, d) &&
 			be_stream( file, blocksize, d))
@@ -122,7 +122,7 @@ struct SoundDataChunk : public streamable
 			return false;
 
 	}
-	unsigned long GetDataOffset()
+	boost::uint32_t GetDataOffset()
 	{
 		return dataoffset;
 	}

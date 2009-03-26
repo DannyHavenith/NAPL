@@ -1,3 +1,6 @@
+#if !defined( PROGRESS_H)
+#define PROGRESS_H
+
 struct progress
 {
 	virtual void step( float progress) = 0;
@@ -17,9 +20,9 @@ struct progress
  *
  * \author Danny
  *
- * \todo 
+ * \todo
  *
- * \bug 
+ * \bug
  *
  */
 struct progress_monitor : public block_mutator
@@ -36,7 +39,7 @@ struct progress_monitor : public block_mutator
 private:
 	void broadcast_step( float step);
 	void set_current_position( sampleno pos);
-	
+
 	typedef std::vector<progress *> callback_list_type;
 	callback_list_type m_callbacks;
 	sampleno m_total;
@@ -47,7 +50,7 @@ private:
 /**
  * \ingroup Napl
  *
- * A default implementation of the progress interface. 
+ * A default implementation of the progress interface.
  * This class shows progress as a text line consisting of
  * asterisk ('*') characters.
  *
@@ -57,9 +60,9 @@ private:
  *
  * \author Danny
  *
- * \todo 
+ * \todo
  *
- * \bug 
+ * \bug
  *
  */
 struct text_based_progress_bar : public progress
@@ -75,3 +78,5 @@ private:
 public:
 	~text_based_progress_bar(void);
 };
+
+#endif //PROGRESS_H

@@ -1,3 +1,6 @@
+#if !defined( REINTERPRET_H)
+#define REINTERPRET_H
+
 class reinterpret_mutator : public block_mutator
 {
 	stream_header m_header;
@@ -5,7 +8,7 @@ class reinterpret_mutator : public block_mutator
 
 	sampleno translate( sampleno input)
 	{
-		return sampleno( __int64( input) * m_header.frame_size() / m_original_header.frame_size());
+		return sampleno( (long long)( input) * m_header.frame_size() / m_original_header.frame_size());
 	}
 
 public:
@@ -19,7 +22,7 @@ public:
 		return m_pProducer->RequestBlock( consumer, translate( start), translate( num));
 	};
 
-	virtual void GetStreamHeader( stream_header &h) 
+	virtual void GetStreamHeader( stream_header &h)
 	{
 		h = m_header;
 	}
@@ -42,3 +45,4 @@ public:
 	{
 	};
 };
+#endif //REINTERPRET_H

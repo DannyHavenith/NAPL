@@ -6,6 +6,7 @@
 /***********************************************************************************/
 
 // include general file type utility classes.
+#include <boost/cstdint.hpp>
 #include "filetype.h"
 
 #define ARCHITECTURE_WAV ARCHITECTURE_LITTLEENDIAN
@@ -20,11 +21,11 @@
 struct WAVHeader : public streamable
 {
 	ChunkID ckID;
-	unsigned long ckSize;
-	
+	boost::uint32_t ckSize;
+
 	virtual bool Stream( FILE *file, const direction &d);
 
-	WAVHeader( unsigned long chunkID)
+	WAVHeader( boost::uint32_t chunkID)
 	{
 		ckID = chunkID;
 	}
@@ -33,12 +34,12 @@ struct WAVHeader : public streamable
 struct FormatChunk: public streamable
 {
 	WAVHeader header;
-	unsigned short format;
-	unsigned short nChannels;
-	unsigned long sampleRate;
-	unsigned long bytesPerSecond;
-	unsigned short blockAlign;
-	unsigned short bitsPerSample;
+	boost::uint16_t format;
+	boost::uint16_t nChannels;
+	boost::uint32_t sampleRate;
+	boost::uint32_t bytesPerSecond;
+	boost::uint16_t blockAlign;
+	boost::uint16_t bitsPerSample;
 
 	virtual bool Stream( FILE *file, const direction &d);
 
@@ -74,13 +75,13 @@ struct FormatChunk: public streamable
 struct WAVDataChunk: public streamable
 {
 	WAVHeader header;
-	unsigned long dataoffset;
-	
+	boost::uint32_t dataoffset;
+
 	WAVDataChunk(): header( ID_DATA) {};
 
 	virtual bool Stream( FILE *file, const direction &d);
 
-	unsigned long GetDataOffset()
+	boost::uint16_t GetDataOffset()
 	{
 		return dataoffset;
 	}

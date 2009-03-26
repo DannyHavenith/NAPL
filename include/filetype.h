@@ -8,6 +8,7 @@
 #define _FILE_TYPE_H_
 
 #include <stdio.h>
+#include <boost/cstdint.hpp>
 #include "architec.h"
 #include "samplebl.h"
 
@@ -26,10 +27,10 @@ public:
 	{
 		h = m_stStreamHeader;
 	}
-	
+
         file_block_producer( FILE *fp, const stream_header &h, unsigned long offset) :
 		m_pFile( fp), m_stStreamHeader( h)
-	{ 
+	{
 		m_nBytesPerSample = (short)(h.get_sample_size() / 8 * h.numchannels);
 		m_nFileOffset = offset;
 	}
@@ -51,7 +52,7 @@ protected:
 
 	virtual sampleno FillBlock( sample_block &b, sampleno count)
 	{
-		if (count * m_nBytesPerSample > b.buffer_size()) 
+		if (count * m_nBytesPerSample > b.buffer_size())
 		{
 			count = sampleno( b.buffer_size() / m_nBytesPerSample);
 		}
@@ -68,7 +69,7 @@ private:
 	stream_header m_stStreamHeader;
 	unsigned short m_nBytesPerSample;
 	unsigned long m_nFileOffset;
-	
+
 };
 
 /*
@@ -86,17 +87,17 @@ public:
 class arch_endian_converter
 {
 protected:
-	inline static unsigned short endian_convert( unsigned short in)
+	inline static boost::uint16_t endian_convert( boost::uint16_t in)
 	{
-		return (short)(in << 8) | (in >> 8);
+		return (boost::uint16_t)(in << 8) | (in >> 8);
 	}
-	inline static unsigned long endian_convert( unsigned long in)
+	inline static boost::uint32_t endian_convert( boost::uint32_t in)
 	{
-		return endian_convert((unsigned short) (in >> 16)) | (endian_convert((unsigned short) in) << 16);
+		return endian_convert((boost::uint16_t) (in >> 16)) | (endian_convert((boost::uint16_t) in) << 16);
 	}
-	inline static long long endian_convert( long long in)
+	inline static boost::int64_t endian_convert( boost::int64_t in)
 	{
-		return endian_convert((unsigned long) (in >> 32)) | (endian_convert((unsigned long) in) << 32);
+		return endian_convert((boost::uint32_t) (in >> 32)) | ((boost::uint64_t)endian_convert((boost::uint32_t) in) << 32);
 	}
 };
 
@@ -104,17 +105,17 @@ protected:
 class endian_non_converter
 {
 protected:
-	inline static unsigned short endian_convert( unsigned short in)
+	inline static boost::uint16_t endian_convert( boost::uint16_t in)
 	{
 		return in;
 	}
-	inline static unsigned long endian_convert( unsigned long in)
+	inline static boost::uint32_t endian_convert( boost::uint32_t in)
 	{
 		return in;
 	}
 };
 
-typedef unsigned long ul;
+typedef boost::uint32_t ul;
 
 #if (LOCAL_ARCHITECTURE == ARCHITECTURE_LITTLEENDIAN)
 
@@ -133,7 +134,7 @@ typedef arch_endian_converter little_endian_converter;
 #endif
 
 //
-// The global function 'stream' is a function that makes 
+// The global function 'stream' is a function that makes
 //
 // Streamable is an interface definition of classes that can be written to a C-style
 // file.
@@ -143,7 +144,7 @@ typedef arch_endian_converter little_endian_converter;
 
 // the function 'stream' (lowercase 's') is a utility function that writes an object
 // (specified in the second parameter) to a file.
-// 
+//
 class streamable
 {
 public:
@@ -159,33 +160,33 @@ public:
 // big_endian_file
 // this template is a definition of a big_endian file
 // it defines how several types must be written to a file.
-// 
+//
 //
 
-// the general case assumes there is a 'Stream()' method 
+// the general case assumes there is a 'Stream()' method
 // notice the capital 'S' in the 'Stream' method.
 template <class T>
 struct big_endian_file : private big_endian_converter
 {
-	inline static bool stream( FILE * file, T &m, const streamable::direction &d)  
+	inline static bool stream( FILE * file, T &m, const streamable::direction &d)
 	{
 		return m.Stream( file, d);
 	}
 };
 
-template<> struct big_endian_file<unsigned long> : private big_endian_converter
+template<> struct big_endian_file<boost::uint32_t> : private big_endian_converter
 {
 	// long (4 bytes) int input/output.
-	static bool stream( FILE * file, unsigned long &c, const streamable::direction &d) 
+	static bool stream( FILE * file, boost::uint32_t &c, const streamable::direction &d)
 	{
 		if (d.isoutput())
 		{
-			unsigned long temp = endian_convert( c);
+		    boost::uint32_t temp = endian_convert( c);
 			return (4 == fwrite( &temp, 1, 4, file));
 		}
 		else
 		{
-			unsigned long temp;
+		    boost::uint32_t temp;
 			if (4 != fread( &temp, 1, 4, file)) return false;
 			c = endian_convert( temp);
 			return true;
@@ -210,10 +211,10 @@ template <> struct big_endian_file< long double>: private big_endian_converter
 
 };
 
-template <> struct big_endian_file< unsigned char> : private big_endian_converter
+template <> struct big_endian_file< boost::uint8_t> : private big_endian_converter
 {
 	// character input/output
-	static bool stream( FILE * file, unsigned char c, const streamable::direction &d)
+	static bool stream( FILE * file, boost::uint8_t c, const streamable::direction &d)
 	{
 		if (d.isoutput())
 		{
@@ -221,25 +222,25 @@ template <> struct big_endian_file< unsigned char> : private big_endian_converte
 		}
 		else
 		{
-			c = static_cast<unsigned char> (getc(file));
+			c = static_cast<boost::uint8_t> (getc(file));
 			return !feof( file);
 		}
 	}
 
 };
 
-template <> struct big_endian_file< unsigned short> : private big_endian_converter
+template <> struct big_endian_file< boost::uint16_t> : private big_endian_converter
 {
-	static bool stream( FILE * file, unsigned short &c, const streamable::direction &d) 
+	static bool stream( FILE * file, boost::uint16_t &c, const streamable::direction &d)
 	{
 		if (d.isoutput())
 		{
-			unsigned short temp = endian_convert( c);
+		    boost::uint32_t temp = endian_convert( c);
 			return (2 == fwrite( &temp, 1, 2, file));
 		}
 		else
 		{
-			unsigned short temp;
+		    boost::uint16_t temp;
 			if (fread( &temp, 1, 2, file) != 2) return false;
 			c = endian_convert( temp);
 			return true;
@@ -252,33 +253,33 @@ template <> struct big_endian_file< unsigned short> : private big_endian_convert
 // little_endian_file
 // this template is a 'traits'-like definition of a little_endian file
 // it defines how several types must be written to a file.
-// 
+//
 //
 
-// the general case assumes there is a 'Stream()' method 
+// the general case assumes there is a 'Stream()' method
 // notice the capital 'S' in the 'Stream' method.
 template <class T>
 struct little_endian_file : private little_endian_converter
 {
-	inline static bool stream( FILE * file, T &m, const streamable::direction &d)  
+	inline static bool stream( FILE * file, T &m, const streamable::direction &d)
 	{
 		return m.Stream( file, d);
 	}
 };
 
-template <> struct little_endian_file<unsigned long> : private little_endian_converter
+template <> struct little_endian_file<boost::uint32_t> : private little_endian_converter
 {
 	// long (4 bytes) int input/output.
-	static bool stream( FILE * file, unsigned long &c, const streamable::direction &d) 
+	static bool stream( FILE * file, boost::uint32_t &c, const streamable::direction &d)
 	{
 		if (d.isoutput())
 		{
-			unsigned long temp = endian_convert( c);
+		    boost::uint32_t temp = endian_convert( c);
 			return (4 == fwrite( &temp, 1, 4, file));
 		}
-		else 
+		else
 		{
-			unsigned long temp;
+		    boost::uint32_t temp;
 			if (4 != fread( &temp, 1, 4, file)) return false;
 			c = endian_convert( temp);
 			return true;
@@ -303,10 +304,10 @@ template <> struct little_endian_file< long double>: private little_endian_conve
 
 };
 
-template <> struct little_endian_file< unsigned char> : private little_endian_converter
+template <> struct little_endian_file< boost::uint8_t> : private little_endian_converter
 {
 	// character input/output
-	static bool stream( FILE * file, unsigned char c, const streamable::direction &d)
+	static bool stream( FILE * file, boost::uint8_t c, const streamable::direction &d)
 	{
 		if (d.isoutput())
 		{
@@ -314,24 +315,24 @@ template <> struct little_endian_file< unsigned char> : private little_endian_co
 		}
 		else
 		{
-			c = static_cast<unsigned char> (getc(file));
+			c = static_cast<boost::uint8_t> (getc(file));
 			return !feof( file);
 		}
 	}
 };
 
-template <> struct little_endian_file< unsigned short> : private little_endian_converter
+template <> struct little_endian_file< boost::uint16_t> : private little_endian_converter
 {
-	static bool stream( FILE * file, unsigned short &c, const streamable::direction &d) 
+	static bool stream( FILE * file, boost::uint16_t &c, const streamable::direction &d)
 	{
 		if (d.isoutput())
 		{
-			unsigned short temp = endian_convert( c);
+		    boost::uint16_t temp = endian_convert( c);
 			return (2 == fwrite( &temp, 1, 2, file));
 		}
 		else
 		{
-			unsigned short temp;
+		    boost::uint16_t temp;
 			if (fread( &temp, 1, 2, file) != 2) return false;
 			c = endian_convert( temp);
 			return true;
@@ -348,7 +349,7 @@ template <> struct little_endian_file< unsigned short> : private little_endian_c
 class ChunkID : public streamable
 {
  protected:
-	unsigned long m_ChunkID;
+     boost::uint32_t m_ChunkID;
  public:
 	virtual bool Stream( FILE *file, const streamable::direction &d)
 	{
@@ -358,11 +359,11 @@ class ChunkID : public streamable
 		}
 		else
 		{
-			unsigned long lID;
+		    boost::uint32_t lID;
 			if (4 != fread( &lID, 1, 4, file)) return false;
 			while (lID != m_ChunkID)
 			{
-				long lLength;
+			    boost::uint32_t lLength;
 				if (4 != fread( &lLength, 1, 4, file)) return false;
 				fseek( file, lLength, SEEK_CUR);
 				if (4 != fread( &lID, 1, 4, file)) return false;
@@ -372,7 +373,7 @@ class ChunkID : public streamable
 		}
 	}
 	ChunkID(){};
-	ChunkID(long l): m_ChunkID(l){};
+	ChunkID(boost::uint32_t l): m_ChunkID(l){};
 };
 
 template <typename T>
