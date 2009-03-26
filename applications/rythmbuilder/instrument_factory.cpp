@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
@@ -20,7 +20,7 @@ instrument_factory::instrument_factory( const boost::filesystem::path &p)
                 new instrument( *i));
 
         }
-    }    
+    }
 }
 
 std::set< std::string> instrument_factory::get_note_names()

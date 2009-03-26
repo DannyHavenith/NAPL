@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include <map>
 #include <fstream>
 #include <string>
@@ -95,8 +95,8 @@ void instrument::add_silence()
 {
     if (!notes.empty())
     {
-        // get details like samplerate and framesize 
-        // of the first note and use those to create a silence with the 
+        // get details like samplerate and framesize
+        // of the first note and use those to create a silence with the
         // same attributes.
         stream_header h;
         notes.begin()->second->GetStreamHeader( h);

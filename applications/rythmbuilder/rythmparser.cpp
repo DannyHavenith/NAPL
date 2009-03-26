@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include <boost/assign.hpp>
-#include <boost/spirit/qi.hpp>
+#include <boost/spirit/include/qi.hpp>
 
-#include "RythmParser.h"
+#include "rythmparser.h"
 #include "track_builder.h"
-#include "RythmTextGrammar.hpp"
+#include "rythmtextgrammar.hpp"
 
 bool ParseRythm(  const boost::filesystem::path &instrument_path, const std::string &content)
 {

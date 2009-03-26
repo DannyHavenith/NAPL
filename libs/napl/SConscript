@@ -11,7 +11,6 @@ sources = Split("""aiff.cpp
 	wav.cpp
 	""")
 
-env = Environment()
-env.Append(CPPPATH = ['/usr/include/', '/usr/include/C++/4.3/', '../../../include/'])
-target = env.Library( 'napl', sources)
-Default( target)
+Import("env")
+napl = env.Library( 'napl', sources)
+env.Export("napl")

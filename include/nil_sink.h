@@ -16,6 +16,9 @@
  *
  *
  */
+#if !defined( NIL_SINK_H)
+#define NIL_SINK_H
+
 struct nil_sink : public block_sink
 {
 	virtual void Start()
@@ -31,8 +34,9 @@ struct nil_sink : public block_sink
 	/**
 	 * This implementation of ReceiveBlock discards the received samples.
 	 */
-	virtual void ReceiveBlock( const sample_block &) 
+	virtual void ReceiveBlock( const sample_block &)
 	{
 		// nop
 	};
 };
+#endif //NIL_SINK_H
