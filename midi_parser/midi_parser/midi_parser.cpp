@@ -20,6 +20,7 @@
 
 #include <boost/lambda/lambda.hpp>
 #include "subsection_parser.hpp"
+#include "midi_event_types.hpp"
 
 //using namespace boost::phoenix;
 using namespace boost::spirit;
@@ -30,71 +31,6 @@ using namespace std;
 
 namespace events
 {
-struct note
-{
-    unsigned char number;
-    unsigned char velocity;
-};
-
-
-struct note_off : note
-{};
-
-struct note_on : note
-{};
-
-struct note_aftertouch : note
-{};
-
-struct controller 
-{
-    unsigned char which;
-    unsigned char value;
-};
-
-struct program_change
-{
-    program_change &operator=( int rhs)
-    {
-        program = rhs;
-    }
-    unsigned char program;
-};
-
-struct channel_aftertouch
-{
-    unsigned char value;
-};
-struct pitch_bend
-{
-    unsigned short value;
-};
-
-typedef boost::variant<
-    note_on,
-    note_off,
-    note_aftertouch,
-    controller,
-    program_change,
-    channel_aftertouch,
-    pitch_bend> channel_event;
-
-struct meta
-{
-    unsigned char       type;
-    std::vector<char>   bytes;
-};
-
-struct sysex
-{
-};
-
-typedef boost::variant<
-    meta,
-    sysex,
-    channel_event
-> any;
-
 template<typename Derived>
 struct visitor : public boost::static_visitor<>
 {
@@ -137,12 +73,6 @@ struct visitor : public boost::static_visitor<>
 
 } // namespace events
 
-struct timed_midi_event
-{
-    unsigned delta_time;
-    events::any event;
-};
-
 template<typename Derived>
 struct timed_midi_visitor : public events::visitor<Derived>
 {
@@ -153,7 +83,7 @@ struct timed_midi_visitor : public events::visitor<Derived>
     }
 
     using events::visitor<Derived>::operator();
-    void operator()( const timed_midi_event &event)
+    void operator()( const events::timed_midi_event &event)
     {
         current_time += event.delta_time;
         derived()( event.event);
@@ -179,57 +109,7 @@ struct print_text_visitor : public timed_midi_visitor<print_text_visitor>
     }
 };
 
-BOOST_FUSION_ADAPT_STRUCT(
-    events::note_on,
-    (unsigned char, number)
-    (unsigned char, velocity)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    events::meta,
-    (unsigned char, type)
-    (std::vector<char>, bytes)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    events::note_off,
-    (unsigned char, number)
-    (unsigned char, velocity)
-    )
-BOOST_FUSION_ADAPT_STRUCT(
-    events::note_aftertouch,
-    (unsigned char, number)
-    (unsigned char, velocity)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    events::controller,
-    (unsigned char, which)
-    (unsigned char, value)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    events::program_change,
-    (unsigned char, program)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    events::channel_aftertouch,
-    (unsigned char, value)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    events::pitch_bend,
-    (unsigned short, value)
-    )
-
-BOOST_FUSION_ADAPT_STRUCT(
-    timed_midi_event,
-    (unsigned, delta_time)
-    (events::any, event)
-    )
-
-typedef std::vector< timed_midi_event>   midi_track;
+typedef std::vector< events::timed_midi_event>   midi_track;
 
 struct midi_header
 {
@@ -309,7 +189,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
         // if there's a high_byte, that will be the event/channel
         // if there isn't, we use the running status (the previously seen event).
         channel_event
-            =      omit[-high_byte[ref(running_status) = _1][ref(std::cout) << "new channel:" << running_status ]] >> eps[_a = val(running_status)/16] >> eps[std::cout << ref(running_status) << std::endl] >>
+            =      omit[-high_byte[ref(running_status) = _1]] >> eps[_a = val(running_status)/16] >> 
         
                     (
                         eps( _a == 0x8) > note_off_event
@@ -363,7 +243,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
     rule<Iterator, midi_file()          > file;
     rule<Iterator, midi_header()        > header;
     rule<Iterator, midi_track(size_t)   > track_data;
-    rule<Iterator, timed_midi_event()   > event_group;
+    rule<Iterator, events::timed_midi_event()   > event_group;
     rule<Iterator, events::any()        > event;
     rule<Iterator, events::pitch_bend() > pitch_bend_event;
     rule<Iterator, size_t()             > variable_length_quantity;
