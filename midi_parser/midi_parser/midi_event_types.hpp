@@ -49,7 +49,13 @@ namespace events
         controller,
         program_change,
         channel_aftertouch,
-        pitch_bend> channel_event;
+        pitch_bend> channel_event_variant;
+
+    struct channel_event
+    {
+        unsigned char         channel;
+        channel_event_variant event;
+    };
 
     struct meta
     {
@@ -116,6 +122,12 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     events::pitch_bend,
     (unsigned short, value)
+    )
+
+BOOST_FUSION_ADAPT_STRUCT(
+    events::channel_event,
+    (unsigned char, channel)
+    (events::channel_event_variant, event)
     )
 
 BOOST_FUSION_ADAPT_STRUCT(
