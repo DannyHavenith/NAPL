@@ -10,6 +10,7 @@
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
@@ -51,7 +52,8 @@ struct visitor : public boost::static_visitor<>
 
     void operator()( const channel_event &event)
     {
-        boost::apply_visitor( derived(), event);
+        current_channel = event.channel;
+        boost::apply_visitor( derived(), event.event);
     }
 
     void operator()( const meta &)
@@ -69,6 +71,8 @@ struct visitor : public boost::static_visitor<>
     void operator()( const program_change &){}
     void operator()( const channel_aftertouch &){}
     void operator()( const pitch_bend &){}
+
+    unsigned short current_channel;
 };
 
 } // namespace events
@@ -100,6 +104,17 @@ struct timed_midi_visitor : public events::visitor<Derived>
 struct print_text_visitor : public timed_midi_visitor<print_text_visitor>
 {
     using timed_midi_visitor<print_text_visitor>::operator();
+
+    void operator()( const events::note_on &note)
+    {
+        std::cout << "n:" << static_cast<int>( note.number);
+    }
+
+    void operator()( const events::note_off &note)
+    {
+        std::cout << "o:" << static_cast<int>( note.number);
+    }
+    
     void operator()( const events::meta &event)
     {
         if (event.type == 0x05 || (event.type == 0x01))
@@ -147,6 +162,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
         using boost::phoenix::val;
 //        using boost::phoenix::var;
         using boost::phoenix::ref;
+        using boost::phoenix::at_c;
         using boost::lambda::var;
         using boost::lambda::constant;
 
@@ -167,14 +183,16 @@ struct midi_parser: grammar< Iterator, midi_file()>
             ;
 
         event
-            %=
+            %= 
+            (
                 sysex_event
             |   meta_event
             |   channel_event
+            )
             ;
 
         meta_event
-            %= char_('\xff') >> byte/*type*/ >> omit[variable_length_quantity[ _a = _1]] >> subsection(_a)[*byte]
+            %= char_('\xff') >> byte >> omit[variable_length_quantity[ _a = _1]] >> subsection(_a)[*byte]
             ;
 
         sysex_event
@@ -184,62 +202,70 @@ struct midi_parser: grammar< Iterator, midi_file()>
         variable_length_quantity
             = eps[_val = 0] >> *high_byte[_val = (_val << 7) + (_1 & 0x7f)] >> low_byte[_val = (_val << 7) + _1]
             ;
+        
 
-        // local _a contains the event type (top nibble of event code)
         // if there's a high_byte, that will be the event/channel
         // if there isn't, we use the running status (the previously seen event).
         channel_event
-            =      omit[-high_byte[ref(running_status) = _1]] >> eps[_a = val(running_status)/16] >> 
-        
+            =  omit[-high_byte[ref(running_status) = _1]] >>
                     (
-                        eps( _a == 0x8) > note_off_event
-                    |   eps( _a == 0x9) > note_on_event
-                    |   eps( _a == 0xa) > note_aftertouch_event
-                    |   eps( _a == 0xb) > controller_event
-                    |   eps( _a == 0xc) > program_change_event
-                    |   eps( _a == 0xd) > channel_aftertouch_event
-                    |   eps( _a == 0xe) > pitch_bend_event
-                    )
-            ;
-
-        note_off_event
-            %=  byte >> byte
+                        note_off_event
+                    |   note_on_event
+                    |   note_aftertouch_event
+                    |   controller_event
+                    |   program_change_event
+                    |   channel_aftertouch_event
+                    |   pitch_bend_event
+                    ) 
+                    [
+                        at_c<1>(_val) = _1
+                    ]
+                    [
+                        at_c<0>(_val) = ref(running_status) & 0x0f
+                    ]
             ;
         
         note_on_event
-            %=  byte >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0x90) >> byte >> byte;
+
+ 
+        note_off_event
+            %=  eps( (ref(running_status) & 0xf0) == 0x80) >> byte >> byte
             ;
         
         note_aftertouch_event
-            %=  byte >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0xa0) >> byte >> byte
             ;
         
         controller_event
-            %=  byte >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0xb0) >> byte >> byte
             ;
         
         program_change_event
-            %=  eps >> byte 
+            %=  eps( (ref(running_status) & 0xf0) == 0xc0) >>  byte 
             ;
         
         channel_aftertouch_event
-            %=  eps >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0xd0) >>  byte
             ;
 
         pitch_bend_event
-            %=  eps >> little_word;
+            %=  eps( (ref(running_status) & 0xf0) == 0xe0) >> little_word;
             ;
 
         low_byte
-            %= char_( '\x00', '\x7f');
+            %= char_( '\x00', '\x7f')
+            ;
 
         high_byte
-            %= char_( '\x80', '\xff');
+            %= char_( '\x80', '\xff')
+            ;
+            /**/
     }
 
     int running_status;
-    rule<Iterator, int()                > high_byte;
-    rule<Iterator, int()                > low_byte;
+    rule<Iterator, unsigned char()                > high_byte;
+    rule<Iterator, unsigned char()                > low_byte;
     rule<Iterator, midi_file()          > file;
     rule<Iterator, midi_header()        > header;
     rule<Iterator, midi_track(size_t)   > track_data;
@@ -256,7 +282,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
     rule<Iterator, midi_track(),            locals<size_t>  > track;
     rule<Iterator, events::sysex(),         locals<size_t>  > sysex_event;
     rule<Iterator, events::meta(),          locals<size_t>  > meta_event;
-    rule<Iterator, events::channel_event(), locals<int>     > channel_event;
+    rule<Iterator, events::channel_event(), locals<unsigned int>     > channel_event;
 };
 
 template<typename Expr>
@@ -311,13 +337,15 @@ int main(int argc, char* argv[])
     iterator last = buffer.end();
     boost::spirit::qi::parse( first, last, parser, contents);
 
+    std::cout << "complete: " << (first == last) << std::endl;
+
     typedef std::vector< midi_track>::iterator track_iterator;
     for (track_iterator i = contents.tracks.begin(); i != contents.tracks.end(); ++i)
     {
         print_text_visitor v;
         std::for_each( i->begin(), i->end(), v);
     }
-/**/
+
 	return 0;
 }
 
