@@ -500,6 +500,14 @@ public:
 		: m_left( (MonoSample)s.left()), m_right( (MonoSample)s.right()) {};
 
 	template <typename sampletype>
+	inline this_type &operator=( const StereoSample< sampletype> &s)
+    {
+        m_left = s.left();
+        m_right = s.right();
+        return *this;
+    }
+
+        template <typename sampletype>
 		inline operator StereoSample< sampletype>()
 	{
 		return StereoSample<sampletype>( (sampletype)m_left, (sampletype)m_right);
