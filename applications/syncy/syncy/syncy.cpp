@@ -96,7 +96,7 @@ public:
             {
                 index -= WAIT_OBJECT_0;
                 ::ResetEvent( events[index]);
-                if (index < WAIT_OBJECT_0 + unique_event_count )
+                if (index < unique_event_count )
                 {
                     position_event( index);
                 }
@@ -150,7 +150,7 @@ private:
         lock( is_first_half); 
         const size_t samples_per_half_buffer = desc.dwBufferBytes / header.frame_size() / 2;
         const size_t requested_samples = std::min(samples_per_half_buffer, samples_to_go);
-        m_pProducer->RequestBlock( *this, 0, requested_samples);
+        m_pProducer->RequestBlock( *this, header.numframes - samples_to_go, requested_samples);
         unlock();
         samples_to_go -= requested_samples;
     }
@@ -220,12 +220,13 @@ private:
 
     void lock( size_t offset, size_t bytes)
     {
-        HRESULT hr = buffer->Lock( offset, bytes, &buffer_data, &buffer_length, 0, 0, DSBLOCK_ENTIREBUFFER);
+        HRESULT hr = buffer->Lock( offset, bytes, &buffer_data, &buffer_length, 0, 0, 0);
         if (hr == DSERR_BUFFERLOST)
         {
             buffer->Restore();
-            buffer->Lock( offset, bytes, &buffer_data, &buffer_length, 0, 0, DSBLOCK_ENTIREBUFFER);
+            hr = buffer->Lock( offset, bytes, &buffer_data, &buffer_length, 0, 0, 0);
         }
+        check( hr, "could not lock buffer");
         current_buffer_ptr = static_cast<char*>( buffer_data);
     }
 
@@ -381,7 +382,7 @@ private:
 
 void testfunc( size_t pos)
 {
-    if (pos%200 == 0)
+    if (pos%100 == 0)
     {
         std::cout << '.';
     }
