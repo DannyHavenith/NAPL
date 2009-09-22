@@ -2,15 +2,267 @@
 //
 
 #include "stdafx.h"
+#include "napl.h"
 #include <iostream>
 #include <iomanip>
 #include <exception>
 #include <dsound.h>
 #include <sstream>
 #include <string>
+#include <boost/function.hpp>
 
-class directsound_buffer
+#undef min
+
+namespace
 {
+    template< size_t size>
+    void check( HRESULT hr, const char (&text)[size])
+    {
+        if (FAILED(hr))
+        {
+            throw std::runtime_error( text);
+        }
+    }
+
+}
+
+/// a NAPL consumer that can play sound to an audio device
+class directsound_player : public block_consumer
+{
+public:
+    typedef boost::function< void(size_t)>      signal_type;
+
+    static const size_t buffer_seconds = 2;
+    static const int unique_event_count = 4;
+    static const int events_per_second = 100;
+
+    directsound_player( 
+        IDirectSoundBuffer *buffer_, 
+        const DSBUFFERDESC &desc_,
+        const stream_header &h)
+        : buffer( buffer_), desc( desc_), header(h)
+    {
+    }
+
+    directsound_player()
+        : buffer(0)
+    {
+    }
+
+    void register_position_handler( signal_type signal)
+    {
+        position_signal = signal;
+    }
+
+    /// receive a NAPL block of wave data
+	virtual void ReceiveBlock( const sample_block &b)
+    {
+        std::copy( b.m_start, b.m_end, current_buffer_ptr);
+        current_buffer_ptr += (b.m_end - b.m_start);
+    }
+
+    /// start playing
+    void start( bool do_events = true)
+    {
+        setup_events();
+        stream_header h;
+        m_pProducer->GetStreamHeader( h);
+        samples_to_go = header.numframes;
+
+        // get the first bunch of samples
+        issue_request( true);
+        expected_position = 0;
+
+        // set the whole circus in motion.
+        // playing the buffer will generate events
+        buffer->SetCurrentPosition(0);
+        buffer->Play( 0, 0, DSBPLAY_LOOPING);
+
+        if (do_events)
+        {
+            handle_events();
+        }
+
+    }
+
+    /// handle events that are generated during sound play
+    void handle_events()
+    {
+        bool go_on = true;
+        while (go_on)
+        {
+            unsigned int index = ::WaitForMultipleObjects( unique_event_count + 2, &events[0], FALSE, INFINITE);
+            if (index >= WAIT_OBJECT_0 && index < WAIT_OBJECT_0 + unique_event_count + 2)
+            {
+                index -= WAIT_OBJECT_0;
+                ::ResetEvent( events[index]);
+                if (index < WAIT_OBJECT_0 + unique_event_count )
+                {
+                    position_event( index);
+                }
+                else 
+                {
+                    index -= (unique_event_count);
+                    go_on = refill_event( index);
+                }
+            }
+
+        }
+    }
+
+    bool refill_event( unsigned int index)
+    {
+        issue_request( index != 0);
+        return samples_to_go != 0;
+    }
+    
+    void position_event( unsigned int index)
+    {
+        // catch up on any missed events
+        while (expected_position%unique_event_count != index)
+        {
+            position_signal( expected_position++);
+        }
+
+        // send out the event
+        position_signal( expected_position++);
+    }
+
+    ~directsound_player()
+    {
+        if (buffer)
+        {
+            buffer->Release();
+        }
+        free_events();
+    }
+
+
+    
+private:
+    typedef std::vector<HANDLE>         event_vector; 
+
+    /// send out a request for more samples
+    void issue_request( 
+        bool is_first_half ///< whether to fill the first half of the buffer or the second
+        )
+    {
+        lock( is_first_half); 
+        const size_t samples_per_half_buffer = desc.dwBufferBytes / header.frame_size() / 2;
+        const size_t requested_samples = std::min(samples_per_half_buffer, samples_to_go);
+        m_pProducer->RequestBlock( *this, 0, requested_samples);
+        unlock();
+        samples_to_go -= requested_samples;
+    }
+
+    /// Create a limited amount of events (say, 4) and create notification positions at every
+    /// 1/Nth of a second (say 1/100th).
+    void setup_events()
+    {
+        size_t bytes_per_event = header.samplerate * header.frame_size() / events_per_second;
+        int position_count = events_per_second * buffer_seconds;
+
+        // create 2 extra events for the 'refill buffer' events
+        free_events();
+        for (int counter = 0; counter < unique_event_count + 2; ++ counter)
+        {
+            events.push_back( CreateEvent( NULL, TRUE, FALSE, NULL));
+        }
+
+        LPDIRECTSOUNDNOTIFY8 lpDsNotify;
+        std::vector<DSBPOSITIONNOTIFY> notifications(position_count + 2);
+
+        check( 
+            buffer->QueryInterface(IID_IDirectSoundNotify8,(LPVOID*)&lpDsNotify),
+            "could not access events of soundbuffer"
+            );
+
+        size_t pos = 0;
+        for (; pos != position_count; ++pos)
+        {
+            notifications[pos].hEventNotify = events[ pos % unique_event_count];
+            notifications[pos].dwOffset = bytes_per_event * pos;
+        }
+
+        // add 2 extra notifications for the 'refill buffer' events.
+
+        notifications[pos].hEventNotify = events[ unique_event_count];
+        notifications[pos].dwOffset = bytes_per_event / 2;
+        ++pos;
+        notifications[pos].hEventNotify = events[unique_event_count + 1];
+        notifications[pos].dwOffset = desc.dwBufferBytes/2 + bytes_per_event/2;
+
+        check(
+            lpDsNotify->SetNotificationPositions( notifications.size(), &notifications[0]),
+            "could not set up timing events"
+            );
+
+        lpDsNotify->Release();
+    }
+
+    void free_events()
+    {
+        std::for_each( events.begin(), events.end(), &::CloseHandle);
+        events.clear();
+    }
+
+    void lock( bool first_half)
+    {
+        if (first_half)
+        {
+            lock( 0, desc.dwBufferBytes/2);
+        }
+        else
+        {
+            lock( desc.dwBufferBytes/2, desc.dwBufferBytes/2);
+        }
+    }
+
+    void lock( size_t offset, size_t bytes)
+    {
+        HRESULT hr = buffer->Lock( offset, bytes, &buffer_data, &buffer_length, 0, 0, DSBLOCK_ENTIREBUFFER);
+        if (hr == DSERR_BUFFERLOST)
+        {
+            buffer->Restore();
+            buffer->Lock( offset, bytes, &buffer_data, &buffer_length, 0, 0, DSBLOCK_ENTIREBUFFER);
+        }
+        current_buffer_ptr = static_cast<char*>( buffer_data);
+    }
+
+    void unlock()
+    {
+        buffer->Unlock( buffer_data, buffer_length, 0, 0);
+    }
+
+    /// events that are used to trigger on offsets in the buffer
+    event_vector    events;
+
+    /// pointer to the start of the complete buffer
+    void            *buffer_data;
+
+    /// pointer to the location that will receive data during a refill.
+    char            *current_buffer_ptr;
+
+    /// length of the full buffer
+    DWORD           buffer_length;
+
+    /// description of the buffer
+    const DSBUFFERDESC desc;
+
+    /// pointer to the DirectSound buffer.
+    IDirectSoundBuffer *buffer;
+
+    /// information about the sample size and expected number of samples, etc
+    stream_header   header;
+
+    /// the number of samples that we need to request from our buffer provider
+    size_t          samples_to_go;
+
+    /// the next position we're supposed to reach. In units of 1/100th of a second.
+    size_t          expected_position;
+
+    /// signal that is given when we've reached a new position in the buffer
+    signal_type     position_signal;
 };
 
 class directsound_wrapper
@@ -18,15 +270,12 @@ class directsound_wrapper
 public:
     directsound_wrapper()
     {
-        HRESULT  hr;
         GUID     guID;
 
         // Clear the GUID
         ::memset(&guID, 0, sizeof(GUID));
 
-        // Create the IDirectSound object with the realiable way (create
-        // standard COM object)
-        check(
+       check(
             CoCreateInstance(CLSID_DirectSound, NULL, CLSCTX_INPROC_SERVER,
                 IID_IDirectSound, (void**)&m_pIDS),
             "could not initialize directx"
@@ -41,7 +290,7 @@ public:
         check(
             m_pIDS->Initialize(&guID),
             "could not initialize sound"
-            };
+            );
 
         check( 
             m_pIDS->SetCooperativeLevel( GetConsoleHwnd(), DSSCL_PRIORITY ),
@@ -49,21 +298,32 @@ public:
             );
     }
 
-    directsound_buffer create_buffer( const size_t size)
+    directsound_player create_player( const stream_header &h)
     {
         WAVEFORMATEX wfx;
         DSBUFFERDESC desc;
 
+        memset( &wfx, 0, sizeof( wfx));
         wfx.wFormatTag = WAVE_FORMAT_PCM;
-        wfx.nChannels = 2;
-        wfx.wBitsPerSample = 16;
-        wfx.nSamplesPerSec = 44100;
-        wfx.nBlockAlign = 4;
-        wfx.nAvgBytesPerSec = 44100 * 4; 
+        wfx.nChannels = h.numchannels;
+        wfx.wBitsPerSample = h.get_sample_size();
+        wfx.nSamplesPerSec = h.samplerate;
+        wfx.nBlockAlign = h.frame_size();
+        wfx.nAvgBytesPerSec = h.samplerate * h.frame_size(); 
 
+        memset( &desc, 0, sizeof(desc));
         desc.dwSize = sizeof( desc);
         desc.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2;
-        desc.dwBufferBytes = size;
+        desc.dwBufferBytes = directsound_player::buffer_seconds * h.frame_size() * h.samplerate;
+        desc.lpwfxFormat = &wfx;
+
+        IDirectSoundBuffer *buffer_ptr = 0;
+        check(
+            m_pIDS->CreateSoundBuffer( &desc, &buffer_ptr,NULL),
+            "could not create a sound buffer"
+            );
+
+        return directsound_player( buffer_ptr, desc, h);
 
     }
 
@@ -78,14 +338,6 @@ public:
 
 
 private:
-    template< size_t size>
-    void check( HRESULT hr, const char (&text)[size])
-    {
-        if (FAILED(hr))
-        {
-            throw std::runtime_error( text);
-        }
-    }
 
     HWND GetConsoleHwnd()
     {
@@ -127,6 +379,14 @@ private:
     LPDIRECTSOUND       m_pIDS;
 };
 
+void testfunc( size_t pos)
+{
+    if (pos%200 == 0)
+    {
+        std::cout << '.';
+    }
+};
+
 int main(int argc, char* argv[])
 {
     // this application needs COM to access directsound
@@ -140,6 +400,14 @@ int main(int argc, char* argv[])
     try
     {
         directsound_wrapper ds;
+        const size_t buffer_size = 441000 * 2 * 2;
+        block_producer *p = filefactory::GetBlockProducer( argv[1]);
+        stream_header h;
+        p->GetStreamHeader( h);
+        directsound_player buffer = ds.create_player( h);
+        buffer.LinkTo( p);
+        buffer.register_position_handler( testfunc);
+        buffer.start();
     }
     catch (std::exception &e)
     {
