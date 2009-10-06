@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../../include"
+				AdditionalIncludeDirectories="../../../include;.."
 				PreprocessorDefinitions="_SCL_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../../include"
+				AdditionalIncludeDirectories="../../../include;.."
 				PreprocessorDefinitions="_SCL_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -213,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lcd_player.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\lrc_parser.hpp"
 				>
 			</File>
@@ -222,6 +226,10 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\text_player.hpp"
 				>
 			</File>
 		</Filter>

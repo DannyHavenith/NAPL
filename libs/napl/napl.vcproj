@@ -1,35 +1,53 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
-	Name="Napl"
+	Version="9.00"
+	Name="napl"
 	ProjectGUID="{8F16DC73-7180-4203-8EBD-300BF472B52D}"
-	SccProjectName="&quot;$/Sounds/libs/Napl&quot;, TBAAAAAA"
-	SccAuxPath=""
-	SccLocalPath="."
-	SccProvider="MSSCCI:Microsoft Visual SourceSafe">
+	TargetFrameworkVersion="131072"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory=".\Debug"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,..\..\include\,D:\program files\intel\plsuite\Include"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile=".\Debug/Napl.pch"
 				AssemblerListingLocation=".\Debug/"
@@ -37,54 +55,77 @@
 				ProgramDataBaseFileName=".\Debug/"
 				BrowseInformation="1"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\Debug\Napl.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				OutputFile=".\Debug\Napl.lib"
+				SuppressStartupBanner="true"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory=".\Release"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,D:\program files\intel\plsuite\Include,..\..\include\"
+				AdditionalIncludeDirectories="../../include"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
+				StringPooling="true"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
 				PrecompiledHeaderFile=".\Release/Napl.pch"
 				AssemblerListingLocation=".\Release/"
@@ -92,34 +133,40 @@
 				ProgramDataBaseFileName=".\Release/"
 				BrowseInformation="1"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
+				SuppressStartupBanner="true"
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\Release\Napl.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLibrarianTool"
+				OutputFile=".\Release\Napl.lib"
+				SuppressStartupBanner="true"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -127,220 +174,289 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+			>
 			<File
-				RelativePath=".\aiff.cpp">
+				RelativePath=".\aiff.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\double_dispatch_factory.cpp">
+				RelativePath=".\double_dispatch_factory.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\Filefact.cpp">
+				RelativePath=".\Filefact.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\IEEE754.cpp">
+				RelativePath=".\IEEE754.cpp"
+				>
 			</File>
 			<File
-				RelativePath=".\lame_wrapper.cpp">
+				RelativePath=".\lame_wrapper.cpp"
+				>
 				<FileConfiguration
 					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
+					ExcludedFromBuild="true"
+					>
 					<Tool
-						Name="VCCLCompilerTool"/>
+						Name="VCCLCompilerTool"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\memory_producer.cpp">
-			</File>
-			<File
-				RelativePath=".\memory_writer.cpp">
-			</File>
-			<File
-				RelativePath=".\objfact.cpp">
-			</File>
-			<File
-				RelativePath=".\progress.cpp">
-			</File>
-			<File
-				RelativePath=".\raw_file.cpp">
-			</File>
-			<File
-				RelativePath=".\StdAfx.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
+					ExcludedFromBuild="true"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"/>
+					/>
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\wav.cpp">
+				RelativePath=".\memory_producer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\memory_writer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\objfact.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\progress.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\raw_file.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StdAfx.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\wav.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl">
+			Filter="h;hpp;hxx;hm;inl"
+			>
 			<Filter
 				Name="public"
-				Filter="">
+				>
 				<File
-					RelativePath="..\..\Include\architec.h">
+					RelativePath="..\..\Include\architec.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\Config.h">
+					RelativePath="..\..\Include\Config.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\config_linux.h">
+					RelativePath="..\..\Include\config_linux.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\Config_old.h">
+					RelativePath="..\..\Include\Config_old.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\Filefact.h">
+					RelativePath="..\..\Include\Filefact.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\Filetype.h">
+					RelativePath="..\..\Include\Filetype.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\general_resampler.h">
+					RelativePath="..\..\Include\general_resampler.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\memory_producer.h">
+					RelativePath="..\..\Include\memory_producer.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\memory_writer.h">
+					RelativePath="..\..\Include\memory_writer.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\ms_config.h">
+					RelativePath="..\..\Include\ms_config.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\napl.h">
+					RelativePath="..\..\Include\napl.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\napl_error.h">
+					RelativePath="..\..\Include\napl_error.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\nil_sink.h">
+					RelativePath="..\..\Include\nil_sink.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\objfact.h">
+					RelativePath="..\..\Include\objfact.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\progress.h">
+					RelativePath="..\..\Include\progress.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\reinterpret.h">
+					RelativePath="..\..\Include\reinterpret.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\sample_analyzer.h">
+					RelativePath="..\..\Include\sample_analyzer.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\Samplebl.h">
+					RelativePath="..\..\Include\Samplebl.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\simpops.h">
+					RelativePath="..\..\Include\simpops.h"
+					>
 				</File>
 				<File
-					RelativePath="..\..\Include\truncate.h">
+					RelativePath="..\..\Include\truncate.h"
+					>
 				</File>
 			</Filter>
 			<Filter
 				Name="private"
-				Filter="">
+				>
 				<File
-					RelativePath=".\Aiff.h">
+					RelativePath=".\Aiff.h"
+					>
 				</File>
 				<File
-					RelativePath=".\amp_modulator.h">
+					RelativePath=".\amp_modulator.h"
+					>
 				</File>
 				<File
-					RelativePath=".\amplifier.h">
+					RelativePath=".\amplifier.h"
+					>
 				</File>
 				<File
-					RelativePath=".\analyzer.h">
+					RelativePath=".\analyzer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\BladeMP3EncDLL.h">
+					RelativePath=".\BladeMP3EncDLL.h"
+					>
 				</File>
 				<File
-					RelativePath=".\constant_producer.h">
+					RelativePath=".\constant_producer.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Convendi.h">
+					RelativePath=".\Convendi.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Delay.h">
+					RelativePath=".\Delay.h"
+					>
 				</File>
 				<File
-					RelativePath=".\extract_channel.h">
+					RelativePath=".\extract_channel.h"
+					>
 				</File>
 				<File
-					RelativePath=".\fmodulator.h">
+					RelativePath=".\fmodulator.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Fourier.h">
+					RelativePath=".\Fourier.h"
+					>
 				</File>
 				<File
-					RelativePath=".\function_impl.h">
+					RelativePath=".\function_impl.h"
+					>
 				</File>
 				<File
-					RelativePath="IEEE754 .H">
+					RelativePath="IEEE754 .H"
+					>
 				</File>
 				<File
-					RelativePath=".\lame_wrapper.h">
+					RelativePath=".\lame_wrapper.h"
+					>
 				</File>
 				<File
-					RelativePath="pan_impl.h">
+					RelativePath="pan_impl.h"
+					>
 				</File>
 				<File
-					RelativePath=".\raw_file.h">
+					RelativePath=".\raw_file.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Resample.h">
+					RelativePath=".\Resample.h"
+					>
 				</File>
 				<File
-					RelativePath=".\sample_factory_instantiator.h">
+					RelativePath=".\sample_factory_instantiator.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Samplety.h">
+					RelativePath=".\Samplety.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Smputils.h">
+					RelativePath=".\Smputils.h"
+					>
 				</File>
 				<File
-					RelativePath=".\StdAfx.h">
+					RelativePath=".\StdAfx.h"
+					>
 				</File>
 				<File
-					RelativePath=".\stereomaker.h">
+					RelativePath=".\stereomaker.h"
+					>
 				</File>
 				<File
-					RelativePath=".\type_converter.h">
+					RelativePath=".\type_converter.h"
+					>
 				</File>
 				<File
-					RelativePath=".\uniform_block_converter.h">
+					RelativePath=".\uniform_block_converter.h"
+					>
 				</File>
 				<File
-					RelativePath=".\Wav.h">
+					RelativePath=".\Wav.h"
+					>
 				</File>
 				<File
-					RelativePath=".\xfade.h">
+					RelativePath=".\xfade.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
 		<File
-			RelativePath=".\Readme.txt">
+			RelativePath=".\Readme.txt"
+			>
 		</File>
 	</Files>
 	<Globals>

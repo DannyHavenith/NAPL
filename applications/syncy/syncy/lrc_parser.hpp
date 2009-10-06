@@ -8,6 +8,7 @@ namespace lyrics
     typedef std::string line;
     typedef size_t centisecond;
     typedef std::map<centisecond, line> songtext;
+    typedef songtext::value_type line_element;
 
     songtext parse_lrc( std::istream &lrc_text);
 }
