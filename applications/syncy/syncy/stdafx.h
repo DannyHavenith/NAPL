@@ -6,9 +6,9 @@
 #pragma once
 
 #include "targetver.h"
+#define BOOST_ASIO_NO_WIN32_LEAN_AND_MEAN
+#include <boost/asio.hpp>
 #include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
 
 
 
