@@ -308,7 +308,7 @@ public:
 
         memset( &desc, 0, sizeof(desc));
         desc.dwSize = sizeof( desc);
-        desc.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2;
+        desc.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_GLOBALFOCUS;
         desc.dwBufferBytes = directsound_player::buffer_seconds * h.frame_size() * h.samplerate;
         desc.lpwfxFormat = &wfx;
 

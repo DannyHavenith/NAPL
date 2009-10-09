@@ -4,6 +4,7 @@
 
 #ifndef _SAMPLEBLOCK_H_
 #define _SAMPLEBLOCK_H_
+#include <vector>
 #include <stddef.h>
 #include "architec.h"
 #include "boost/shared_ptr.hpp"

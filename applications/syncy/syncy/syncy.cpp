@@ -15,6 +15,7 @@
 #include "lrc_parser.hpp"
 #include "directsound_player.hpp"
 #include "lcd_player.hpp"
+#include "mpg_file.hpp" // mp3 file reader
 
 void testfunc( size_t pos)
 {
@@ -42,7 +43,7 @@ int main(int argc, char* argv[])
 
         unsigned int address = 0;
         std::string port = "COM1";
-        std::string wav_filename;
+        std::string mp3_filename;
         std::string lrc_filename;
 
         // parse program options
@@ -59,11 +60,11 @@ int main(int argc, char* argv[])
         po::options_description hidden("Hidden options");
         hidden.add_options()
             ("lrc-file", po::value< std::string>(&lrc_filename), "lyrics file")
-            ("wav-file", po::value< std::string>(&wav_filename), "wave file");
+            ("mp3-file", po::value< std::string>(&mp3_filename), "wave file");
 
         po::positional_options_description p;
         p.add("lrc-file", 1);
-        p.add("wav-file", 1);
+        p.add("mp3-file", 1);
 
         po::options_description all("All options");
         all.add( desc).add(hidden);
@@ -75,23 +76,23 @@ int main(int argc, char* argv[])
 
         if (vm.count("help") || !vm.count("lrc-file")) 
         {
-            std::cout << "usage: syncy lrc-file [wav-file] <options>\n";
+            std::cout << "usage: syncy lrc-file [mp3-file] <options>\n";
             std::cout << desc << "\n";
             return 1;
         }
 
-        if (!vm.count("wav-file"))
+        if (!vm.count("mp3-file"))
         {
             using namespace boost::filesystem;
 
             path p( lrc_filename);
-            wav_filename = p.replace_extension(".wav").string();
+            mp3_filename = p.replace_extension(".mp3").string();
         }
 
 
         directsound_wrapper ds;
-        block_producer *producer = filefactory::GetBlockProducer( wav_filename.c_str());
-        if (!producer) throw std::runtime_error("could not open wav file " + wav_filename);
+        mp3_block_producer mp3_file( mp3_filename.c_str());
+//        if (!producer) throw std::runtime_error("could not open mp3 file " + mp3_filename);
 
         std::ifstream lyricsfile( lrc_filename.c_str());
         if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + lrc_filename);
@@ -102,9 +103,9 @@ int main(int argc, char* argv[])
 //        console_textplayer player( text, std::cout);
 
         stream_header h;
-        producer->GetStreamHeader( h);
+        mp3_file.GetStreamHeader( h);
         directsound_player buffer = ds.create_player( h);
-        buffer.LinkTo( producer);
+        buffer.LinkTo( &mp3_file);
         buffer.register_position_handler( boost::bind( &text_player::display, &player, _1));
         buffer.start();
     }
