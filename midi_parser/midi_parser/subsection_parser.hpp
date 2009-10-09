@@ -16,8 +16,6 @@ using namespace std;
 
 namespace local_spirit_components
 {
-
-
     //
     // Proto tags.
     //
