@@ -17,54 +17,52 @@
 #include "lcd_player.hpp"
 #include "mpg_file.hpp" // mp3 file reader
 
-void testfunc( size_t pos)
+struct lcd_send_options
 {
-    if (pos%100 == 0)
+    lcd_send_options()
+        :
+    serial_device( "COM1"),
+    address( 0)
     {
-        std::cout << '.';
     }
+
+    std::string     serial_device;
+    unsigned int    address;
 };
 
-
-int main(int argc, char* argv[])
+struct options : lcd_send_options
 {
-    // this application needs COM to access directsound
-    HRESULT hr = ::CoInitialize(NULL);
+    std::string sound_filename;
+    std::string lrc_filename;
+};
 
-    if(FAILED(hr))
-    {
-        std::cerr << "Could not initialize COM for DirectSound" << std::endl;
-        return -1;
-    }
-
-    try
-    {
+/// parse command line options
+bool parse_options( int argc, char *argv[], options &opts)
+{
         namespace po=boost::program_options;
 
-        unsigned int address = 0;
-        std::string port = "COM1";
-        std::string mp3_filename;
-        std::string lrc_filename;
+        // reset options to defaults
+        opts = options();
 
         // parse program options
         po::options_description desc("Allowed options");
         desc.add_options()
             ("help",        
                 "produce this help message")
-            ("address,a",   po::value<unsigned int>(&address), 
+                ("address,a",   po::value<unsigned int>(&opts.address), 
                 "receiver address to send to")
-            ("port,p",      po::value< std::string>(&port), 
+                ("port,p",      po::value< std::string>(&opts.serial_device), 
                 "serial device")
             ;
 
         po::options_description hidden("Hidden options");
         hidden.add_options()
-            ("lrc-file", po::value< std::string>(&lrc_filename), "lyrics file")
-            ("mp3-file", po::value< std::string>(&mp3_filename), "wave file");
+            ("lrc-file", po::value< std::string>(&opts.lrc_filename), "lyrics file")
+            ("sound-file", po::value< std::string>(&opts.sound_filename), "wave file");
 
         po::positional_options_description p;
         p.add("lrc-file", 1);
-        p.add("mp3-file", 1);
+        p.add("sound-file", 1);
 
         po::options_description all("All options");
         all.add( desc).add(hidden);
@@ -76,38 +74,69 @@ int main(int argc, char* argv[])
 
         if (vm.count("help") || !vm.count("lrc-file")) 
         {
-            std::cout << "usage: syncy lrc-file [mp3-file] <options>\n";
+            std::cout << "usage: syncy lrc-file [sound-file] <options>\n";
             std::cout << desc << "\n";
-            return 1;
+            return false;
         }
 
-        if (!vm.count("mp3-file"))
+        if (!vm.count("sound-file"))
         {
             using namespace boost::filesystem;
 
-            path p( lrc_filename);
-            mp3_filename = p.replace_extension(".mp3").string();
+            path p( opts.lrc_filename);
+            opts.sound_filename = p.replace_extension(".mp3").string();
         }
+    return true;
+}
+
+int main(int argc, char* argv[])
+{
+    // this application needs COM to access directsound
+    HRESULT hr = ::CoInitialize(NULL);
 
 
+    if(FAILED(hr))
+    {
+        std::cerr << "Could not initialize COM for DirectSound" << std::endl;
+        return -1;
+    }
+
+    options opts;
+    if (! parse_options( argc, argv, opts)) 
+    {
+        return -2;
+    }
+
+    try
+    {
         directsound_wrapper ds;
-        mp3_block_producer mp3_file( mp3_filename.c_str());
-//        if (!producer) throw std::runtime_error("could not open mp3 file " + mp3_filename);
 
-        std::ifstream lyricsfile( lrc_filename.c_str());
-        if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + lrc_filename);
+        // open an mp3 sound producer.
+        mp3_block_producer mp3_file( opts.sound_filename.c_str());
 
+
+        // try to open the lyrics file and parse it to obtain text records.
+        std::ifstream lyricsfile( opts.lrc_filename.c_str());
+        if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + opts.lrc_filename);
         lyrics::songtext text = lyrics::parse_lrc( lyricsfile);
 
-        lcd_player player( text, port, address);
+        // the lcd player will receive timing events and send the correct text to 
+        // an lcd.
+        lcd_player lcd( text, opts.serial_device, opts.address);
 //        console_textplayer player( text, std::cout);
 
         stream_header h;
         mp3_file.GetStreamHeader( h);
-        directsound_player buffer = ds.create_player( h);
-        buffer.LinkTo( &mp3_file);
-        buffer.register_position_handler( boost::bind( &text_player::display, &player, _1));
-        buffer.start();
+
+        // set up the sound player.
+        directsound_player player = ds.create_player( h);
+
+        // couple it to the file source
+        player.LinkTo( &mp3_file);
+
+        // send timing events to the lcd_player
+        player.register_position_handler( boost::bind( &text_player::display, &lcd, _1));
+        player.start();
     }
     catch (std::exception &e)
     {
