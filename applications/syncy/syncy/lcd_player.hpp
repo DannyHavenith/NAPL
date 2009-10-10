@@ -15,7 +15,6 @@ struct lcd_player: text_player
         prepare_texts( &lcd_player::adapt_text);
     }
 
-
     virtual void emit_line( const lyrics::line_element &el)
     {
         std::string text( el.second);
@@ -30,6 +29,10 @@ struct lcd_player: text_player
         pack.send_string( end);
     }
 
+    //
+    /// Adapt text to fit this particular player.
+    /// This implementation word-wraps the text to the number of lines 
+    /// of the display.
     static void adapt_text( std::string &text)
     {
         typedef std::vector<std::string> stringvector;
