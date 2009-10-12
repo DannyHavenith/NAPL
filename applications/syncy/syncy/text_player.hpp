@@ -3,11 +3,17 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/function.hpp>
 
-struct text_player
+struct text_player_interface
+{
+    virtual void display( lyrics::centisecond position) = 0;
+};
+
+struct text_player : text_player_interface
 {
     text_player( const lyrics::songtext &song_)
         :song(song_)
@@ -20,27 +26,26 @@ struct text_player
         current = song.begin();
     }
 
-    void display( lyrics::centisecond position)
+    virtual void display( lyrics::centisecond position)
     {
         while (current != song.end() && current->first <= position)
         {
-            emit_line( *current);
+            emit_lines( *current);
             ++current;
         }
     }
 
-    void prepare_texts( boost::function<void ( std::string &)> adapter)
+    void prepare_texts( boost::function<void ( lyrics::line &)> adapter)
     {
         for (lyrics::songtext::iterator current = song.begin(); current != song.end(); ++current)
         {
-            adapter( current->second);
+            std::for_each( current->second.begin(), current->second.end(), adapter);
         }
     }
 
     virtual void end_song() {};
+    virtual void emit_lines( const lyrics::line_element &el) = 0;
 
-protected:
-    virtual void emit_line( const lyrics::line_element &el) = 0;
 
 private:
     lyrics::songtext song;
@@ -54,12 +59,35 @@ struct console_textplayer : text_player
     {
     }
     
-    virtual void emit_line( const lyrics::line_element &el)
+    virtual void emit_lines( const lyrics::line_element &el)
     {
-        output << el.second << std::endl;
+        for ( lyrics::lines::const_iterator i = el.second.begin(); i != el.second.end(); ++i)
+        {
+            std::cout << (int)i->channel << ' ' << i->text << std::endl;
+        }
     }
 private:
     std::ostream &output;
+};
+
+struct composite_textplayer : public text_player_interface
+{
+    virtual void display( lyrics::centisecond position)
+    {
+        for (players_vector::iterator i = players.begin(); i != players.end(); ++i)
+        {
+            (*i)->display( position);
+        }
+    }
+
+    void add( text_player &player)
+    {
+        players.push_back( &player);
+    }
+
+private:
+    typedef std::vector <text_player *> players_vector;
+    std::vector <text_player *> players;
 };
 
 

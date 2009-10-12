@@ -118,11 +118,15 @@ int main(int argc, char* argv[])
         // try to open the lyrics file and parse it to obtain text records.
         std::ifstream lyricsfile( opts.lrc_filename.c_str());
         if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + opts.lrc_filename);
-        lyrics::songtext text = lyrics::parse_lrc( lyricsfile);
+        lyrics::songtext text = lyrics::parse_lrc( lyricsfile, lyrics::numeric_channel_converter( opts.address));
 
-        // the lcd player will receive timing events and send the correct text to 
-        // an lcd.
+        // set up both an lcd player and a console player. wrap them in a composite.
         lcd_player lcd( text, opts.serial_device, opts.address);
+        console_textplayer console( text, std::cout);
+        composite_textplayer text_players;
+        text_players.add( lcd);
+        text_players.add( console);
+
 //        console_textplayer player( text, std::cout);
 
         stream_header h;
@@ -134,8 +138,8 @@ int main(int argc, char* argv[])
         // couple it to the file source
         player.LinkTo( &mp3_file);
 
-        // send timing events to the lcd_player
-        player.register_position_handler( boost::bind( &text_player::display, &lcd, _1));
+        // send timing events to the composite player
+        player.register_position_handler( boost::bind( &text_player_interface::display, &text_players, _1));
         player.start();
     }
     catch (std::exception &e)

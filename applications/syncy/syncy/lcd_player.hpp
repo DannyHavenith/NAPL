@@ -12,14 +12,15 @@ struct lcd_player: text_player
         :text_player( song), sink(port), pack( sink, address)
     {
         // adapt the texts to fit in the lcd display.
-        prepare_texts( &lcd_player::adapt_text);
+        prepare_texts( &lcd_player::adapt_line);
     }
 
-    virtual void emit_line( const lyrics::line_element &el)
+    virtual void emit_lines( const lyrics::line_element &el)
     {
-        std::string text( el.second);
-        pack.send_string( text);
-        std::cout << el.second << std::endl;
+        for ( lyrics::lines::const_iterator i = el.second.begin(); i != el.second.end(); ++i)
+        {
+            pack.send_string( i->text, i->channel);
+        }
     }
 
     virtual void end_song()
@@ -27,6 +28,11 @@ struct lcd_player: text_player
         std::string end = "<cls>";
         translate_special_inplace( end);
         pack.send_string( end);
+    }
+
+    static void adapt_line( lyrics::line &line)
+    {
+        adapt_text( line.text);
     }
 
     //
