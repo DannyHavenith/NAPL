@@ -1,5 +1,10 @@
 #ifndef MIDI_EVENT_TYPES_HPP
 #define MIDI_EVENT_TYPES_HPP
+
+#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/variant.hpp>
+#include <boost/variant/recursive_variant.hpp>
+
 namespace events
 {
     struct note
