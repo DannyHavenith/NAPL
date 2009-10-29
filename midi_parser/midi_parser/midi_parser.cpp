@@ -1,11 +1,8 @@
 // midi_parser.cpp : Defines the entry point for the console application.
 //
 #include <string>
-#include <vector>
 #include <iostream>
-#include <fstream>
 #include <iterator>
-#include <algorithm>
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -13,15 +10,14 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
-#include <boost/variant/recursive_variant.hpp>
-#include <boost/variant/apply_visitor.hpp>
 #include <boost/spirit/include/qi_binary.hpp>
 
 #include <boost/lambda/lambda.hpp>
 #include "subsection_parser.hpp"
 #include "midi_event_types.hpp"
+#include "midi_file.hpp"
+#include "midi_parser.hpp"
 
 //using namespace boost::phoenix;
 using namespace boost::spirit;
@@ -29,128 +25,6 @@ using namespace boost::spirit::qi;
 using namespace boost::spirit::ascii; // for a definition of space_type
 using namespace boost::spirit::arg_names;
 using namespace std;
-
-namespace events
-{
-template<typename Derived>
-struct visitor : public boost::static_visitor<>
-{
-    Derived &derived()
-    {
-        return *static_cast<Derived*>(this);
-    }
-
-    const Derived &derived() const
-    {
-        return *static_cast<Derived*>(this);
-    }
-
-    void operator()( const any &event)
-    {
-        boost::apply_visitor( derived(), event);
-    }
-
-    void operator()( const channel_event &event)
-    {
-        current_channel = event.channel;
-        boost::apply_visitor( derived(), event.event);
-    }
-
-    void operator()( const meta &)
-    {
-    }
-
-    void operator()( const sysex &)
-    {
-    }
-
-    void operator()( const note_on &){}
-    void operator()( const note_off &){}
-    void operator()( const note_aftertouch &){}
-    void operator()( const controller &){}
-    void operator()( const program_change &){}
-    void operator()( const channel_aftertouch &){}
-    void operator()( const pitch_bend &){}
-
-    unsigned short current_channel;
-};
-
-} // namespace events
-
-template<typename Derived>
-struct timed_midi_visitor : public events::visitor<Derived>
-{
-    timed_midi_visitor()
-        :current_time(0)
-    {
-
-    }
-
-    using events::visitor<Derived>::operator();
-    void operator()( const events::timed_midi_event &event)
-    {
-        current_time += event.delta_time;
-        derived()( event.event);
-    }
-
-    void reset()
-    {
-        current_time = 0;
-    }
-
-    size_t current_time;
-};
-
-struct print_text_visitor : public timed_midi_visitor<print_text_visitor>
-{
-    using timed_midi_visitor<print_text_visitor>::operator();
-
-    void operator()( const events::note_on &note)
-    {
-        std::cout << "n:" << static_cast<int>( note.number);
-    }
-
-    void operator()( const events::note_off &note)
-    {
-        std::cout << "o:" << static_cast<int>( note.number);
-    }
-    
-    void operator()( const events::meta &event)
-    {
-        if (event.type == 0x05 || (event.type == 0x01))
-        {
-            std::cout << current_time << '\t' << std::string( event.bytes.begin(), event.bytes.end()) << '\n';
-        }
-    }
-};
-
-typedef std::vector< events::timed_midi_event>   midi_track;
-
-struct midi_header
-{
-    unsigned format;
-    unsigned number_of_tracks;
-    unsigned division;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(
-    midi_header,
-    (unsigned, format)
-    (unsigned, number_of_tracks)
-    (unsigned, division)
- )
-
-struct midi_file
-{
-    midi_header header;
-    std::vector< midi_track> tracks;
-};
-
-BOOST_FUSION_ADAPT_STRUCT(
-    midi_file,
-    (midi_header, header)
-    (std::vector<midi_track>, tracks)
-)
 
 template<typename Iterator>
 struct midi_parser: grammar< Iterator, midi_file()>
@@ -285,67 +159,22 @@ struct midi_parser: grammar< Iterator, midi_file()>
     rule<Iterator, events::channel_event(), locals<unsigned int>     > channel_event;
 };
 
-template<typename Expr>
-bool test_validity( const Expr &)
+bool parse_midifile( std::istream &in, midi_file &result)
 {
-	return boost::spirit::qi::is_valid_expr<Expr>::value;
-}
 
-template <typename Iterator>
-struct sub : grammar<Iterator, std::vector<int>(), locals<size_t> >
-{
-    sub() : sub::base_type(start)
-    {
-        start %= omit[ byte[_a = _1]] >> subsection(_a)[ *byte];
-    	//start %= *byte;
-    }
-    rule<Iterator, std::vector<int>(), locals<size_t> > start;
-};
-
-int main(int argc, char* argv[])
-{
-    using namespace std;
-
-    if (argc < 2)
-    {
-        cerr << "usage: parsemidi <filename>\n";
-        return -1;
-    }
-
-    ifstream in(argv[1], ios::binary);
+	result.tracks.clear();
     in.unsetf( ios_base::skipws);
 
-    if (!in)
-    {
-        cerr << "could not open " << argv[1] << '\n';
-        return -2;
-    }
-//    typedef boost::spirit::multi_pass<istream_iterator<char> > default_multi_pass_t;
-    typedef std::istreambuf_iterator<char> base_iterator_type;
-//    typedef multi_pass<base_iterator_type, unused_type> iterator;
-
-    std::string buffer;
-    buffer.assign( base_iterator_type(in), base_iterator_type());
-    std::cout << buffer.size() << "\n";
-    
+    typedef std::istreambuf_iterator<char> base_iterator;
     typedef string::iterator iterator;
 
+    std::string buffer;
     midi_parser<iterator> parser;
-    midi_file contents;
-
+    buffer.assign( base_iterator(in), base_iterator());
     iterator first = buffer.begin();
     iterator last = buffer.end();
-    boost::spirit::qi::parse( first, last, parser, contents);
 
-    std::cout << "complete: " << (first == last) << std::endl;
+	boost::spirit::qi::parse( first, last, parser, result);
 
-    typedef std::vector< midi_track>::iterator track_iterator;
-    for (track_iterator i = contents.tracks.begin(); i != contents.tracks.end(); ++i)
-    {
-        print_text_visitor v;
-        std::for_each( i->begin(), i->end(), v);
-    }
-
-	return 0;
+	return first == last;
 }
-

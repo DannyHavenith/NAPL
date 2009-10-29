@@ -61,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="winmm.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -133,6 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="winmm.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -177,6 +179,14 @@
 				RelativePath=".\midi_parser.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\midi_parser_main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\windows_midi.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -185,6 +195,18 @@
 			>
 			<File
 				RelativePath=".\midi_event_types.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\midi_event_visitor.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\midi_file.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\midi_parser.hpp"
 				>
 			</File>
 			<File
