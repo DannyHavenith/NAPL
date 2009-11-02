@@ -14,11 +14,19 @@ void windows_midi()
 	unsigned long result; 
 	HMIDIOUT      outHandle;
 
-	/* Open the MIDI Mapper. Note: myWindow is a handle to some open window */
+	/* Open the MIDI Mapper. */
 	result = midiOutOpen(&outHandle, (UINT)-1, 0, 0, CALLBACK_WINDOW);
 	if (result)
 	{
 		throw midi_exception( "could not open midi device");
 	}
 
+
+    midiOutShortMsg( outHandle, 0x007f4090);
+    midiOutShortMsg( outHandle, 0x007f4590);
+
+    midiOutShortMsg( outHandle, 0x007f4990);
+    
+    ::Sleep( 1000);
 }
+

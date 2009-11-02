@@ -5,6 +5,7 @@
 
 #include "midi_parser.hpp"
 #include "midi_event_visitor.hpp"
+#include "windows_midi.hpp"
 
 struct print_text_visitor : public events::timed_visitor<print_text_visitor>
 {
@@ -34,6 +35,7 @@ int main(int argc, char* argv[])
 {
 	using namespace std;
 
+    windows_midi();
 	if (argc < 2)
 	{
 		cerr << "usage: parsemidi <filename>\n";
