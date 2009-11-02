@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="midi_parser"
 	ProjectGUID="{EF8E567D-8493-489C-8FD4-14081AE1CAE1}"
 	RootNamespace="midi_parser"
@@ -211,6 +211,10 @@
 			</File>
 			<File
 				RelativePath=".\subsection_parser.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\windows_midi.hpp"
 				>
 			</File>
 		</Filter>
