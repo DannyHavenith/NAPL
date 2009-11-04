@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "syncy", "syncy\syncy.vcproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "napl", "..\..\libs\napl\napl.vcproj", "{8F16DC73-7180-4203-8EBD-300BF472B52D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "midi", "..\..\libs\midi\midi\midi.vcproj", "{F8008C25-4D9F-408E-A79D-96722CAB38B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -22,6 +24,10 @@ Global
 		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Debug|Win32.Build.0 = Debug|Win32
 		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Release|Win32.ActiveCfg = Release|Win32
 		{8F16DC73-7180-4203-8EBD-300BF472B52D}.Release|Win32.Build.0 = Release|Win32
+		{F8008C25-4D9F-408E-A79D-96722CAB38B8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F8008C25-4D9F-408E-A79D-96722CAB38B8}.Debug|Win32.Build.0 = Debug|Win32
+		{F8008C25-4D9F-408E-A79D-96722CAB38B8}.Release|Win32.ActiveCfg = Release|Win32
+		{F8008C25-4D9F-408E-A79D-96722CAB38B8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

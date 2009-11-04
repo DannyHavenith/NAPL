@@ -1,10 +1,15 @@
+#include "stdafx.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <algorithm>
 
-#include "midi_parser.hpp"
-#include "midi_event_visitor.hpp"
+// napl midi file parser
+#include "midi/midi_parser.hpp"
+#include "midi/midi_event_visitor.hpp"
+
+// this applications midi functions
 #include "windows_midi.hpp"
 
 struct print_text_visitor : public events::timed_visitor<print_text_visitor>
@@ -31,11 +36,10 @@ struct print_text_visitor : public events::timed_visitor<print_text_visitor>
 };
 
 
-int main(int argc, char* argv[])
+int midi_testfunc(int argc, char* argv[])
 {
 	using namespace std;
 
-    windows_midi();
 	if (argc < 2)
 	{
 		cerr << "usage: parsemidi <filename>\n";
