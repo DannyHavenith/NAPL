@@ -14,10 +14,10 @@
 #include <boost/spirit/include/qi_binary.hpp>
 
 #include <boost/lambda/lambda.hpp>
-#include "subsection_parser.hpp"
-#include "midi_event_types.hpp"
-#include "midi_file.hpp"
+#include "midi/midi_event_types.hpp"
+#include "midi/midi_file.hpp"
 #include "midi_parser.hpp"
+#include "subsection_parser.hpp"
 
 //using namespace boost::phoenix;
 using namespace boost::spirit;
