@@ -16,7 +16,7 @@
 #include <boost/lambda/lambda.hpp>
 #include "midi/midi_event_types.hpp"
 #include "midi/midi_file.hpp"
-#include "midi_parser.hpp"
+#include "midi/midi_parser.hpp"
 #include "subsection_parser.hpp"
 
 //using namespace boost::phoenix;

@@ -9,8 +9,6 @@
 #include "midi/midi_parser.hpp"
 #include "midi/midi_event_visitor.hpp"
 
-// this applications midi functions
-#include "windows_midi.hpp"
 
 struct print_text_visitor : public events::timed_visitor<print_text_visitor>
 {

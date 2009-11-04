@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -10,7 +11,6 @@
 #include <string>
 #include <boost/bind.hpp>
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
 
 #include "lrc_parser.hpp"
 #include "directsound_player.hpp"
