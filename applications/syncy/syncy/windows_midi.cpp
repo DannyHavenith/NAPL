@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "stdafx.h"
 #include <stdexcept>
 
 struct midi_exception : public std::runtime_error
