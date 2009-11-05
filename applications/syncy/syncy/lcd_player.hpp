@@ -23,6 +23,20 @@ struct lcd_player: text_player
         }
     }
 
+    /// try to fit more lines in a single display.
+    static lyrics::songtext compact_songtext( const lyrics::songtext &original_song)
+    {
+        using namespace lyrics;
+        songtext song;
+        for (songtext::const_iterator i = original_song.begin(); i != original_song.end(); ++i)
+        {
+            for (lines::const_iterator l = i->second.begin(); l != i->second.end(); ++l)
+            {
+                
+            }
+        }
+    }
+
     virtual void end_song()
     {
         std::string end = "<cls>";
@@ -39,21 +53,23 @@ struct lcd_player: text_player
     /// Adapt text to fit this particular player.
     /// This implementation word-wraps the text to the number of lines 
     /// of the display.
-    static void adapt_text( std::string &text)
+    static int adapt_text( std::string &text, int starting_line = 0)
     {
         typedef std::vector<std::string> stringvector;
         using namespace boost::algorithm;
+        int line = starting_line;
 
         stringvector words;
-        split( words, text, is_space());
 
+        // split the string on spaces. 
+        split( words, text, is_space(), token_compress_on);
         stringvector::const_iterator current_word = words.begin();
 
         if ( current_word != words.end())
         {
-            std::string buffer = "<cls>" + *current_word;
+            std::string buffer = starting_line? ("<goto 0 " + boost::lexical_cast< std::string>( line) + '>'):"<cls>";
+            buffer += *current_word;
             int column = current_word->size();
-            int line = 0;
             ++current_word;
             while (current_word != words.end() && line != lines)
             {
@@ -78,6 +94,7 @@ struct lcd_player: text_player
             translate_special_inplace( buffer);
             text = buffer;
         }
+        return line;
     }
 
 private:

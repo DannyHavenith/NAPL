@@ -127,8 +127,6 @@ int main(int argc, char* argv[])
         text_players.add( lcd);
         text_players.add( console);
 
-//        console_textplayer player( text, std::cout);
-
         stream_header h;
         mp3_file.GetStreamHeader( h);
 
