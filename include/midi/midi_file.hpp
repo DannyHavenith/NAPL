@@ -23,8 +23,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 struct midi_file
 {
+	typedef std::vector<midi_track> tracks_type;
     midi_header header;
-    std::vector< midi_track> tracks;
+    tracks_type tracks;
 };
 
 BOOST_FUSION_ADAPT_STRUCT(

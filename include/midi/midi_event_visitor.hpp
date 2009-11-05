@@ -60,7 +60,7 @@ namespace events
 		}
 
 		using events::visitor<Derived>::operator();
-		void operator()( const events::timed_midi_event &event)
+		void operator()( const timed_midi_event &event)
 		{
 			current_time += event.delta_time;
 			derived()( event.event);
