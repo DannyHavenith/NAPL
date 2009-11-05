@@ -8,6 +8,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/function.hpp>
 
+#include "lrc_parser.hpp" // for lyrics::songtext and friends
 struct text_player_interface
 {
     virtual void display( lyrics::centisecond position) = 0;

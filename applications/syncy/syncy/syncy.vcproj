@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="syncy"
 	ProjectGUID="{7A6C9B0D-CEF9-4799-A06F-90F0ADA6183B}"
 	RootNamespace="syncy"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libmpg123-0.lib dsound.lib dxguid.lib"
+				AdditionalDependencies="libmpg123-0.lib dsound.lib dxguid.lib winmm.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../../../libs/mpg123"
 				GenerateDebugInformation="true"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libmpg123-0.lib dsound.lib dxguid.lib"
+				AdditionalDependencies="libmpg123-0.lib dsound.lib dxguid.lib winmm.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../../libs/mpg123"
 				GenerateDebugInformation="true"
