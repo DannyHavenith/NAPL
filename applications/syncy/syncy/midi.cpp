@@ -8,7 +8,7 @@
 // napl midi file parser
 #include "midi/midi_parser.hpp"
 #include "midi/midi_event_visitor.hpp"
-
+#include "midi/midi_multiplexer.hpp"
 
 struct print_text_visitor : public events::timed_visitor<print_text_visitor>
 {
@@ -33,6 +33,20 @@ struct print_text_visitor : public events::timed_visitor<print_text_visitor>
 	}
 };
 
+struct multi_to_single_track
+{
+	multi_to_single_track( midi_track &track_)
+		:track( track)
+	{
+	}
+
+	void operator()( const events::timed_midi_event &e)
+	{
+		track.push_back( e);
+	}
+
+	midi_track &track;
+};
 
 int midi_testfunc(int argc, char* argv[])
 {
@@ -62,6 +76,9 @@ int midi_testfunc(int argc, char* argv[])
 			std::for_each( i->begin(), i->end(), v);
 		}
 
+		midi_track track;
+		midi_multiplexer multiplexer( contents.tracks);
+		multiplexer.accept( multi_to_single_track( track));
 	}
 
 

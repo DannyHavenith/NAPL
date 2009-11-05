@@ -161,6 +161,26 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\..\include\midi\midi_event_types.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\midi\midi_event_visitor.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\midi\midi_file.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\midi\midi_multiplexer.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\midi\midi_parser.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\subsection_parser.hpp"
 				>
 			</File>
