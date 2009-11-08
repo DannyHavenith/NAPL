@@ -1,30 +1,26 @@
-/*
-        mpg123_to_wav.c
-
-        copyright 2007 by the mpg123 project - free software under the terms of the LGPL 2.1
-        see COPYING and AUTHORS files in distribution or http://mpg123.org
-        initially written by Nicholas Humfrey
-*/
-#include <cstdio>
 #include <mpg123.h>
 #include <stdexcept>
 #include "mpg_file.hpp"
 
 using namespace std;
 
-//=========================================
-/// make sure mpg123 is initialized and de-initialized.
-struct mpg123_initializer
+namespace
 {
-    mpg123_initializer()
+    /// make sure mpg123 is initialized and de-initialized.
+    struct mpg123_initializer
     {
-         mpg123_init();
-    }
-    ~mpg123_initializer()
-    {
-        mpg123_exit();
-    }
-} initializer;
+        mpg123_initializer()
+        {
+             mpg123_init();
+        }
+        ~mpg123_initializer()
+        {
+            mpg123_exit();
+        }
+    } initializer;
+} // end unnamed namespace
+
+/// The implementation part (pimpl) of a napl block producer for mp3-files
 struct mp3_block_producer::implementation
 {
     mpg123_handle *mh;
@@ -33,9 +29,9 @@ struct mp3_block_producer::implementation
     implementation( const char *filename)
         :mh(0)
     {
-        long rate;
-        int channels;
-        int encoding;
+        long rate = 0;
+        int channels = 0;
+        int encoding = 0;
         int err = MPG123_OK;
 
         mh = mpg123_new(NULL, &err);

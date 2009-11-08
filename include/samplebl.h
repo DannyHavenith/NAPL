@@ -154,10 +154,15 @@ struct sample_block
 	inline void Init( buffer_ptr_type buffer)
 	{
 		m_buffer_ptr =  buffer;
-		m_start = m_buffer_ptr->get_begin();
-		m_end = m_start + m_buffer_ptr->get_size();
+        Reset();
 	}
 
+    inline void Reset()
+    {
+		m_start = m_buffer_ptr->get_begin();
+		m_end = m_start + m_buffer_ptr->get_size();
+        std::fill( m_start, m_end, 0);
+    }
 
 	byte_type *buffer_begin()
 	{
@@ -218,6 +223,7 @@ public:
 		{
 			result.swap( m_free_blocks.back());
 			m_free_blocks.pop_back();
+            result->Reset();
 			return true;
 		}
 		else
@@ -284,7 +290,7 @@ public:
 
 	bool is_initialized()
 	{
-		return m_initialized;
+		return false;
 	}
 };
 
@@ -972,6 +978,7 @@ public:
 	{
 		m_currentLeft = start;
 		m_left.GetProducer()->Seek( start);
+        m_right.GetProducer()->Seek( start);
 	};
 
 	/**
@@ -988,10 +995,10 @@ public:
 		if (0 == channel)
 		{
 			m_leftBlock = b;
-			if (b.m_end == b.m_start)
-			{
-				m_leftBlock = b;
-			}
+//			if (b.m_end == b.m_start)
+//			{
+//				m_leftBlock = b;
+//			}
 			sampleno sample_count = (sampleno)((b.m_end - b.m_start) / m_leftFrameSize);
 			m_right.RequestBlock(
 				m_currentLeft,

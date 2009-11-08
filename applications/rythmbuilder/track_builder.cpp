@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include "track_builder.h"
 #include "instrument.h"
 
@@ -24,12 +25,19 @@ namespace
 
     block_producer *Add( block_producer *left, block_producer *right)
     {
+        static int counter = 0;
 			stream_header h;
 			left->GetStreamHeader( h);
 			sample_object_factory *factory_ptr = factory_factory::GetSampleFactory( h);
 			binary_block_processor *adder = factory_ptr->GetAdder();
 			delete factory_ptr;
 			adder->LinkTo( left, right);
+
+            std::string filename = "added_" + boost::lexical_cast< std::string>( counter) + ".wav";
+            ++counter;
+            block_sink *temp_file_writer = filefactory::GetBlockSink( filename.c_str());
+            temp_file_writer->LinkTo( adder);
+            temp_file_writer->Start();
 
             return adder;
     }
@@ -130,6 +138,17 @@ void track_builder::cleanup()
     }
 }
 
+void write_file( const std::string &filename, block_producer *p)
+{
+    block_sink *file_writer = filefactory::GetBlockSink( filename.c_str());
+
+    file_writer->LinkTo( p);
+
+    //
+    // write to file...
+    file_writer->Start();
+
+}
 
 void track_builder::emit_track()
 {
@@ -142,6 +161,10 @@ void track_builder::emit_track()
                 join_sounds( bar.begin(), bar.end(), Concatenate)
             );
     }
+
+    write_file( "first.wav", bars[0]);
+    write_file( "second.wav", bars[1]);
+    write_file( "first_channels.wav", Add( bars[0], bars[1]));
 
     // spread over stereo space.
     spread_bars( bars.begin(), bars.end());
