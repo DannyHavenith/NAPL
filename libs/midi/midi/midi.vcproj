@@ -184,6 +184,10 @@
 				RelativePath=".\subsection_parser.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\timed_midi_visitor.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

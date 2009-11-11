@@ -51,9 +51,9 @@ namespace events
 	};
 
 	template<typename Derived>
-	struct timed_visitor : public visitor<Derived>
+	struct simple_timed_visitor : public visitor<Derived>
 	{
-		timed_visitor()
+		simple_timed_visitor()
 			:current_time(0)
 		{
 
