@@ -9,18 +9,19 @@ namespace events
 	struct timed_visitor : public visitor<Derived>
 	{
 		timed_visitor( const midi_header &h)
-			:current_time(0.0), time_step(1.0), ignore_bpm(false), bpm( 120)
+			:current_time(0.0), time_step(1.0), ignore_bpm(false), division( h.division)
 		{
 			if (h.division & 0x8000)
 			{
 				int fps_raw = (h.division & 0x7f00) >> 8;
-				double fps = fps_raw == 29?29.97:fps_raw;
+				double fps = (fps_raw == 29)?29.97:fps_raw;
 				time_step = fps * (h.division & 0x00ff);
 				ignore_bpm = true;
 			}
 			else
 			{
-				time_step = ((double)bpm/h.division)/60;
+                // assume 120 bpm (0.5s/beat) at start
+				time_step = .5/division;
 			}
 		}
 
@@ -32,6 +33,16 @@ namespace events
 			derived()( event.event);
 		}
 
+        void operator() (const meta &event)
+        {
+            // react on tempo changes
+            if (event.type == 81 && event.bytes.size() == 3 && !ignore_bpm)
+            {
+                unsigned microseconds_per_quarter_note = event.bytes[0] << 14 + event.bytes[1] << 7 + event.bytes[2];
+                time_step = (microseconds_per_quarter_note * 1000000.0) / division;
+            }
+        }
+
 		void reset()
 		{
 			current_time = 0.0;
@@ -40,7 +51,7 @@ namespace events
 		double	current_time;
 		double  time_step;
 		bool	ignore_bpm;
-		unsigned int bpm;
+		unsigned int division;
 	};
 
 
