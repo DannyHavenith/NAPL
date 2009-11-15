@@ -65,7 +65,7 @@ namespace events
     struct meta
     {
         unsigned char       type;
-        std::vector<char>   bytes;
+        std::vector<unsigned char>   bytes;
     };
 
     struct sysex
@@ -94,7 +94,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
     events::meta,
     (unsigned char, type)
-    (std::vector<char>, bytes)
+    (std::vector<unsigned char>, bytes)
     )
 
 BOOST_FUSION_ADAPT_STRUCT(

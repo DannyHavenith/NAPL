@@ -17,6 +17,7 @@
 #include "lcd_player.hpp"
 #include "mpg_file.hpp" // mp3 file reader
 #include "midi.hpp"
+#include "midi_player.hpp"
 
 namespace fs = boost::filesystem;
 
@@ -45,7 +46,7 @@ bool parse_options( int argc, char *argv[], options &opts)
 {
 	namespace po = boost::program_options;
 
-	typedef std::vector< fs::path> file_vector;
+    typedef std::vector< std::string> file_vector;
 	file_vector filenames;
 
 	// reset options to defaults
@@ -64,7 +65,7 @@ bool parse_options( int argc, char *argv[], options &opts)
 
 	po::options_description hidden("Hidden options");
 	hidden.add_options()
-		("file", po::value< std::vector< fs::path> >(&filenames), "mp3, midi or lrc-file");
+        ("file", po::value< std::vector< std::string> >(&filenames), "mp3, midi or lrc-file");
 	//&opts.sound_filename
 	po::positional_options_description p;
 	p.add("file", -1);
@@ -82,31 +83,32 @@ bool parse_options( int argc, char *argv[], options &opts)
 	// different types of filenames.
 	for (file_vector::const_iterator i = filenames.begin(); i != filenames.end(); ++i)
 	{
-		const std::string extension = boost::algorithm::to_lower_copy( i->extension());
+        fs::path p( *i);
+		const std::string extension = boost::algorithm::to_lower_copy( p.extension());
 		if (extension == ".mp3")
 		{
-			opts.sound_filename = *i;
+			opts.sound_filename = p;
 		}
 		else if (extension == ".mid" || extension == ".kar")
 		{
-			opts.midi_filename = *i;
+			opts.midi_filename = p;
 		}
 		else if (extension == ".lrc")
 		{
-			opts.lrc_filename = *i;
+			opts.lrc_filename = p;
 		}
 	}
 
 	// we need a sound file. If none was given, try to determine the name of the 
 	// sound file from a given midi- or lrc file path.
-	if (!opts.sound_filename)
+	if (opts.sound_filename.empty())
 	{
-		if (opts.lrc_filename)
+		if (!opts.lrc_filename.empty())
 		{
 			opts.sound_filename = opts.lrc_filename;
 			opts.sound_filename.replace_extension( ".mp3");
 		}
-		else if (opts.midi_filename)
+		else if (!opts.midi_filename.empty())
 		{
 			opts.sound_filename = opts.midi_filename;
 			opts.sound_filename.replace_extension( ".mp3");
@@ -114,7 +116,7 @@ bool parse_options( int argc, char *argv[], options &opts)
 	}
 
 	// if we still don't have a path to a sound file, we return an error result.
-	if (!opts.sound_filename) 
+	if (opts.sound_filename.empty()) 
 	{
 		std::cout << "usage: syncy [lrc-file|sound-file|midi-file]... <options>\n";
 		std::cout << desc << "\n";
@@ -136,40 +138,56 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	options opts;
-	if (! parse_options( argc, argv, opts)) 
-	{
-		return -2;
-	}
 
 	try
 	{
 		directsound_wrapper ds;
 
-		// open an mp3 sound producer.
+	    options opts;
+	    if (! parse_options( argc, argv, opts)) 
+	    {
+		    return -2;
+	    }
+
+        // open an mp3 sound producer.
 		mp3_block_producer mp3_file( opts.sound_filename.string().c_str());
 
 
 		lyrics::songtext text;
 
-		if (opts.lrc_filename)
+        bool have_text = false;
+		if (!opts.lrc_filename.empty())
 		{
 			// try to open the lyrics file and parse it to obtain text records.
 			std::ifstream lyricsfile( opts.lrc_filename.string().c_str());
-			if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + opts.lrc_filename);
+			if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + opts.lrc_filename.string());
 			text = lyrics::parse_lrc( lyricsfile, lyrics::numeric_channel_converter( opts.address));
+            have_text = true;
 		}
-		else 
+		else if (!opts.midi_filename.empty())
 		{
-			text = parse_midifile_text( lyricsfile, opts.address);
+			text = parse_midi_text( opts.midi_filename, opts.address);
+            have_text = !text.empty();
 		}
 
 		// set up both an lcd player and a console player. wrap them in a composite.
 		lcd_player lcd( text, opts.serial_device, opts.address);
 		console_textplayer console( text, std::cout);
-		composite_textplayer text_players;
-		text_players.add( lcd);
-		text_players.add( console);
+        composite_textplayer text_players;
+
+        if (have_text)
+        {
+    		text_players.add( lcd);
+	    	text_players.add( console);
+        }
+
+        // if there's a midi filename, add a midi player to the composite
+        midi_player midi;        
+        if (!opts.midi_filename.empty())
+        {
+            midi_player_from_file( opts.midi_filename, midi);
+            text_players.add( midi);
+        }
 
 		stream_header h;
 		mp3_file.GetStreamHeader( h);
