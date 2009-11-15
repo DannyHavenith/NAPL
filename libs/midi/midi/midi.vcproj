@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="midi"
 	ProjectGUID="{F8008C25-4D9F-408E-A79D-96722CAB38B8}"
 	RootNamespace="midi"
@@ -160,6 +160,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\..\include\midi\event_to_codes.hpp"
+				>
+			</File>
 			<File
 				RelativePath="..\..\..\include\midi\midi_event_types.hpp"
 				>

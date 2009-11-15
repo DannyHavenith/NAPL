@@ -1,6 +1,6 @@
 #if !defined( TIMED_MIDI_VISITOR_HPP)
 #define TIMED_MIDI_VISITOR_HPP
-
+#include "midi_event_visitor.hpp"
 #include "midi_file.hpp"
 
 namespace events
@@ -38,8 +38,8 @@ namespace events
             // react on tempo changes
             if (event.type == 81 && event.bytes.size() == 3 && !ignore_bpm)
             {
-                unsigned microseconds_per_quarter_note = event.bytes[0] << 14 + event.bytes[1] << 7 + event.bytes[2];
-                time_step = (microseconds_per_quarter_note * 1000000.0) / division;
+                unsigned microseconds_per_quarter_note = (event.bytes[0] << 16) + (event.bytes[1] << 8) + event.bytes[2];
+                time_step = (microseconds_per_quarter_note / 1000000.0) / division;
             }
         }
 

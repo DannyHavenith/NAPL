@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <boost/lexical_cast.hpp>
+#include "lyrics.hpp"
 
 namespace lyrics
 {
@@ -46,27 +47,6 @@ namespace lyrics
     private:
         const unsigned int default_channel;
     };
-
-    struct line
-    {
-        explicit line( const std::string &text_)
-            : channel(0), text( text_)
-        {
-        }
-
-        line( unsigned char channel_, const std::string &text_)
-            : channel( channel_), text( text_)
-        {
-        }
-
-        std::string text;
-        unsigned char channel;
-    };
-
-    typedef size_t centisecond;
-    typedef std::vector<line> lines;
-    typedef std::map<centisecond, lines > songtext;
-    typedef songtext::value_type line_element;
 
     /// parse an lrc file and generate a songtext structure.
     songtext parse_lrc( 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="syncy"
 	ProjectGUID="{7A6C9B0D-CEF9-4799-A06F-90F0ADA6183B}"
 	RootNamespace="syncy"
@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\midi_player.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\mpg_file.cpp"
 				>
 				<FileConfiguration
@@ -251,7 +255,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lyrics.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\midi.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\midi_player.hpp"
 				>
 			</File>
 			<File

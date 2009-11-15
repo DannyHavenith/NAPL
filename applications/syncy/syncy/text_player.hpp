@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <iostream> // because console player uses std::cout
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/function.hpp>
@@ -81,14 +82,14 @@ struct composite_textplayer : public text_player_interface
         }
     }
 
-    void add( text_player &player)
+    void add( text_player_interface &player)
     {
         players.push_back( &player);
     }
 
 private:
-    typedef std::vector <text_player *> players_vector;
-    std::vector <text_player *> players;
+    typedef std::vector <text_player_interface *> players_vector;
+    players_vector players;
 };
 
 

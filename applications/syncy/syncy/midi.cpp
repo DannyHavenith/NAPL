@@ -5,6 +5,8 @@
 #include <string>
 #include <algorithm>
 
+#include <boost/algorithm/string/predicate.hpp> // for starts_with, ends_with
+
 // napl midi file parser
 #include "midi/midi_parser.hpp"
 #include "midi/midi_event_visitor.hpp"
@@ -44,25 +46,46 @@ struct print_text_visitor : public events::timed_visitor<print_text_visitor>
 };
 
 ///
-/// This class extracts text events from a midi-file and adds the text to a songtext object.
+/// This class extracts text events from a midi-file and adds the text to a songtext 
+/// object at the right instances.
 ///
 struct extract_text_visitor: public events::timed_visitor<extract_text_visitor>
 {
-	typedef events::timed_visitor< print_text_visitor> parent;
+	typedef events::timed_visitor< extract_text_visitor> parent;
 	using parent::operator();
 
-	extract_text_visitor( midi_header &h)
-		: parent( h)
+    extract_text_visitor( midi_header &h, lyrics::songtext &text_, int channel_)
+		: parent( h), text( text_), channel( channel_)
 	{
 	}
 
+
+    ~extract_text_visitor()
+    {
+        flush();
+    }
+
 	void operator()( const events::meta &event)
 	{
+        using namespace boost::algorithm;
 		// is it a text event?
-		if (event.type == 0x05 || (event.type == 0x01))
+        // we're ignoring lyrics (0x05) events, because text events have more
+        // information (like 'start of new line')
+		if (event.type == 0x01)
 		{
-			// then add it to the songtext
-			text[current_time/100].push_back( std::string( event.bytes.begin(), event.bytes.end()));
+            std::string event_text( event.bytes.begin(), event.bytes.end());
+            if (event_text.size() > 0 && event_text[0] != '@')
+            {
+                if (event_text[0] == '/' || event_text[0] == '\\')
+                {
+                    flush();
+                    add_to_current_line( event_text.substr( 1));
+                }
+                else
+                {
+                    add_to_current_line( event_text);
+                }
+            }
 		}
 		else
 		{
@@ -71,82 +94,64 @@ struct extract_text_visitor: public events::timed_visitor<extract_text_visitor>
 		}
 	}
 
-	lyrics::songtext get_text() const
-	{
-		return text;
-	}
+    void flush()
+    {
+        if (!current_line.empty())
+        {
+            // then add it to the songtext.
+            // songtext works in centiseconds resolution.
+            text[static_cast<unsigned int>(current_line_time*100)]
+                .push_back( 
+                    lyrics::line( current_line)
+                    );
+            current_line.clear();
+        }
+    }
+
+    void add_to_current_line( const std::string &word)
+    {
+        if (current_line.empty())
+        {
+            current_line_time = current_time;
+        }
+
+        current_line += word;
+    }
 
 private:
-	lyrics::songtext text;
+    double              current_line_time;
+    std::string         current_line;
+    const unsigned int  channel;
+	lyrics::songtext    &text;
 };
 
-lyrics::songtext parse_midi_text( const boost::filesystem::path &p)
+lyrics::songtext parse_midi_text( const boost::filesystem::path &p, unsigned int channel)
 {
 	using namespace std;
+    lyrics::songtext result;
 
-	ifstream in(p.string(), ios::binary);
+	ifstream in(p.string().c_str(), ios::binary);
 
 	if (!in)
 	{
 		throw std::runtime_error( "could not open file " + p.string());
 	}
+
 	midi_file contents;
 	if (!parse_midifile( in, contents))
 	{
+        throw std::runtime_error( "corrupt midi file " + p.string());
 	}
 	else
 	{
-		typedef std::vector< midi_track>::iterator track_iterator;
-		for (track_iterator i = contents.tracks.begin(); i != contents.tracks.end(); ++i)
-		{
-			print_text_visitor v( contents.header);
-			std::for_each( i->begin(), i->end(), v);
-		}
 
-		midi_track track;
+        // merge all tracks into one track
 		midi_multiplexer multiplexer( contents.tracks);
-		multiplexer.accept( print_text_visitor(contents.header));
-//		multiplexer.accept( multi_to_single_track( track));
+
+        // and then offer all events to the text extractor.
+		multiplexer.accept( extract_text_visitor(contents.header, result, channel));
 	}
 
-
-}
-
-int midi_testfunc(int argc, char* argv[])
-{
-	using namespace std;
-
-	if (argc < 2)
-	{
-		cerr << "usage: parsemidi <filename>\n";
-		return -1;
-	}
-
-	ifstream in(argv[1], ios::binary);
-
-	if (!in)
-	{
-		cerr << "could not open " << argv[1] << '\n';
-		return -2;
-	}
-
-	midi_file contents;
-	if (parse_midifile( in, contents))
-	{
-		typedef std::vector< midi_track>::iterator track_iterator;
-		for (track_iterator i = contents.tracks.begin(); i != contents.tracks.end(); ++i)
-		{
-			print_text_visitor v( contents.header);
-			std::for_each( i->begin(), i->end(), v);
-		}
-
-		midi_track track;
-		midi_multiplexer multiplexer( contents.tracks);
-		multiplexer.accept( print_text_visitor(contents.header));
-//		multiplexer.accept( multi_to_single_track( track));
-	}
-
-
-	return 0;
+    return result;
 }
 
