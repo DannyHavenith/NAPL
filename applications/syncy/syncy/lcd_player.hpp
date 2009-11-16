@@ -8,7 +8,9 @@
 
 struct text_compactor
 {
+
 };
+
 struct lcd_player: text_player
 {
     lcd_player( lyrics::songtext &song, const std::string &port, unsigned int address)

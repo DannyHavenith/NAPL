@@ -3,17 +3,20 @@
 
 #include "stdafx.h"
 
-#include <boost/filesystem.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <string>
+
+#include <boost/filesystem.hpp>
 #include <boost/bind.hpp>
 #include <boost/program_options.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "lrc_parser.hpp"
 #include "directsound_player.hpp"
+#include "objfact.h" // napl object factory
 #include "lcd_player.hpp"
 #include "mpg_file.hpp" // mp3 file reader
 #include "midi.hpp"
@@ -100,23 +103,18 @@ bool parse_options( int argc, char *argv[], options &opts)
 	}
 
 	// we need a sound file. If none was given, try to determine the name of the 
-	// sound file from a given midi- or lrc file path.
-	if (opts.sound_filename.empty())
+	// sound file from a given lrc file path.
+	if (
+            opts.sound_filename.empty()
+        &&  opts.midi_filename.empty()
+        &&  !opts.lrc_filename.empty())
 	{
-		if (!opts.lrc_filename.empty())
-		{
-			opts.sound_filename = opts.lrc_filename;
-			opts.sound_filename.replace_extension( ".mp3");
-		}
-		else if (!opts.midi_filename.empty())
-		{
-			opts.sound_filename = opts.midi_filename;
-			opts.sound_filename.replace_extension( ".mp3");
-		}
+		opts.sound_filename = opts.lrc_filename;
+		opts.sound_filename.replace_extension( ".mp3");
 	}
 
 	// if we still don't have a path to a sound file, we return an error result.
-	if (opts.sound_filename.empty()) 
+	if (opts.sound_filename.empty() && opts.midi_filename.empty()) 
 	{
 		std::cout << "usage: syncy [lrc-file|sound-file|midi-file]... <options>\n";
 		std::cout << desc << "\n";
@@ -148,9 +146,6 @@ int main(int argc, char* argv[])
 	    {
 		    return -2;
 	    }
-
-        // open an mp3 sound producer.
-		mp3_block_producer mp3_file( opts.sound_filename.string().c_str());
 
 
 		lyrics::songtext text;
@@ -189,14 +184,35 @@ int main(int argc, char* argv[])
             text_players.add( midi);
         }
 
+        // if an mp3 filename was given, open it. Otherwise create a silence that is long enough for the midi 
+        // file
+        boost::scoped_ptr< block_producer> wave_sound;
 		stream_header h;
-		mp3_file.GetStreamHeader( h);
+        if (!opts.sound_filename.empty())
+        {
+            wave_sound.reset( new mp3_block_producer( opts.sound_filename.string().c_str()));
+            wave_sound->GetStreamHeader( h);
+        }
+        else
+        {
+            double seconds = midi.length();
+            h.samplerate = 44100;
+            h.samplesize = 16;
+            h.numchannels = 2;
+            h.numframes = static_cast< unsigned long>( seconds * 44100);
+            h.architecture = LOCAL_ARCHITECTURE; // local endianness
+            sample_object_factory *f =
+                factory_factory::GetSampleFactory( h);
+            wave_sound.reset( f->GetConstant( h));
+
+        }
+
 
 		// set up the sound player.
 		directsound_player player = ds.create_player( h);
 
 		// couple it to the file source
-		player.LinkTo( &mp3_file);
+		player.LinkTo( wave_sound.get());
 
 		// send timing events to the composite player
 		player.register_position_handler( boost::bind( &text_player_interface::display, &text_players, _1));
