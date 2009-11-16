@@ -30,6 +30,16 @@ public:
         current = events.begin();
     }
 
+    double length() const
+    {
+        double result = 0.0;
+        if (!events.empty())
+        {
+            result = events.rbegin()->first/100.0;
+        }
+        return result;
+    }
+
     ~midi_player();
 
     virtual void display( lyrics::centisecond position);
