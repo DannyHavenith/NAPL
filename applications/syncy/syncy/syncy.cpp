@@ -109,8 +109,19 @@ bool parse_options( int argc, char *argv[], options &opts)
         &&  opts.midi_filename.empty()
         &&  !opts.lrc_filename.empty())
 	{
-		opts.sound_filename = opts.lrc_filename;
-		opts.sound_filename.replace_extension( ".mp3");
+        fs::path p = opts.lrc_filename;
+        if (fs::exists( p.replace_extension("mp3")))
+        {
+            opts.sound_filename = p;
+        }
+        else if (fs::exists( p.replace_extension("mid")))
+        {
+            opts.midi_filename = p;
+        }
+        else if (fs::exists( p.replace_extension( "kar")))
+        {
+            opts.midi_filename = p;
+        }
 	}
 
 	// if we still don't have a path to a sound file, we return an error result.
@@ -150,29 +161,42 @@ int main(int argc, char* argv[])
 
 		lyrics::songtext text;
 
-        bool have_text = false;
+        bool there_is_text = false;
 		if (!opts.lrc_filename.empty())
 		{
 			// try to open the lyrics file and parse it to obtain text records.
 			std::ifstream lyricsfile( opts.lrc_filename.string().c_str());
 			if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + opts.lrc_filename.string());
 			text = lyrics::parse_lrc( lyricsfile, lyrics::numeric_channel_converter( opts.address));
-            have_text = true;
+            there_is_text = true;
 		}
 		else if (!opts.midi_filename.empty())
 		{
 			text = parse_midi_text( opts.midi_filename, opts.address);
-            have_text = !text.empty();
+            there_is_text = !text.empty();
 		}
 
 		// set up both an lcd player and a console player. wrap them in a composite.
-		lcd_player lcd( text, opts.serial_device, opts.address);
+        // We're using a scoped ptr here so that we can construct in a try block.
+        // this is needed to give a little more information than the "file not found" 
+        // message you get on windows when there's issues with the serial port.
+        boost::scoped_ptr< lcd_player> lcd;
+        try
+        {
+            lcd.reset( new lcd_player(text, opts.serial_device, opts.address));
+        }
+        catch (std::exception &)
+        {
+            std::cerr << "Error while opening serial device\n";
+            throw;
+        }
+
 		console_textplayer console( text, std::cout);
         composite_textplayer text_players;
 
-        if (have_text)
+        if (there_is_text)
         {
-    		text_players.add( lcd);
+    		text_players.add( *lcd);
 	    	text_players.add( console);
         }
 
@@ -204,9 +228,7 @@ int main(int argc, char* argv[])
             sample_object_factory *f =
                 factory_factory::GetSampleFactory( h);
             wave_sound.reset( f->GetConstant( h));
-
         }
-
 
 		// set up the sound player.
 		directsound_player player = ds.create_player( h);
@@ -226,4 +248,3 @@ int main(int argc, char* argv[])
 	::CoUninitialize();
 	return 0;
 }
-
