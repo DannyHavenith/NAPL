@@ -6,7 +6,9 @@
 #include "track_builder.h"
 #include "rythmtextgrammar.hpp"
 
-bool ParseRythm(  const boost::filesystem::path &instrument_path, const std::string &content)
+bool ParseRythm(  const boost::filesystem::path &instrument_path, 
+                const std::string &content,
+                const std::string &default_track_name)
 {
     using namespace boost::spirit;
     using namespace boost::spirit::qi;
@@ -16,7 +18,7 @@ bool ParseRythm(  const boost::filesystem::path &instrument_path, const std::str
 
     instrument_factory f( instrument_path);
 
-    track_builder builder( f);
+    track_builder builder( f, default_track_name);
 
     rythm_grammar_def<std::string::const_iterator> def( f.get_note_names(), builder);
 

@@ -7,6 +7,7 @@
 #include <exception>
 //#include <boost/spirit/qi.hpp>
 #include <boost/assign.hpp>
+#include <boost/filesystem/path.hpp>
 #include <string>
 
 #include "rythmparser.h"
@@ -21,8 +22,6 @@ boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe
 
 int main(int argc, char* argv[])
 {
-
-    std::cout << "sizeof unsigned long = " << sizeof(unsigned long) << std::endl;
 
     if (argc != 2) return -1;
 
@@ -41,12 +40,14 @@ int main(int argc, char* argv[])
 
     std::cout << storage << endl;
 
+    boost::filesystem::path input_path( argv[1]);
+    const std::string filename = input_path.stem();
 
     bool r = false;
 
     try
     {
-        r = ParseRythm(  find_instrument_path( argv[0]), storage);
+        r = ParseRythm(  find_instrument_path( argv[0]), storage, filename);
     }
     catch (std::exception &e)
     {
