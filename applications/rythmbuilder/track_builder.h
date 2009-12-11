@@ -41,11 +41,7 @@ public:
     void end_bar();
 
 
-    track_builder( instrument_factory &instruments_);
-
-    ~track_builder(void)
-    {
-    }
+    track_builder( instrument_factory &instruments_, const std::string &default_name = "track");
 
 private:
     void cleanup();

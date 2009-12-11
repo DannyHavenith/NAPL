@@ -57,6 +57,6 @@ private:
 
 };
 
-void midi_player_from_file( const boost::filesystem::path &p, midi_player &result);
+void midi_player_from_file( const boost::filesystem::path &p, midi_player &result, double delay);
 
 #endif //MIDI_PLAYER_HPP

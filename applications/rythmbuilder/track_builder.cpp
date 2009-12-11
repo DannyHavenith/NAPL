@@ -25,19 +25,12 @@ namespace
 
     block_producer *Add( block_producer *left, block_producer *right)
     {
-        static int counter = 0;
 			stream_header h;
 			left->GetStreamHeader( h);
 			sample_object_factory *factory_ptr = factory_factory::GetSampleFactory( h);
 			binary_block_processor *adder = factory_ptr->GetAdder();
 			delete factory_ptr;
 			adder->LinkTo( left, right);
-
-            std::string filename = "added_" + boost::lexical_cast< std::string>( counter) + ".wav";
-            ++counter;
-            block_sink *temp_file_writer = filefactory::GetBlockSink( filename.c_str());
-            temp_file_writer->LinkTo( adder);
-            temp_file_writer->Start();
 
             return adder;
     }
@@ -104,12 +97,14 @@ namespace
 
 }
 
-track_builder::track_builder( instrument_factory &instruments_)
-    : note_seconds(1.0/120.0), 
+track_builder::track_builder( instrument_factory &instruments_, const std::string &default_name)
+    : note_seconds(.25), 
     instruments( instruments_), 
     last_measure_index(0),
-    current_note_seconds( 0.0)
+    current_note_seconds( 0.0),
+    track_name( default_name)
 {
+
 
 };
 
@@ -162,10 +157,6 @@ void track_builder::emit_track()
             );
     }
 
-    write_file( "first.wav", bars[0]);
-    write_file( "second.wav", bars[1]);
-    write_file( "first_channels.wav", Add( bars[0], bars[1]));
-
     // spread over stereo space.
     spread_bars( bars.begin(), bars.end());
 
@@ -182,6 +173,10 @@ void track_builder::emit_track()
     filename += ".wav";
 
     block_sink *file_writer = filefactory::GetBlockSink( filename.c_str());
+    if (!file_writer)
+    {
+        throw std::runtime_error( "could not open file " + filename + " for writing, is it open in another application?");
+    }
 
     file_writer->LinkTo( result);
 

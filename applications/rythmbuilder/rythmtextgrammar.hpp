@@ -59,8 +59,8 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::as
 
         BOOST_SPIRIT_DEBUG_NODE( header);
         header  =       lit("TRACK")
-                            >   string_             [_a = _1]
-                            >>  -( '-' >> string_   [_b = _1])
+                            >   title_string             [_a = _1]
+                            >>  -( '-' >> title_string   [_b = _1])
                             >>  ','
                             >   uint_               [_c = _1]
                             >   ','
@@ -78,17 +78,20 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::as
         bar     =    opt_bar_header >>  notes;
 
         BOOST_SPIRIT_DEBUG_NODE( opt_bar_header);
-        opt_bar_header = -char_(':') >> (-(string_ [_a = _1] >> -('(' >> string_[_b = _1] >> ')') >> ':'))
+        opt_bar_header = -char_(':') >> (string_ [_a = _1] >> -('(' >> string_[_b = _1] >> ')') >> ':')
                                                     [bind( &track_builder::start_bar,
                                                             ref( builder),
                                                             _a,
                                                             _b
                                                          )
                                                     ]
+        |   (eps >> ':') [bind( &track_builder::start_bar, ref(builder), "djembe1", "")]
                         ;
 
         BOOST_SPIRIT_DEBUG_NODE( string_);
         string_  =   lexeme[ +alnum[_val += _1]];
+
+        title_string = lexeme[ +(char_ - ',' - '\n' - '-')[_val += _1]];
 
         notes   =   +(
                         note | nlet | measure_sep | pause | multiply
@@ -145,6 +148,8 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::as
 
 
     string_rule string_;
+    string_rule title_string;
+
     boost::spirit::qi::symbols<char,std::string> note_symbols;
     boost::spirit::qi::symbols<char,int> pause_symbols;
 

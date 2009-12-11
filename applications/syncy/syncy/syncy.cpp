@@ -13,6 +13,7 @@
 #include <boost/bind.hpp>
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include "lrc_parser.hpp"
 #include "directsound_player.hpp"
@@ -39,9 +40,15 @@ struct lcd_send_options
 
 struct options : lcd_send_options
 {
+    options()
+        :midi_delay(0.0)
+    {
+    }
+
 	fs::path sound_filename;
 	fs::path midi_filename;
 	fs::path lrc_filename;
+    double midi_delay;
 };
 
 /// parse command line options
@@ -64,6 +71,8 @@ bool parse_options( int argc, char *argv[], options &opts)
 		"receiver address to send to")
 		("port,p",      po::value< std::string>(&opts.serial_device), 
 		"serial device")
+        ("delay,d", po::value<double>( &opts.midi_delay),
+        "midi delay in seconds")
 		;
 
 	po::options_description hidden("Hidden options");
@@ -88,7 +97,7 @@ bool parse_options( int argc, char *argv[], options &opts)
 	{
         fs::path p( *i);
 		const std::string extension = boost::algorithm::to_lower_copy( p.extension());
-		if (extension == ".mp3")
+		if (extension == ".mp3" || extension == ".wav")
 		{
 			opts.sound_filename = p;
 		}
@@ -114,6 +123,10 @@ bool parse_options( int argc, char *argv[], options &opts)
         {
             opts.sound_filename = p;
         }
+        else if (fs::exists( p.replace_extension("wav")))
+        {
+            opts.sound_filename = p;
+        }
         else if (fs::exists( p.replace_extension("mid")))
         {
             opts.midi_filename = p;
@@ -133,6 +146,21 @@ bool parse_options( int argc, char *argv[], options &opts)
 	}
 
 	return true;
+}
+
+block_producer *create_wave_producer( const fs::path &p)
+{
+    block_producer *result = 0;
+    if (boost::algorithm::to_lower_copy(p.extension()) == ".mp3")
+    {
+        result = new mp3_block_producer( p.string().c_str());
+    }
+    else
+    {
+        result = filefactory::GetBlockProducer( p.string());
+    }
+
+    return result;
 }
 
 int main(int argc, char* argv[])
@@ -161,12 +189,13 @@ int main(int argc, char* argv[])
 
 		lyrics::songtext text;
 
+        // see if we can retrieve text from either an lrc file or a midi (or karaoke) file.
         bool there_is_text = false;
 		if (!opts.lrc_filename.empty())
 		{
 			// try to open the lyrics file and parse it to obtain text records.
 			std::ifstream lyricsfile( opts.lrc_filename.string().c_str());
-			if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file" + opts.lrc_filename.string());
+			if (!lyricsfile) throw std::runtime_error( "could not open lyrics (lrc-)file " + opts.lrc_filename.string());
 			text = lyrics::parse_lrc( lyricsfile, lyrics::numeric_channel_converter( opts.address));
             there_is_text = true;
 		}
@@ -204,7 +233,7 @@ int main(int argc, char* argv[])
         midi_player midi;        
         if (!opts.midi_filename.empty())
         {
-            midi_player_from_file( opts.midi_filename, midi);
+            midi_player_from_file( opts.midi_filename, midi, opts.midi_delay);
             text_players.add( midi);
         }
 
@@ -214,7 +243,7 @@ int main(int argc, char* argv[])
 		stream_header h;
         if (!opts.sound_filename.empty())
         {
-            wave_sound.reset( new mp3_block_producer( opts.sound_filename.string().c_str()));
+            wave_sound.reset( create_wave_producer( opts.sound_filename));
             wave_sound->GetStreamHeader( h);
         }
         else

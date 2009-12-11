@@ -61,8 +61,8 @@ struct midi_events_builder : public events::timed_visitor< midi_events_builder>
 {
     typedef events::timed_visitor< midi_events_builder> parent;
 
-    midi_events_builder( event_map &result_, const midi_header &h)
-        :parent(h), result( result_)
+    midi_events_builder( event_map &result_, const midi_header &h, double delay_)
+        :parent(h), result( result_), delay( delay_)
     {
     }
 
@@ -80,15 +80,22 @@ struct midi_events_builder : public events::timed_visitor< midi_events_builder>
                 word = (word << 8) | trans.codes[i];
             }
 
-            result[ static_cast<unsigned int>(current_time * 100)]
+            double time = current_time + delay;
+            if (time < 0.0)
+            {
+                time = 0.0;
+            }
+
+            result[ static_cast<unsigned int>(time * 100)]
                 .push_back( word);
         }
     }
 private:
+    double    delay;
     event_map &result;
 };
 
-void midi_player_from_file( const boost::filesystem::path &p, midi_player &result)
+void midi_player_from_file( const boost::filesystem::path &p, midi_player &result, double delay)
 {
 	using namespace std;
 
@@ -112,7 +119,7 @@ void midi_player_from_file( const boost::filesystem::path &p, midi_player &resul
         event_map events;
         
         // and then offer all events to the text extractor.
-		multiplexer.accept( midi_events_builder( events, contents.header));
+		multiplexer.accept( midi_events_builder( events, contents.header, delay));
         result.set_events( events);
         
 	}
