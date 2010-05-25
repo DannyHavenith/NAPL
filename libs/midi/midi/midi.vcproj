@@ -106,7 +106,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\..\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;$(NOINHERIT)"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -153,6 +153,34 @@
 			<File
 				RelativePath=".\midi_parser.cpp"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="$(NOINHERIT)"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\test_info.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -173,7 +201,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\include\midi\midi_events_fusion.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\include\midi\midi_file.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\include\midi\midi_file_fusion.hpp"
 				>
 			</File>
 			<File
@@ -186,6 +222,10 @@
 			</File>
 			<File
 				RelativePath=".\subsection_parser.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\subsection_parser2_0.hpp"
 				>
 			</File>
 			<File
