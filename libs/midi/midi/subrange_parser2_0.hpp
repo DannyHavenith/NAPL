@@ -1,3 +1,7 @@
+// This version of the subsection parser appears to only have worked with a 
+// version 2.1(?) of the spirit library, which had separate directors and components
+
+
 #ifndef SUBSECTION_PARSER_HPP_INCLUDED
 #define SUBSECTION_PARSER_HPP_INCLUDED
 

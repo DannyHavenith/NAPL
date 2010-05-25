@@ -9,22 +9,18 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/fusion/include/io.hpp>
 #include <boost/spirit/include/qi_binary.hpp>
 
-#include <boost/lambda/lambda.hpp>
-#include "midi/midi_event_types.hpp"
-#include "midi/midi_file.hpp"
-#include "midi/midi_parser.hpp"
-#include "subsection_parser.hpp"
+#include "subrange_parser.hpp"
 
-//using namespace boost::phoenix;
+#include "midi/midi_events_fusion.hpp"
+#include "midi/midi_file_fusion.hpp"
+#include "midi/midi_parser.hpp"
+
+using namespace boost::phoenix;
 using namespace boost::spirit;
-using namespace boost::spirit::qi;
-using namespace boost::spirit::ascii; // for a definition of space_type
-using namespace boost::spirit::arg_names;
 using namespace std;
+using namespace boost::spirit::qi;
 
 template<typename Iterator>
 struct midi_parser: grammar< Iterator, midi_file()>
@@ -33,12 +29,9 @@ struct midi_parser: grammar< Iterator, midi_file()>
         midi_parser::base_type( file),
             running_status(-1)
     {
-        using boost::phoenix::val;
-//        using boost::phoenix::var;
+        using boost::spirit::ascii::char_;
         using boost::phoenix::ref;
         using boost::phoenix::at_c;
-        using boost::lambda::var;
-        using boost::lambda::constant;
 
         file
             %= header >> *track
@@ -49,7 +42,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
             ;
 
         track
-            %= lit("MTrk") >>  omit[big_dword [_a = _1]] >> subsection(_a)[+event_group]
+            %= lit("MTrk") >>  omit[big_dword [_a = _1]] >> subrange(_a)[+event_group]
             ;
 
         event_group
@@ -66,11 +59,11 @@ struct midi_parser: grammar< Iterator, midi_file()>
             ;
 
         meta_event
-            %= char_('\xff') >> byte >> omit[variable_length_quantity[ _a = _1]] >> subsection(_a)[*byte]
+            %= char_('\xff') >> byte_ >> omit[variable_length_quantity[ _a = _1]] >> subrange(_a)[*byte_]
             ;
 
         sysex_event
-			= (char_('\xfe') | char_('\xf7')) >> variable_length_quantity[ _a = _1] >> subsection(_a)[*byte]
+			= (char_('\xfe') | char_('\xf7')) >> variable_length_quantity[ _a = _1] >> subrange(_a)[*byte_]
 			;
 
         variable_length_quantity
@@ -81,7 +74,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
         // if there's a high_byte, that will be the event/channel
         // if there isn't, we use the running status (the previously seen event).
         channel_event
-            =  omit[-high_byte[ref(running_status) = _1]] >>
+            =  omit[-high_byte[ref(running_status) = _1]] >> 
                     (
                         note_off_event
                     |   note_on_event
@@ -100,27 +93,27 @@ struct midi_parser: grammar< Iterator, midi_file()>
             ;
         
         note_on_event
-            %=  eps( (ref(running_status) & 0xf0) == 0x90) >> byte >> byte;
+            %=  eps( (ref(running_status) & 0xf0) == 0x90) >> byte_ >> byte_
+            ;
 
- 
         note_off_event
-            %=  eps( (ref(running_status) & 0xf0) == 0x80) >> byte >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0x80) >> byte_ >> byte_
             ;
         
         note_aftertouch_event
-            %=  eps( (ref(running_status) & 0xf0) == 0xa0) >> byte >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0xa0) >> byte_ >> byte_
             ;
         
         controller_event
-            %=  eps( (ref(running_status) & 0xf0) == 0xb0) >> byte >> byte
+            %=  eps( (ref(running_status) & 0xf0) == 0xb0) >> byte_ >> byte_
             ;
         
         program_change_event
-            %=  eps( (ref(running_status) & 0xf0) == 0xc0) >>  byte 
+            %=  eps( (ref(running_status) & 0xf0) == 0xc0) >>  byte_ 
             ;
         
         channel_aftertouch_event
-            %=  eps( (ref(running_status) & 0xf0) == 0xd0) >>  byte
+            %=  eps( (ref(running_status) & 0xf0) == 0xd0) >>  byte_
             ;
 
         pitch_bend_event
@@ -134,12 +127,12 @@ struct midi_parser: grammar< Iterator, midi_file()>
         high_byte
             %= char_( '\x80', '\xff')
             ;
-            /**/
+
     }
 
     int running_status;
-    rule<Iterator, unsigned char()                > high_byte;
-    rule<Iterator, unsigned char()                > low_byte;
+    rule<Iterator, unsigned char()      > high_byte;
+    rule<Iterator, unsigned char()      > low_byte;
     rule<Iterator, midi_file()          > file;
     rule<Iterator, midi_header()        > header;
     rule<Iterator, midi_track(size_t)   > track_data;
