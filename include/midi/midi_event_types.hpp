@@ -40,6 +40,7 @@ namespace events
     {
         unsigned char value;
     };
+
     struct pitch_bend
     {
         unsigned short value;
