@@ -12,7 +12,7 @@ bool ParseRythm(  const boost::filesystem::path &instrument_path,
 {
     using namespace boost::spirit;
     using namespace boost::spirit::qi;
-    using namespace boost::spirit::ascii;
+    //using namespace boost::spirit::ascii;
     using namespace boost::assign;
     using namespace std;
 

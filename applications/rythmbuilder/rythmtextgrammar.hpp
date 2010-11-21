@@ -12,9 +12,9 @@
 #include "track_builder.h"
 
 template <typename Iterator>
-struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::ascii::space_type>
+struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::standard::space_type>
 {
-    typedef boost::spirit::ascii::space_type space_type;
+    typedef boost::spirit::standard::space_type space_type;
 
     template< typename ConvertibleToStringRange>
     void set_note_symbols(  const ConvertibleToStringRange &range)
@@ -39,12 +39,12 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::as
 
     template< typename ConvertibleToStringRange>
     rythm_grammar_def( const ConvertibleToStringRange &range, track_builder &builder)
-     :boost::spirit::qi::grammar<Iterator, boost::spirit::ascii::space_type>(file)
+     :boost::spirit::qi::grammar<Iterator, boost::spirit::standard::space_type>(file)
     {
         using namespace boost::spirit;
         using namespace boost::spirit::qi;
-        using namespace boost::spirit::ascii;
-        using namespace boost::spirit::arg_names;
+        //using namespace boost::spirit::ascii; // this was necessary in older spirit 2.x versions, now it clashes with definitions in b::s::standard
+        //using boost::spirit::ascii::char_;
         using namespace boost::phoenix;
 
         set_note_symbols( range);
