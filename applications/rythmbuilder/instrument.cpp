@@ -135,7 +135,7 @@ instrument::instrument(const boost::filesystem::path &p)
         }
         else if (regex_match( filename, what, aliasfile))
         {
-            aliases[ what[1]] = *i;
+            aliases[ to_lower_copy(string(what[1]))] = *i;
         }
     }
 
