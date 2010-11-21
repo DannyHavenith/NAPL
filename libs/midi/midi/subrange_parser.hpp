@@ -75,9 +75,9 @@ namespace local_spirit_components
             // limit parsing to the range (first,first+arg1>
             Iterator local_end = first;
             std::advance( local_end, offset);
-            return true;/*subject.parse(
+            return subject.parse(
                 first,  local_end,
-                context, skipper, attr);*/
+                context, skipper, attr);
         }
 
         template <typename Context>

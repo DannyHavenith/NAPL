@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <iterator>
-#include <tchar.h>
 #include <stdexcept>
 #include <boost/clipp.hpp>
 #include <boost/javascript.hpp>

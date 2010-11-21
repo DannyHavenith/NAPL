@@ -29,20 +29,25 @@ namespace events
 
     struct program_change
     {
-        program_change &operator=( int rhs)
-        {
-            program = rhs;
-        }
+    	explicit program_change( unsigned char program)
+    		:program( program){}
+    	program_change(){}
         unsigned char program;
     };
 
     struct channel_aftertouch
     {
+    	explicit channel_aftertouch( unsigned char value)
+    		:value( value){}
+    	channel_aftertouch(){}
         unsigned char value;
     };
 
     struct pitch_bend
     {
+    	explicit pitch_bend( unsigned short value)
+    		:value(value){}
+    	pitch_bend(){}
         unsigned short value;
     };
 

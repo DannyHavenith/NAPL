@@ -59,7 +59,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
             ;
 
         meta_event
-            %= char_('\xff') >> byte_ >> omit[variable_length_quantity[ _a = _1]] >> subrange(_a)[*byte_]
+            %= omit[char_('\xff')] >> byte_ >> omit[variable_length_quantity[ _a = _1]] >> subrange(_a)[*byte_]
             ;
 
         sysex_event
