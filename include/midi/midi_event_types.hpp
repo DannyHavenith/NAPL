@@ -11,7 +11,6 @@ namespace events
         unsigned char velocity;
     };
 
-
     struct note_off : note
     {};
 
