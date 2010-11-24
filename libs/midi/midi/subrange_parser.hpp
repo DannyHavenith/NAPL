@@ -1,3 +1,7 @@
+// Subrange parser
+// This file defines a spirit (2.x) directive that limits a parser to parse only a given number of input tokens
+//
+
 #ifndef SUBRANGE_PARSER_HPP_INCLUDED
 #define SUBRANGE_PARSER_HPP_INCLUDED
 
@@ -17,6 +21,7 @@ namespace local_spirit_components
 }
 using local_spirit_components::subrange;
 
+// plug our parser into the spirit metagrammar.
 namespace boost { namespace spirit 
 {
     
@@ -46,12 +51,20 @@ namespace local_spirit_components
     using namespace ::boost::spirit::qi;
 
 
+    /// Subrange parser
+    /// This parser (directive) is used to limit a parser p to only the next n input tokens
+    /// Usage is like this: subrange[n][p]
+    /// An example of its use is in a--binary--midi chunk parser where it would be used like this:
+    ///    subrange(chunk_size)[*midi_event]
+    /// in this particular case this would parse the next 'chunk_size' bytes as a sequence of midi_events
     template< typename Subject>
     struct subrange_parser
         :unary_parser< subrange_parser<Subject> >
     {
+        /// subject_type is the type of the parser we're enclosing
         typedef Subject subject_type;
 
+        /// The attribute of this parser is the attribute of the enclosed parser.
         template <typename Context, typename Iterator>
         struct attribute
         {
@@ -95,6 +108,7 @@ namespace local_spirit_components
 namespace boost { namespace spirit { 
     namespace qi {
 
+
         template< typename T, typename Subject, typename Modifiers>
         struct make_directive<
                 terminal_ex<
@@ -115,6 +129,7 @@ namespace boost { namespace spirit {
     }
 
     namespace traits {
+    	/// A subrange parser has a semantic action if the enclosed parser has one.
         template< typename Subject>
         struct has_semantic_action< local_spirit_components::subrange_parser< Subject> >
             : unary_has_semantic_action< Subject> {};

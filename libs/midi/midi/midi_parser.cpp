@@ -1,4 +1,4 @@
-// midi_parser.cpp : Defines the entry point for the console application.
+// midi_parser.cpp
 //
 #include <string>
 #include <iostream>
@@ -22,6 +22,7 @@ using namespace boost::spirit;
 using namespace std;
 using namespace boost::spirit::qi;
 
+/// Binary grammar that parses midi files.
 template<typename Iterator>
 struct midi_parser: grammar< Iterator, midi_file()>
 {
@@ -42,10 +43,10 @@ struct midi_parser: grammar< Iterator, midi_file()>
             ;
 
         track
-            %= lit("MTrk") >>  omit[big_dword [_a = _1]] >> subrange(_a)[+event_group]
+            %= lit("MTrk") >>  omit[big_dword [_a = _1]] >> subrange(_a)[+timed_event]
             ;
 
-        event_group
+        timed_event
             %= variable_length_quantity >> event
             ;
 
@@ -136,7 +137,7 @@ struct midi_parser: grammar< Iterator, midi_file()>
     rule<Iterator, midi_file()          > file;
     rule<Iterator, midi_header()        > header;
     rule<Iterator, midi_track(size_t)   > track_data;
-    rule<Iterator, events::timed_midi_event()   > event_group;
+    rule<Iterator, events::timed_midi_event()   > timed_event;
     rule<Iterator, events::any()        > event;
     rule<Iterator, events::pitch_bend() > pitch_bend_event;
     rule<Iterator, size_t()             > variable_length_quantity;
@@ -152,18 +153,24 @@ struct midi_parser: grammar< Iterator, midi_file()>
     rule<Iterator, events::channel_event(), locals<unsigned int>     > channel_event;
 };
 
+/// parse the midi file that the istream 'in' refers to and return the result in a midi_file structure
+/// Note that on some platforms the input file must have been opened as binary.
 bool parse_midifile( std::istream &in, midi_file &result)
 {
 
 	result.tracks.clear();
+
+	// don't skip whitespaces.
     in.unsetf( ios_base::skipws);
 
+    // copy the whole file into a string.
     typedef std::istreambuf_iterator<char> base_iterator;
     typedef string::iterator iterator;
-
     std::string buffer;
-    midi_parser<iterator> parser;
     buffer.assign( base_iterator(in), base_iterator());
+
+    // parse the string
+    midi_parser<iterator> parser;
     iterator first = buffer.begin();
     iterator last = buffer.end();
 
