@@ -14,11 +14,21 @@
 
 using namespace std;
 
+#if defined(_WIN32)
 boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe_path)
 {
     // implementation for windows only:
     return exe_path.branch_path() / "instruments";
 }
+#endif
+
+#if defined(linux)
+boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe_path)
+{
+    // implementation for linux:
+    return "~/.local/share/rythmbuilder/instruments";
+}
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -41,7 +51,7 @@ int main(int argc, char* argv[])
     std::cout << storage << endl;
 
     boost::filesystem::path input_path( argv[1]);
-    const std::string filename = input_path.stem();
+    const std::string filename = input_path.stem().string();
 
     bool r = false;
 

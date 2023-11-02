@@ -16,7 +16,7 @@ instrument_factory::instrument_factory( const boost::filesystem::path &p)
     {
         if (is_directory( *i))
         {
-            instruments[i->leaf()] = instrument_ptr(
+            instruments[i->path().filename().string()] = instrument_ptr(
                 new instrument( *i));
 
         }

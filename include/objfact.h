@@ -35,6 +35,8 @@ public:
 	virtual binary_block_processor *GetAmpModulator() = 0;
 	virtual from_to_factory *GetFromToFactory( const stream_header &to_header) = 0;
 	//virtual block_mutator *GetFFT( int power) = 0;
+
+	virtual ~sample_object_factory() = default;
 };
 
 struct t_sample_object_factory

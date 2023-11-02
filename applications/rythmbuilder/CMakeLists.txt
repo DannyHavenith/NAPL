@@ -16,5 +16,9 @@ add_executable(
 	note_table.h
 	)
 
-TARGET_LINK_LIBRARIES( rythmbuilder napl ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+TARGET_LINK_LIBRARIES( 
+	rythmbuilder 
+	PRIVATE
+	    project_options
+	    napl ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 

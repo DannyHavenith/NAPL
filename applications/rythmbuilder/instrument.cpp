@@ -31,7 +31,7 @@ void instrument::add_wav( const boost::filesystem::path &p, const std::string &n
 
     if (boost::filesystem::is_regular( p))
     {
-        block_producer_ptr producer(filefactory::GetBlockProducer( p.external_file_string().c_str()));
+        block_producer_ptr producer(filefactory::GetBlockProducer( p.native().c_str()));
         if (producer)
         {
             notes[ to_lower_copy( name)] = producer;
@@ -121,14 +121,14 @@ instrument::instrument(const boost::filesystem::path &p)
 
     if (!is_directory( p))
     {
-        throw std::runtime_error( "the directory " + p.external_file_string() + " does not exist");
+        throw std::runtime_error( "the directory " + p.native() + " does not exist");
     }
 
     directory_iterator end_it;
     for (directory_iterator i( p); i != end_it; ++i)
     {
         smatch what;
-        string filename = i->leaf();
+        string filename = i->path().filename().string();
         if (regex_match( filename, what, wavfile))
         {
             add_wav( *i, what[1]);

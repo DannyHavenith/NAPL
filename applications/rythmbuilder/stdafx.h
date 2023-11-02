@@ -10,11 +10,8 @@
 #include <map>
 #include <iostream>
 #include <iterator>
-#include <stdlib.h>
 #include <math.h>
 #include <fstream>
 #include <string>
-#include <strstream>
-
 #include "napl.h"
 

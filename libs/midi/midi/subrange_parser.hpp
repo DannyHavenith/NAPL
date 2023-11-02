@@ -12,14 +12,16 @@
 #include <boost/spirit/home/support/attributes.hpp>
 #include <boost/fusion/include/at.hpp>
 
+#include <boost/spirit/home/support/terminal.hpp>
 #include <iterator> // for std::advance
 
 
-namespace local_spirit_components
+namespace next_directive
 {
-    BOOST_SPIRIT_TERMINAL_EX( subrange)
+    BOOST_SPIRIT_TERMINAL_EX( next)
 }
-using local_spirit_components::subrange;
+
+using next_directive::subrange;
 
 // plug our parser into the spirit metagrammar.
 namespace boost { namespace spirit 
@@ -30,7 +32,7 @@ namespace boost { namespace spirit
     struct use_directive<
         qi::domain,
         terminal_ex< 
-            local_spirit_components::tag::subrange,
+            next_directive::tag::subrange,
             fusion::vector1<T>
         >
     > : mpl::true_ {};
@@ -39,13 +41,13 @@ namespace boost { namespace spirit
     template <>                                     
     struct use_lazy_directive<
         qi::domain,
-        local_spirit_components::tag::subrange,
+        next_directive::tag::subrange,
         1 // arity
     > : mpl::true_ {};
 
 }} // end namespace boost::spirit
 
-namespace local_spirit_components
+namespace next_directive
 {
 
     using namespace ::boost::spirit::qi;
@@ -58,8 +60,8 @@ namespace local_spirit_components
     ///    subrange(chunk_size)[*midi_event]
     /// in this particular case this would parse the next 'chunk_size' bytes as a sequence of midi_events
     template< typename Subject>
-    struct subrange_parser
-        :unary_parser< subrange_parser<Subject> >
+    struct next_parser
+        :unary_parser< next_parser<Subject> >
     {
         /// subject_type is the type of the parser we're enclosing
         typedef Subject subject_type;
@@ -74,7 +76,7 @@ namespace local_spirit_components
                     type;
         };
 
-        subrange_parser( Subject const &sub, ptrdiff_t off)
+        next_parser( Subject const &sub, ptrdiff_t off)
             : subject( sub), offset(off) {};
 
         template <
@@ -112,13 +114,13 @@ namespace boost { namespace spirit {
         template< typename T, typename Subject, typename Modifiers>
         struct make_directive<
                 terminal_ex<
-                        local_spirit_components::tag::subrange, 
+                        next_directive::tag::subrange, 
                         fusion::vector1<T> 
                     >,
                 Subject, Modifiers
                 >
         {
-            typedef local_spirit_components::subrange_parser< Subject> result_type;
+            typedef next_directive::next_parser< Subject> result_type;
             template< typename Terminal>
             result_type operator()(
                 Terminal const &term, Subject const &subject, unused_type) const
@@ -131,7 +133,7 @@ namespace boost { namespace spirit {
     namespace traits {
     	/// A subrange parser has a semantic action if the enclosed parser has one.
         template< typename Subject>
-        struct has_semantic_action< local_spirit_components::subrange_parser< Subject> >
+        struct has_semantic_action< next_directive::next_parser< Subject> >
             : unary_has_semantic_action< Subject> {};
 
     }

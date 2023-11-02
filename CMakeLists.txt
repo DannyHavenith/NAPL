@@ -7,10 +7,17 @@
 ## This is the main CMakeLists file for the napl project.
 
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0)
 
 project(napl)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+target_compile_features(
+    project_options
+    INTERFACE
+        cxx_std_17)
 
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREAD ON)

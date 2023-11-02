@@ -5,11 +5,17 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/foreach.hpp>
 #include <string>
 #include <vector>
 
 #include "track_builder.h"
+
+inline void AppendChar( std::string &str, char c)
+{
+    str.push_back(c);
+}
 
 template <typename Iterator>
 struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::standard::space_type>
@@ -36,26 +42,26 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
         }
     }
 
-
     template< typename ConvertibleToStringRange>
     rythm_grammar_def( const ConvertibleToStringRange &range, track_builder &builder)
      :boost::spirit::qi::grammar<Iterator, boost::spirit::standard::space_type>(file)
     {
+        using namespace boost::placeholders;
         using namespace boost::spirit;
         using namespace boost::spirit::qi;
-        //using namespace boost::spirit::ascii; // this was necessary in older spirit 2.x versions, now it clashes with definitions in b::s::standard
-        //using boost::spirit::ascii::char_;
-        using namespace boost::phoenix;
+        using boost::phoenix::bind;
+        using boost::spirit::qi::_1;
+        using boost::spirit::qi::_2;
 
         set_note_symbols( range);
 
 
 
         BOOST_SPIRIT_DEBUG_NODE(file);
-        file    =   +track                  [bind(&track_builder::end_track, ref(builder))];
+        file    =   +track                  [bind(&track_builder::end_track, &builder)];
 
         BOOST_SPIRIT_DEBUG_NODE(track);
-        track   =   -header >> +bar         [bind(&track_builder::end_bar, ref(builder))];
+        track   =   -header >> +bar         [bind(&track_builder::end_bar, &builder)];
 
         BOOST_SPIRIT_DEBUG_NODE( header);
         header  =       lit("TRACK")
@@ -65,8 +71,8 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
                             >   uint_               [_c = _1]
                             >   ','
                             >>  lexeme[*(char_ - '\n')[_d += _1] ]
-                                                    [bind(&track_builder::start_track,
-                                                            ref(builder),
+                                                    [boost::phoenix::bind(&track_builder::start_track,
+                                                            &builder,
                                                             _a,
                                                             _b,
                                                             _c,
@@ -79,19 +85,19 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
 
         BOOST_SPIRIT_DEBUG_NODE( opt_bar_header);
         opt_bar_header = -char_(':') >> (string_ [_a = _1] >> -('(' >> string_[_b = _1] >> ')') >> ':')
-                                                    [bind( &track_builder::start_bar,
-                                                            ref( builder),
+                                                    [boost::phoenix::bind( &track_builder::start_bar,
+                                                            &builder,
                                                             _a,
                                                             _b
                                                          )
                                                     ]
-        |   (eps >> ':') [bind( &track_builder::start_bar, ref(builder), "djembe1", "")]
+        |   (eps >> ':') [bind( &track_builder::start_bar, &builder, "djembe1", "")]
                         ;
 
         BOOST_SPIRIT_DEBUG_NODE( string_);
-        string_  =   lexeme[ +alnum[_val += _1]];
+        string_  =   lexeme[ +alnum[boost::phoenix::bind( &AppendChar, _val, _1)]];
 
-        title_string = lexeme[ +(char_ - ',' - '\n' - '-')[_val += _1]];
+        title_string = lexeme[ +(char_ - ',' - '\n' - '-')[bind( &AppendChar, _val, _1)]];
 
         notes   =   +(
                         note | nlet | measure_sep | pause | multiply
@@ -100,23 +106,23 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
 
         nlet    =       uint_                           [_a = _1]
                     >>  (-( '/' >>  uint_ [_b = _1])) [bind(    &track_builder::start_nlet,
-                                                                ref( builder),
+                                                                &builder,
                                                                 _a,
                                                                 _b
                                                             )
                                                         ]
-                    >>  ('(' >> notes >> ')')       [bind(&track_builder::end_nlet, ref(builder))]
+                    >>  ('(' >> notes >> ')')       [bind(&track_builder::end_nlet, &builder)]
                  ;
 
-        note    =   no_case[ note_symbols]          [bind(&track_builder::note, ref(builder), _1)];
+        note    =   no_case[ note_symbols]          [boost::phoenix::bind(&track_builder::note, &builder, _1)];
         measure_sep =
-                        char_('|')                  [bind(&track_builder::new_measure, ref(builder))]
+                        char_('|')                  [bind(&track_builder::new_measure, &builder)]
             ;
 
-        pause   =   no_case[ pause_symbols]         [bind(&track_builder::pause, ref(builder))];
+        pause   =   no_case[ pause_symbols]         [bind(&track_builder::pause, &builder)];
         pause_symbols.add( ".")("en");
 
-        multiply=   '*' >> uint_                    [bind(&track_builder::repeat, ref(builder), _1)];
+        multiply=   '*' >> uint_                    [boost::phoenix::bind(&track_builder::repeat, &builder, _1)];
 
     }
 
@@ -142,7 +148,7 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
 
     boost::spirit::qi::rule<
         Iterator,
-        boost::spirit::locals< int, int>,
+        boost::spirit::locals< unsigned int, int>,
         space_type>
             nlet;
 

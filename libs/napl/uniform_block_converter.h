@@ -88,7 +88,7 @@ struct mutator_adapter :
 	void do_convert( sample_type *source, sample_type *destination)
 	{
 		sample_type temp = *source;
-		Mutate( &temp);
+		mutator::Mutate( &temp);
 		*destination = temp;
 	}
 
