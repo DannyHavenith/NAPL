@@ -1,15 +1,18 @@
 #ifndef __TRACK_BUILDER_H__
 #define __TRACK_BUILDER_H__
 
-#include <string>
-#include <vector>
-#include <stack>
+#include "instrument_factory.h"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/assign.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include <iostream>
+#include <string>
+#include <stack>
+#include <vector>
 
-#include "instrument_factory.h"
+
 
 class block_producer;
 class instrument;
@@ -19,7 +22,7 @@ class track_builder
 public:
     struct no_instrument_exception : public std::runtime_error
     {
-        no_instrument_exception( const std::string &what) 
+        no_instrument_exception( const std::string &what)
             : std::runtime_error( what)
         {
         };
@@ -41,12 +44,16 @@ public:
     void end_bar();
 
 
-    track_builder( instrument_factory &instruments_, const std::string &default_name = "track");
+    track_builder(
+        instrument_factory &instruments_,
+        const std::string &default_name = "track",
+        std::ostream &logging_stream = std::cout);
 
 private:
     void cleanup();
     void emit_track();
     void push_note();
+    void log( std::string_view message);
     typedef block_producer *sound_pointer;
 
 private:
@@ -65,6 +72,7 @@ private:
     int last_measure_index;
     instrument_factory &instruments;
     boost::shared_ptr<instrument> current_instrument;
+    std::ostream &logging_stream;
 
 };
 

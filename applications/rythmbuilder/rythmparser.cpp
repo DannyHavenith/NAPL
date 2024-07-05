@@ -1,12 +1,12 @@
-#include "stdafx.h"
+
+#include "rythmparser.h"
+#include "rythmtextgrammar.hpp"
+#include "track_builder.h"
+
 #include <boost/assign.hpp>
 #include <boost/spirit/include/qi.hpp>
 
-#include "rythmparser.h"
-#include "track_builder.h"
-#include "rythmtextgrammar.hpp"
-
-bool ParseRythm(  const boost::filesystem::path &instrument_path, 
+bool ParseRythm(  const boost::filesystem::path &instrument_path,
                 const std::string &content,
                 const std::string &default_track_name)
 {
@@ -38,6 +38,4 @@ bool ParseRythm(  const boost::filesystem::path &instrument_path,
     }
 
     return r;
-
-
 }

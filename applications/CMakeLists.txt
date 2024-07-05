@@ -13,4 +13,4 @@
 
 add_subdirectory( rythmbuilder)
 #add_subdirectory( syncy)
-add_subdirectory( syncy)
+

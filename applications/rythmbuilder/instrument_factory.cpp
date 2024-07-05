@@ -1,9 +1,8 @@
-#include "stdafx.h"
+#include "instrument.h"
+#include "instrument_factory.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
-#include "instrument.h"
-#include "instrument_factory.h"
 
 instrument_factory::instrument_factory( const boost::filesystem::path &p)
     : instrument_path( p)

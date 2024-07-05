@@ -1,16 +1,17 @@
 // RythmBuilder.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
-
 #define BOOST_SPIRIT_DEBUG
-#include <exception>
-//#include <boost/spirit/qi.hpp>
+#include "rythmparser.h"
+
 #include <boost/assign.hpp>
 #include <boost/filesystem/path.hpp>
+
+#include <exception>
+#include <fstream>
+#include <iostream>
 #include <string>
 
-#include "rythmparser.h"
 
 using namespace std;
 
@@ -26,7 +27,15 @@ boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe
 boost::filesystem::path find_instrument_path( const boost::filesystem::path &exe_path)
 {
     // implementation for linux:
-    return "~/.local/share/rythmbuilder/instruments";
+    const auto home = getenv("HOME");
+    if (home)
+    {
+        return boost::filesystem::path(home) / ".local/share/rythmbuilder/instruments";
+    }
+    else
+    {
+        return "/usr/local/share/rythmbuilder/instruments";
+    }
 }
 #endif
 

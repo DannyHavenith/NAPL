@@ -1,17 +1,15 @@
-#include "stdafx.h"
-#include <map>
-#include <fstream>
-#include <string>
+#include "instrument.h"
+#include "napl.h"
 
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/xpressive/xpressive_static.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/foreach.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
-#include "napl.h"
-#include "instrument.h"
+#include <map>
+#include <string>
 
 
 namespace {

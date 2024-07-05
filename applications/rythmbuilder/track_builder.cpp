@@ -1,17 +1,18 @@
-#include "stdafx.h"
-#include <string>
-#include <iostream>
-#include <iterator>
-#include <algorithm>
+#include "instrument.h"
+#include "napl.h"
+#include "track_builder.h"
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include "track_builder.h"
-#include "instrument.h"
+
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <string>
 
 using namespace std;
 
-namespace 
+namespace
 {
 
     block_producer *Concatenate( block_producer *left, block_producer *right)
@@ -25,12 +26,12 @@ namespace
 
     block_producer *Add( block_producer *left, block_producer *right)
     {
-			stream_header h;
-			left->GetStreamHeader( h);
-			sample_object_factory *factory_ptr = factory_factory::GetSampleFactory( h);
-			binary_block_processor *adder = factory_ptr->GetAdder();
-			delete factory_ptr;
-			adder->LinkTo( left, right);
+            stream_header h;
+            left->GetStreamHeader( h);
+            sample_object_factory *factory_ptr = factory_factory::GetSampleFactory( h);
+            binary_block_processor *adder = factory_ptr->GetAdder();
+            delete factory_ptr;
+            adder->LinkTo( left, right);
 
             return adder;
     }
@@ -61,7 +62,7 @@ namespace
 
     }
 
-    // spread the sound in the iterator range over the stereo space (so that the first one is 
+    // spread the sound in the iterator range over the stereo space (so that the first one is
     // on the utter left channel and the last on the utter right.
     //
     template<typename iterator_t>
@@ -97,12 +98,21 @@ namespace
 
 }
 
-track_builder::track_builder( instrument_factory &instruments_, const std::string &default_name)
-    : note_seconds(.25), 
-    instruments( instruments_), 
+void track_builder::log( std::string_view message)
+{
+    logging_stream << message << std::endl;
+}
+
+track_builder::track_builder(
+    instrument_factory &instruments_,
+    const std::string &default_name,
+    std::ostream &logging_stream)
+    : note_seconds(.25),
+    instruments( instruments_),
     last_measure_index(0),
     current_note_seconds( 0.0),
-    track_name( default_name)
+    track_name( default_name),
+    logging_stream( logging_stream)
 {
 
 
@@ -110,6 +120,7 @@ track_builder::track_builder( instrument_factory &instruments_, const std::strin
 
 void track_builder::start_track( const string &rythm, const string &section, int bpm, const string &comment)
 {
+    log( "start track: " + rythm);
     note_seconds = 60.0/bpm;
     track_name = rythm.empty()?string("track"): rythm;
     section_name = section;
@@ -152,7 +163,7 @@ void track_builder::emit_track()
     temp_sound_vec bars;
     BOOST_FOREACH( bar_vector &bar, track)
     {
-        bars.push_back( 
+        bars.push_back(
                 join_sounds( bar.begin(), bar.end(), Concatenate)
             );
     }
@@ -193,6 +204,7 @@ void track_builder::emit_track()
 //
 void track_builder::start_bar( const string &bar_name, const string &instrument_name)
 {
+    log( "start bar: " + bar_name);
     string instrument = instrument_name;
 
     if (instrument.empty())
@@ -211,15 +223,16 @@ void track_builder::start_bar( const string &bar_name, const string &instrument_
 
 void track_builder::start_nlet( int numerator, int denominator)
 {
+    log( "start nlet: " + std::to_string(numerator) + "/" + std::to_string(denominator));
     tempo.push( note_seconds);
 
     if (denominator == 0) denominator = 1;
     if (numerator == 0) numerator = 1;
 
-    // 
+    //
     // this  may look counter-intuitive: if we encounter an nlet of the
-    // form n/m(...), for example 3/2(...), this means that the nlet itself takes 2 beats 
-    // for every three notes encountered. So note duration becomes, in this case 2/3 of the original 
+    // form n/m(...), for example 3/2(...), this means that the nlet itself takes 2 beats
+    // for every three notes encountered. So note duration becomes, in this case 2/3 of the original
     // duration.
     //
     // a typical triplet would thus become 3/2(...).
@@ -231,6 +244,7 @@ void track_builder::start_nlet( int numerator, int denominator)
 
 void track_builder::new_measure()
 {
+    log( "new measure");
     push_note();
     last_measure_index = (int)current_bar.size();
 }
@@ -247,8 +261,8 @@ void track_builder::repeat( int count)
     // create a copy of the notes to repeat, because we're going to invalidate all iterators by
     // performing a copy into a vector.
     //
-    bar_vector::iterator begin = 
-        (last_measure_index != current_bar.size()) ? 
+    bar_vector::iterator begin =
+        (last_measure_index != current_bar.size()) ?
                 (current_bar.begin() + last_measure_index)
             :   current_bar.begin();
 
@@ -276,9 +290,9 @@ void track_builder::push_note()
         // (current_note_name == "")
         // if there is only silence to push
         // (for instance when the bar starts with silence)
-        current_bar.push_back( 
-            current_instrument->get_note( 
-                current_note_name, 
+        current_bar.push_back(
+            current_instrument->get_note(
+                current_note_name,
                 current_note_seconds
                 )
             );
@@ -306,6 +320,7 @@ void track_builder::pause()
 
 void track_builder::end_nlet()
 {
+    log( "end nlet");
     note_seconds = tempo.top();
     tempo.pop();
 }
@@ -313,12 +328,14 @@ void track_builder::end_nlet()
 
 void track_builder::end_track()
 {
-    cleanup();    
+    log( "end track: " + track_name);
+    cleanup();
 }
 
 
 void track_builder::end_bar()
 {
+    log( "end bar");
     push_note();
     if (!current_bar.empty())
     {
