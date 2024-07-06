@@ -64,7 +64,6 @@ private:
     void push_note();
     sound_pointer notes_to_bar(
         const note_vector &notes);
-    void log( std::string_view message);
 
 private:
     using sound_vector  = std::vector< sound_pointer >;

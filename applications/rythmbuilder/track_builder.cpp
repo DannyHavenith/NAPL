@@ -103,11 +103,6 @@ namespace
 
 }
 
-void track_builder::log( std::string_view message)
-{
-    logging_stream << message << std::endl;
-}
-
 track_builder::track_builder(
     instrument_factory &instruments_,
     const std::string &default_name,
@@ -123,7 +118,6 @@ track_builder::track_builder(
 
 void track_builder::start_track( const string &rythm, const string &section, int bpm, const string &comment)
 {
-    log( "start track: " + rythm);
     note_seconds = 60.0/bpm;
     track_name = rythm.empty()?string("track"): rythm;
     section_name = section;
@@ -194,7 +188,6 @@ void track_builder::emit_track()
 //
 void track_builder::start_bar( const string &bar_name, const string &instrument_name)
 {
-    log( "start bar: " + bar_name);
     string instrument = instrument_name;
 
     if (instrument.empty())
@@ -213,7 +206,6 @@ void track_builder::start_bar( const string &bar_name, const string &instrument_
 
 void track_builder::start_nlet( int numerator, int denominator)
 {
-    log( "start nlet: " + std::to_string(numerator) + "/" + std::to_string(denominator));
     tempo.push( note_seconds);
 
     if (denominator == 0) denominator = 1;
@@ -234,7 +226,6 @@ void track_builder::start_nlet( int numerator, int denominator)
 
 void track_builder::new_measure()
 {
-    log( "new measure");
     push_note();
     last_measure_index = notes.size();
 }
@@ -294,7 +285,6 @@ void track_builder::pause()
 
 void track_builder::end_nlet()
 {
-    log( "end nlet");
     note_seconds = tempo.top();
     tempo.pop();
 }
@@ -302,7 +292,6 @@ void track_builder::end_nlet()
 
 void track_builder::end_track()
 {
-    log( "end track: " + track_name);
     cleanup();
 }
 
@@ -337,7 +326,6 @@ track_builder::sound_pointer track_builder::notes_to_bar(
 
 void track_builder::end_bar()
 {
-    log( "end bar");
     push_note();
     if (!notes.empty())
     {
