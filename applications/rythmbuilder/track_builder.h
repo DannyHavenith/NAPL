@@ -3,16 +3,16 @@
 
 #include "instrument_factory.h"
 
-#include <boost/shared_ptr.hpp>
 #include <boost/assign.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <iostream>
-#include <string>
+#include <memory>
 #include <stack>
+#include <stdexcept>
+#include <string>
 #include <vector>
-
-
 
 class block_producer;
 class instrument;
@@ -36,7 +36,7 @@ public:
 
     void new_measure();
     void repeat( int count);
-    void note( const string &note);
+    void append_note( const string &note);
     void pause();
 
     void end_nlet();
@@ -50,28 +50,37 @@ public:
         std::ostream &logging_stream = std::cout);
 
 private:
+    struct note
+    {
+        std::string name;
+        double      seconds;
+    };
+
+    using note_vector = std::vector< note >;
+    using sound_pointer = std::shared_ptr< block_producer>;
+
     void cleanup();
     void emit_track();
     void push_note();
+    sound_pointer notes_to_bar(
+        const note_vector &notes);
     void log( std::string_view message);
-    typedef block_producer *sound_pointer;
 
 private:
-    typedef std::vector< sound_pointer > bar_vector;
-    typedef std::vector< bar_vector> bars_vector;
-    typedef std::stack< double> tempo_stack;
+    using sound_vector  = std::vector< sound_pointer >;
+    using bars_vector = sound_vector;
+    using tempo_stack = std::stack< double>;
 
     bars_vector track;
-    bar_vector current_bar;
+    note_vector notes;
     tempo_stack tempo;
     double note_seconds;
-    double current_note_seconds;
-    std::string current_note_name;
+    note current_note;
     std::string track_name;
     std::string section_name;
-    int last_measure_index;
+    std::size_t last_measure_index;
     instrument_factory &instruments;
-    boost::shared_ptr<instrument> current_instrument;
+    std::shared_ptr<instrument> current_instrument;
     std::ostream &logging_stream;
 
 };

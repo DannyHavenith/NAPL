@@ -7,7 +7,7 @@
 instrument_factory::instrument_factory( const boost::filesystem::path &p)
     : instrument_path( p)
 {
-    typedef boost::shared_ptr<instrument> instrument_ptr;
+    typedef std::shared_ptr<instrument> instrument_ptr;
     using namespace boost::filesystem;
 
     directory_iterator end_it;
@@ -35,9 +35,9 @@ std::set< std::string> instrument_factory::get_note_names()
     return names;
 }
 
-boost::shared_ptr< instrument> instrument_factory::get_instrument( const std::string &name)
+std::shared_ptr< instrument> instrument_factory::get_instrument( const std::string &name)
 {
-    typedef boost::shared_ptr<instrument> instrument_ptr;
+    typedef std::shared_ptr<instrument> instrument_ptr;
     if (!instruments[name])
     {
         instruments[name] = instrument_ptr( new instrument( instrument_path / name));

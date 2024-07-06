@@ -1,8 +1,9 @@
 #include "instrument.h"
 #include "napl.h"
+#include "samplebl.h"
+#include "simpops.h"
 #include "track_builder.h"
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
@@ -14,23 +15,24 @@ using namespace std;
 
 namespace
 {
+    using block_producer_ptr = std::shared_ptr< block_producer>;
 
-    block_producer *Concatenate( block_producer *left, block_producer *right)
+    block_producer_ptr Concatenate( block_producer_ptr left, block_producer_ptr right)
     {
-        paste_mutator *paster = new paste_mutator();
+        auto paster = std::make_shared<owning_paste_mutator>( std::make_unique<paste_mutator>());
+
         paster->LinkTo( left, 0);
         paster->LinkTo( right, 1);
 
         return paster;
     }
 
-    block_producer *Add( block_producer *left, block_producer *right)
+    block_producer_ptr Add( block_producer_ptr left, block_producer_ptr right)
     {
             stream_header h;
             left->GetStreamHeader( h);
-            sample_object_factory *factory_ptr = factory_factory::GetSampleFactory( h);
-            binary_block_processor *adder = factory_ptr->GetAdder();
-            delete factory_ptr;
+            std::unique_ptr<sample_object_factory> factory_ptr{ factory_factory::GetSampleFactory( h)};
+            auto adder = std::make_shared<owning_binary_block_processor>(std::unique_ptr<binary_block_processor>{factory_ptr->GetAdder()});
             adder->LinkTo( left, right);
 
             return adder;
@@ -41,7 +43,7 @@ namespace
     // Doesn't really need RAIterators, but is a lot slower otherwise.
     //
     template< class RAIterator, class Op>
-    block_producer *join_sounds( RAIterator begin, const RAIterator &end, Op op)
+    block_producer_ptr join_sounds( RAIterator begin, const RAIterator &end, Op op)
     {
         size_t dist = std::distance( begin, end);
 
@@ -65,12 +67,14 @@ namespace
     // spread the sound in the iterator range over the stereo space (so that the first one is
     // on the utter left channel and the last on the utter right.
     //
-    template<typename iterator_t>
-        void spread_bars( iterator_t begin, iterator_t end)
+    template<
+        typename iterator_t,
+        typename output_iterator>
+        void spread_bars(
+            iterator_t begin, iterator_t end,
+            output_iterator destination)
     {
         if (begin == end) return;
-
-        iterator_t current = begin;
 
         size_t count = std::distance( begin, end);
 
@@ -82,16 +86,17 @@ namespace
         {
             short step = 2 * (32767 / static_cast<short>(count-1));
             short pan_position = -32768;
-            while (current != end)
+            for (iterator_t current = begin; current != end; ++current)
             {
-                block_producer *prod_ptr = * current;
-                block_mutator *panner = factory_ptr->GetPan( pan_position);
-                panner->LinkTo( prod_ptr);
-                *current = panner;
+                std::shared_ptr<block_mutator> panner{ factory_ptr->GetPan( pan_position)};
+                panner->LinkTo( current->get());
+                *destination++ = panner;
                 pan_position += step;
-                ++current;
             }
-            current = begin;
+        }
+        else
+        {
+            *destination = *begin;
         }
     }
 
@@ -110,12 +115,10 @@ track_builder::track_builder(
     : note_seconds(.25),
     instruments( instruments_),
     last_measure_index(0),
-    current_note_seconds( 0.0),
+    current_note{},
     track_name( default_name),
     logging_stream( logging_stream)
 {
-
-
 };
 
 void track_builder::start_track( const string &rythm, const string &section, int bpm, const string &comment)
@@ -129,13 +132,7 @@ void track_builder::start_track( const string &rythm, const string &section, int
 void track_builder::cleanup()
 {
     last_measure_index = 0;
-
-    push_note();
-    if (!current_bar.empty())
-    {
-        track.push_back( current_bar);
-        current_bar.clear();
-    }
+    end_bar();
 
     if (!track.empty())
     {
@@ -158,21 +155,14 @@ void write_file( const std::string &filename, block_producer *p)
 
 void track_builder::emit_track()
 {
-    typedef std::vector< block_producer *> temp_sound_vec;
 
-    temp_sound_vec bars;
-    BOOST_FOREACH( bar_vector &bar, track)
-    {
-        bars.push_back(
-                join_sounds( bar.begin(), bar.end(), Concatenate)
-            );
-    }
+    sound_vector bars( track.size());
 
     // spread over stereo space.
-    spread_bars( bars.begin(), bars.end());
+    spread_bars( track.begin(), track.end(), bars.begin());
 
     // add all bars
-    block_producer *result =
+    auto result =
         join_sounds( bars.begin(), bars.end(), Add);
 
     std::string filename = track_name;
@@ -183,13 +173,13 @@ void track_builder::emit_track()
 
     filename += ".wav";
 
-    block_sink *file_writer = filefactory::GetBlockSink( filename.c_str());
+    std::unique_ptr<block_sink> file_writer{ filefactory::GetBlockSink( filename.c_str())};
     if (!file_writer)
     {
         throw std::runtime_error( "could not open file " + filename + " for writing, is it open in another application?");
     }
 
-    file_writer->LinkTo( result);
+    file_writer->LinkTo( result.get());
 
     //
     // write to file...
@@ -246,7 +236,7 @@ void track_builder::new_measure()
 {
     log( "new measure");
     push_note();
-    last_measure_index = (int)current_bar.size();
+    last_measure_index = notes.size();
 }
 
 
@@ -261,12 +251,12 @@ void track_builder::repeat( int count)
     // create a copy of the notes to repeat, because we're going to invalidate all iterators by
     // performing a copy into a vector.
     //
-    bar_vector::iterator begin =
-        (last_measure_index != current_bar.size()) ?
-                (current_bar.begin() + last_measure_index)
-            :   current_bar.begin();
+    auto begin =
+        (last_measure_index != notes.size()) ?
+                (notes.begin() + last_measure_index)
+            :   notes.begin();
 
-    bar_vector fragment( begin, current_bar.end());
+    note_vector fragment( begin, notes.end());
 
     //
     // now copy count-1 times
@@ -274,7 +264,7 @@ void track_builder::repeat( int count)
     while (--count)
     {
         std::copy( fragment.begin(), fragment.end(),
-            std::back_inserter( current_bar));
+            std::back_inserter( notes));
     }
 
     new_measure();
@@ -283,40 +273,24 @@ void track_builder::repeat( int count)
 
 void track_builder::push_note()
 {
-    if (current_note_seconds > .001)
+    if (current_note.seconds > .001)
     {
-        //
-        // this will ask for a note with an empty name
-        // (current_note_name == "")
-        // if there is only silence to push
-        // (for instance when the bar starts with silence)
-        current_bar.push_back(
-            current_instrument->get_note(
-                current_note_name,
-                current_note_seconds
-                )
-            );
-
+        notes.push_back( std::move( current_note));
     }
-
-    current_note_name.clear();
-    current_note_seconds = 0.0;
+    current_note = {};
 }
 
-void track_builder::note( const string &note)
+void track_builder::append_note( const string &note)
 {
     push_note();
-    current_note_name = note;
-    current_note_seconds = note_seconds;
+    current_note = { note, note_seconds};
 }
 
 
 void track_builder::pause()
 {
-    current_note_seconds += note_seconds;
+    current_note.seconds += note_seconds;
 }
-
-
 
 void track_builder::end_nlet()
 {
@@ -332,15 +306,43 @@ void track_builder::end_track()
     cleanup();
 }
 
+track_builder::sound_pointer track_builder::notes_to_bar(
+    const note_vector &notes)
+{
+    sound_vector sounds;
+    note last_note{};
+    for (const auto &note : notes)
+    {
+        if (note.name.empty())
+        {
+            last_note.seconds += note.seconds;
+        }
+        else
+        {
+            if (last_note.seconds > .001)
+            {
+                sounds.push_back( current_instrument->get_note( last_note.name, last_note.seconds));
+            }
+            last_note = note;
+        }
+    }
+
+    if (last_note.seconds > .001)
+    {
+        sounds.push_back( current_instrument->get_note( last_note.name, last_note.seconds));
+    }
+
+    return join_sounds( sounds.begin(), sounds.end(), Concatenate);
+}
 
 void track_builder::end_bar()
 {
     log( "end bar");
     push_note();
-    if (!current_bar.empty())
+    if (!notes.empty())
     {
-        track.push_back( current_bar);
-        current_bar.clear();
+        track.push_back( notes_to_bar(notes));
+        notes.clear();
         last_measure_index = 0;
     }
 }

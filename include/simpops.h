@@ -28,7 +28,7 @@ public:
 		if (num < 0) num = 0;
 
 		long maxnum = get_source_numframes() - start;
-		
+
 		if (maxnum < 0)
 		{
 			start = num = 0;
@@ -55,7 +55,7 @@ public:
 	}
 
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
-	{ 
+	{
 		state_saver<block_consumer *> save( m_pConsumer);
 		m_pConsumer = &c;
 
@@ -68,7 +68,7 @@ public:
 		// pass the block.
 		m_pConsumer->ReceiveBlock( b);
 	}
-	
+
 protected:
 	sampleno get_source_numframes()
 	{
@@ -112,7 +112,7 @@ public:
 		{
 			m_jump_size = window_width;
 		}
-		//set_window();	
+		//set_window();
 	}
 
 	bool at_end()
@@ -151,16 +151,15 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////
 //
-// a paste_mutator pastes two samples
+// a paste_mutator concatenates two samples
 //
 ///////////////////////////////////////////////////////////////////////////////////
 class paste_mutator: public block_mutator
 {
 public:
-
-
 	void LinkTo( block_producer *p, int channel)
 	{
+        assert( channel >= 0 and channel <= 1);
 		if (channel == 0)
 		{
 			stream_header h;
@@ -169,7 +168,7 @@ public:
 			m_treshold = h.numframes;
 		}
 
-		if (channel == 1) 
+		if (channel == 1)
 		{
 			m_pSecondProducer = p;
 			m_pSecondProducer->LinkToConsumer( this);
@@ -196,8 +195,8 @@ public:
 	}
 
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
-	{ 
-		// this is not quite thread-safe. This object keeps the requesting consumer in it's
+	{
+		// this is not quite thread-safe. This object keeps the requesting consumer in its
 		// state until the next call to RequestBlock
 		//
 		// each thread should have it's own mutator...
@@ -217,7 +216,7 @@ public:
 		{
 			start -= m_treshold;
 		}
-		
+
 		if (num)
 		{
 			m_pSecondProducer->RequestBlock( c, start, num);
@@ -230,10 +229,56 @@ public:
 		// pass the block.
 		m_pConsumer->ReceiveBlock( b);
 	}
-	
+
 private:
 	sampleno m_treshold;
 	block_producer *m_pSecondProducer;
+};
+
+/**
+ * This class is wrapper around the paste mutator that keeps
+ * shared pointers to the producers it is linked to.
+ */
+class owning_paste_mutator: public block_mutator
+{
+    public:
+        using block_producer_ptr = std::shared_ptr< block_producer>;
+        owning_paste_mutator( std::unique_ptr<paste_mutator> paster)
+            :paster( std::move( paster))
+        {
+            // nop
+        }
+
+        void LinkTo( block_producer_ptr p, int channel)
+        {
+            assert( channel >= 0 and channel <= 1);
+            paster->LinkTo( p.get(), channel);
+            producers[channel] = std::move( p);
+        }
+
+        void Seek( sampleno start) override
+        {
+            paster->Seek( start);
+        }
+
+        void GetStreamHeader( stream_header &h) override
+        {
+            paster->GetStreamHeader( h);
+        }
+
+        block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num) override
+        {
+            return paster->RequestBlock( c, start, num);
+        }
+
+        void ReceiveBlock( const sample_block &b) override
+        {
+            paster->ReceiveBlock( b);
+        }
+
+    private:
+        std::unique_ptr<paste_mutator> paster;
+        std::vector<std::shared_ptr<block_producer>> producers{2};
 };
 
 #endif

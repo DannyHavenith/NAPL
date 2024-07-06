@@ -14,10 +14,12 @@ class block_producer;
 class instrument
 {
 public:
+    typedef std::shared_ptr< block_producer> block_producer_ptr;
+
     instrument( const boost::filesystem::path &path);
     ~instrument();
 
-    block_producer *get_note( const std::string &name, double seconds);
+    block_producer_ptr get_note( const std::string &name, double seconds);
 
     std::set<std::string>
     get_note_names( )
@@ -26,7 +28,6 @@ public:
     }
 
 private:
-    typedef boost::shared_ptr< block_producer> block_producer_ptr;
     void add_wav( const boost::filesystem::path &path, const std::string &name);
     block_producer_ptr create_note( const std::string &name, double seconds);
     void add_silence();

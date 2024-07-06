@@ -114,7 +114,7 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
                     >>  ('(' >> notes >> ')')       [bind(&track_builder::end_nlet, &builder)]
                  ;
 
-        note    =   no_case[ note_symbols]          [boost::phoenix::bind(&track_builder::note, &builder, _1)];
+        note    =   no_case[ note_symbols]          [boost::phoenix::bind(&track_builder::append_note, &builder, _1)];
         measure_sep =
                         char_('|')                  [bind(&track_builder::new_measure, &builder)]
             ;

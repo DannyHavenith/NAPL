@@ -4,11 +4,13 @@
 
 #ifndef _SAMPLEBLOCK_H_
 #define _SAMPLEBLOCK_H_
-#include <vector>
-#include <stddef.h>
 #include "architec.h"
-#include "boost/shared_ptr.hpp"
-#include "boost/utility.hpp"
+
+#include <boost/core/noncopyable.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
+#include <stddef.h>
+#include <vector>
 
 #define BLOCK_ERROR 1
 typedef int block_result;
@@ -1030,6 +1032,50 @@ protected:
     sampleno m_currentLeft;
     block_connector m_left;
     block_connector m_right;
+};
+
+class owning_binary_block_processor : public block_producer, public block_multi_consumer
+{
+public:
+    using block_producer_ptr = std::shared_ptr<block_producer>;
+
+    owning_binary_block_processor( std::unique_ptr<binary_block_processor> p)
+        :processor( std::move( p))
+    {
+        // nop
+    }
+
+    void ReceiveBlock( const sample_block &b, short channel) override
+    {
+        processor->ReceiveBlock( b, channel);
+    }
+
+    void GetStreamHeader( stream_header &h) override
+    {
+        processor->GetStreamHeader( h);
+    }
+
+    block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num) override
+    {
+        return processor->RequestBlock( c, start, num);
+    }
+
+    void Seek( sampleno start) override
+    {
+        processor->Seek( start);
+    }
+
+    void LinkTo( block_producer_ptr pLeft, block_producer_ptr pRight)
+    {
+        processor->LinkTo( pLeft.get(), pRight.get());
+
+        producers[0] = std::move(pLeft);
+        producers[1] = std::move(pRight);
+    }
+
+private:
+    std::unique_ptr<binary_block_processor> processor;
+    std::array<block_producer_ptr, 2>       producers;
 };
 
 

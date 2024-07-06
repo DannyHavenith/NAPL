@@ -37,7 +37,7 @@ void instrument::add_wav( const boost::filesystem::path &p, const std::string &n
     }
 }
 
-block_producer *instrument::get_note( const std::string &name, double seconds)
+instrument::block_producer_ptr instrument::get_note( const std::string &name, double seconds)
 {
     using boost::algorithm::to_lower_copy;
     std::string name_lower = to_lower_copy( name);
@@ -50,7 +50,7 @@ block_producer *instrument::get_note( const std::string &name, double seconds)
         cache[microseconds][name_lower] = note;
     }
 
-    return note.get();
+    return note;
 }
 
 instrument::block_producer_ptr instrument::create_note( const std::string &name, double seconds)
@@ -100,7 +100,6 @@ void instrument::add_silence()
         notes.begin()->second->GetStreamHeader( h);
         notes[""] = block_producer_ptr(
             factory_factory::GetSampleFactory( h)->GetConstant( h));
-
     }
 }
 
