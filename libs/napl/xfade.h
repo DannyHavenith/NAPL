@@ -20,10 +20,10 @@ struct mut_xfade
 		m_step = (0x7fffffff) / (result.numframes - 1);
 	}
 
-	inline const sampletype Mutate( 
+	inline const sampletype Mutate(
 		const sampletype &left, const sampletype &right)
 	{
-		register long bal= (long)(m_currentLevel >> 16);
+		long bal= (long)(m_currentLevel >> 16);
 
 		m_currentLevel += m_step;
 

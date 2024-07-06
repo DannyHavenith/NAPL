@@ -49,3 +49,7 @@ add_library( napl
 	wav.h
 	xfade.h
 	)
+target_link_libraries(napl
+    PRIVATE
+        project_options)
+
