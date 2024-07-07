@@ -57,8 +57,6 @@ int main(int argc, char* argv[])
         std::istreambuf_iterator<char>(instream.rdbuf()),
         std::istreambuf_iterator<char>());
 
-    std::cout << storage << endl;
-
     boost::filesystem::path input_path( argv[1]);
     const std::string filename = input_path.stem().string();
 
