@@ -1,4 +1,0 @@
-TRACK guinees_arrangement, 300, x
-djembe1: do en en ta do en ta en do ta en ta do ta ta en do en en ta do en ta en do ta en ta do ta ta en 
-djembe2: do en ta ta do en ta ta do en ta ta do en ta ta do en ta ta do en ta ta do en ta ta do en ta ta 
-djembe3: ta ta en ch ta ta ch en ta ta en ch ta ta ch en ta ta en ch ta ta ch en ta ta en ch ta ta ch en 

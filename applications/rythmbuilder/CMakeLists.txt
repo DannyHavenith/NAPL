@@ -10,7 +10,6 @@ add_executable(
 	track_builder.h
 	instrument_factory.h
 	instrument.h
-	note_table.h
 	)
 
 TARGET_LINK_LIBRARIES(
