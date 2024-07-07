@@ -7,9 +7,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <iostream>
 #include <memory>
-#include <numeric>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -17,6 +15,41 @@
 
 class block_producer;
 class instrument;
+
+struct note
+{
+    std::string name;   ///< note name, empty for pause
+    double      seconds;///< duration of the note in seconds
+    bool optional = false; /// for pauses added before anacrusis and after final bar
+};
+
+using note_vector = std::vector<note>;
+struct measure
+{
+    note_vector notes;
+    std::size_t anacrusis_index = 0;
+};
+
+struct repeated_measure : public measure
+{
+    int     repeat_count = 1;
+};
+
+struct bar
+{
+    std::string bar_name;
+    std::string instrument_name;
+    std::vector< repeated_measure> measures;
+};
+using bars_vector = std::vector< bar>;
+
+struct track
+{
+    std::string name;
+    std::string section;
+    std::string comment;
+    bars_vector bars;
+};
 
 class track_builder
 {
@@ -32,7 +65,7 @@ public:
     typedef std::string string;
 
     void start_track( const string &rythm, const string &section, int bpm, const string &comment);
-    void start_bar( const string &bar_name, const string &instrument_name);
+    void start_bar( const string &instrument_name, const string &bar_name);
     void start_nlet( int numerator, int denominator);
 
     void new_measure();
@@ -48,45 +81,24 @@ public:
 
     track_builder(
         instrument_factory &instruments_,
-        const std::string &default_name = "track",
-        std::ostream &logging_stream = std::cout);
+        const std::string &default_name = "track");
 
 private:
-    struct note
-    {
-        std::string name;
-        double      seconds;
-    };
 
-    using note_vector = std::vector< note >;
-    using sound_pointer = std::shared_ptr< block_producer>;
-
-    void cleanup();
-    void emit_track();
-    void push_note();
-    sound_pointer notes_to_bar(
-        const note_vector &notes);
 
     static double total_duration( note_vector::const_iterator begin, note_vector::const_iterator end);
 
 private:
-    using sound_vector  = std::vector< sound_pointer >;
-    using bars_vector = sound_vector;
     using tempo_stack = std::stack< double>;
 
-    bars_vector track;
-    note_vector notes;
+    std::map< std::string, bar> named_bars;
+    track current_track;
+    bar current_bar;
+    repeated_measure current_measure;
     tempo_stack tempo;
     double note_seconds;
-    note current_note;
-    std::string track_name;
-    std::string section_name;
-    std::size_t last_measure_index;
-    std::size_t anacrusis_index;
     instrument_factory &instruments;
     std::shared_ptr<instrument> current_instrument;
-    std::ostream &logging_stream;
-
 };
 
 #endif //__TRACK_BUILDER_H__

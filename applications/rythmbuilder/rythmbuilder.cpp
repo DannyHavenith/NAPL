@@ -4,7 +4,6 @@
 #define BOOST_SPIRIT_DEBUG
 #include "rythmparser.h"
 
-#include <boost/assign.hpp>
 #include <boost/filesystem/path.hpp>
 
 #include <exception>
@@ -76,6 +75,6 @@ int main(int argc, char* argv[])
         std::cerr << "Could not parse rythm" << std::endl;
     }
 
-	return 0;
+    return 0;
 }
 
