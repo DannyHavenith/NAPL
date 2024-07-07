@@ -100,9 +100,11 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
         title_string = lexeme[ +(char_ - ',' - '\n' - '-')[bind( &AppendChar, _val, _1)]];
 
         notes   =   +(
-                        note | nlet | measure_sep | pause | multiply
+                        note | nlet | measure_sep | pause | multiply | anacrusis_marker
                     )
             ;
+
+        anacrusis_marker =  lit('>') [bind(&track_builder::mark_anacrusis, &builder)];
 
         nlet    =       uint_                           [_a = _1]
                     >>  (-( '/' >>  uint_ [_b = _1])) [bind(    &track_builder::start_nlet,
@@ -130,7 +132,7 @@ struct rythm_grammar_def: boost::spirit::qi::grammar<Iterator, boost::spirit::st
     typedef boost::spirit::qi::rule<Iterator, std::string(), space_type> string_rule;
 
 
-    regular_rule file, track, bar, notes, measure_sep, pause, note;
+    regular_rule file, track, bar, notes, measure_sep, pause, note, anacrusis_marker;
     regular_rule  multiply, continuation;
 
     boost::spirit::qi::rule<

@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <stack>
 #include <stdexcept>
 #include <string>
@@ -35,6 +36,7 @@ public:
     void start_nlet( int numerator, int denominator);
 
     void new_measure();
+    void mark_anacrusis();
     void repeat( int count);
     void append_note( const string &note);
     void pause();
@@ -65,6 +67,8 @@ private:
     sound_pointer notes_to_bar(
         const note_vector &notes);
 
+    static double total_duration( note_vector::const_iterator begin, note_vector::const_iterator end);
+
 private:
     using sound_vector  = std::vector< sound_pointer >;
     using bars_vector = sound_vector;
@@ -78,6 +82,7 @@ private:
     std::string track_name;
     std::string section_name;
     std::size_t last_measure_index;
+    std::size_t anacrusis_index;
     instrument_factory &instruments;
     std::shared_ptr<instrument> current_instrument;
     std::ostream &logging_stream;

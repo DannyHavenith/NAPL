@@ -110,6 +110,7 @@ track_builder::track_builder(
     : note_seconds(.25),
     instruments( instruments_),
     last_measure_index(0),
+    anacrusis_index(0),
     current_note{},
     track_name( default_name),
     logging_stream( logging_stream)
@@ -126,6 +127,8 @@ void track_builder::start_track( const string &rythm, const string &section, int
 void track_builder::cleanup()
 {
     last_measure_index = 0;
+    anacrusis_index = 0;
+
     end_bar();
 
     if (!track.empty())
@@ -230,6 +233,21 @@ void track_builder::new_measure()
     last_measure_index = notes.size();
 }
 
+void track_builder::mark_anacrusis()
+{
+    push_note();
+    anacrusis_index = notes.size();
+}
+
+double track_builder::total_duration(
+    note_vector::const_iterator begin,
+    note_vector::const_iterator end)
+{
+    return std::accumulate( begin, end, 0.0, []( double sum, const note &n)
+    {
+        return sum + n.seconds;
+    });
+}
 
 void track_builder::repeat( int count)
 {
@@ -242,21 +260,39 @@ void track_builder::repeat( int count)
     // create a copy of the notes to repeat, because we're going to invalidate all iterators by
     // performing a copy into a vector.
     //
-    auto begin =
+    auto measure_begin =
         (last_measure_index != notes.size()) ?
                 (notes.begin() + last_measure_index)
             :   notes.begin();
 
-    note_vector fragment( begin, notes.end());
+    const note_vector measure( measure_begin, notes.end());
+    const auto duration = total_duration( measure.begin(), measure.end());
+    const auto local_anacrusis_index = anacrusis_index - std::distance(  notes.begin(), measure_begin);
+    notes.erase( measure_begin, notes.end());
+
+    note_vector last_fragment;
+    if (anacrusis_index != 0 and anacrusis_index < notes.size() + measure.size())
+    {
+        const auto anacrusis_duration = total_duration( measure.begin() + local_anacrusis_index, measure.end());
+        note_vector anacrusis;
+        anacrusis.push_back( { "", duration - anacrusis_duration});
+        anacrusis.insert( anacrusis.end(), measure.begin() + local_anacrusis_index, measure.end());
+
+        last_fragment.assign( measure.begin(), measure.begin() + local_anacrusis_index);
+        last_fragment.push_back( { "", anacrusis_duration});
+        notes.insert( notes.end(), anacrusis.begin(), anacrusis.end());
+        --count;
+    }
 
     //
-    // now copy count-1 times
+    // now copy count times
     //
-    while (--count)
+    while (count--)
     {
-        std::copy( fragment.begin(), fragment.end(),
-            std::back_inserter( notes));
+        notes.insert( notes.end(), measure.begin(), measure.end());
     }
+
+    notes.insert( notes.end(), last_fragment.begin(), last_fragment.end());
 
     new_measure();
 
@@ -332,6 +368,7 @@ void track_builder::end_bar()
         track.push_back( notes_to_bar(notes));
         notes.clear();
         last_measure_index = 0;
+        anacrusis_index = 0;
     }
 }
 
