@@ -1,7 +1,6 @@
 //
 //
 //
-#include "stdafx.h"
 #include "processor_visitor.h"
 #include "sample_analyzer.h"
 #include "general_resampler.h"

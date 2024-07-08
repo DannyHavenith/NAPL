@@ -170,6 +170,10 @@ template <> struct sampletraits< sampletype_m16> : public builtin_type_sampletra
 {
 };
 
+template<> struct sampletraits< long> : public builtin_type_sampletraits< long, long>
+{
+};
+
 template <> struct sampletraits< sampletype_m8> : public builtin_type_sampletraits< sampletype_m8, long>
 {
     static inline sampletype_m8 get_middle()

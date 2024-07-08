@@ -1156,11 +1156,22 @@ public:
     static inline const sampletype Mutate(
         const sampletype &left, const sampletype &right)
     {
-        typedef
-            typename sampletraits<sampletype>::
-                template accumulator_gen<void>::type accumulatortype;
-        return (sampletype)((accumulatortype(left) + accumulatortype(right)) /
-                        short(2));
+        using accumulatortype =  typename sampletraits<sampletype>::template accumulator_gen<void>::type;
+        using channel_type = typename sampletraits<sampletype>::template channel_gen<void>::type;
+        using channel_traits = sampletraits<channel_type>;
+        using accumulator_traits = sampletraits<accumulatortype>;
+
+        auto result = accumulatortype(left) + accumulatortype(right);
+        const auto clamp = []( auto &sample)
+        {
+            using accumulator_sampletype = typename std::remove_reference<decltype( sample)>::type;
+            sample = std::clamp(
+                sample,
+                static_cast<accumulator_sampletype>(channel_traits::get_min()), static_cast<accumulator_sampletype>(channel_traits::get_max()));
+        };
+        accumulator_traits::apply_to_all_channels(clamp, result);
+
+        return result;
     }
 };
 
