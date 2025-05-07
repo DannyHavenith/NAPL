@@ -46,11 +46,10 @@ struct memory_adder : public memory_writer_base
 
 	virtual void ReceiveBlock( const sample_block &b)
 	{
-		typedef typename sample_container< sample_type>::const_iterator const_iterator;
-		sample_container< sample_type> container( b);
+		const sample_container< sample_type> container( b);
 		m_destination =reinterpret_cast< sample_block::byte_type *>(
 				std::transform(
-					const_iterator( container.begin()),
+					container.begin(),
 					container.end(),
 					reinterpret_cast< sample_type *>( m_destination),
 					reinterpret_cast< sample_type *>( m_destination),

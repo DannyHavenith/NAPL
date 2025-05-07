@@ -6,6 +6,7 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <iostream>
 #include <iterator>
 #include <numeric>
 #include <string>
@@ -131,7 +132,11 @@ namespace
         const note_vector &notes)
     {
         sound_vector sounds;
+        note_vector compressed_notes;
         note last_note{};
+
+        // first compress the notes: remove pauses and attach them to the last note
+        // if there is any.
         for (const auto &note : notes)
         {
             if (note.name.empty())
@@ -140,9 +145,9 @@ namespace
             }
             else
             {
-                if (last_note.seconds > .001)
+                if (last_note.seconds > 0.001)
                 {
-                    sounds.push_back( instrument.get_note( last_note.name, last_note.seconds));
+                    compressed_notes.push_back( last_note);
                 }
                 last_note = note;
             }
@@ -150,8 +155,17 @@ namespace
 
         if (last_note.seconds > .001)
         {
-            sounds.push_back( instrument.get_note( last_note.name, last_note.seconds));
+            compressed_notes.push_back( last_note);
         }
+
+        std::cout << "Compressed Notes:" << std::endl;
+        print( std::cout, compressed_notes) << std::endl;
+
+        std::transform( compressed_notes.begin(), compressed_notes.end(), std::back_inserter( sounds),
+            [&instrument]( const note &note)
+            {
+                    return instrument.get_note( note.name, note.seconds);
+            });
 
         return join_sounds( sounds.begin(), sounds.end(), Concatenate);
     }
@@ -231,11 +245,16 @@ namespace
         auto filename = track.name;
         if (not track.section.empty())
         {
-            filename += "_" + track.section;
+            filename = track.section;
         }
-        filename += ".wav";
 
-        write_file( filename, track_sounds.get());
+        int counter = 0;
+        for ( auto &bar : stereo_bars)
+        {
+            write_file( filename + "_" + std::to_string( ++counter) + ".wav", bar.get());
+        }
+
+        write_file( filename + ".wav", track_sounds.get());
     }
 
 } // namespace
@@ -341,6 +360,8 @@ void track_builder::end_track()
 
     if (not current_track.bars.empty())
     {
+        print( std::cout, current_track);
+        std::cout << std::endl;
         write_track( current_track, instruments);
         current_track = {};
     }

@@ -522,6 +522,11 @@ public:
         return m_left + m_right < rhs.m_left + rhs.m_right;
     }
 
+    inline bool operator==( const this_type &rhs) const
+    {
+        return m_left == rhs.m_left && m_right == rhs.m_right;
+    }
+
     template<typename other_type>
     inline StereoSample<MonoSample> &operator+=( const StereoSample<other_type> &rhs)
     {

@@ -8,7 +8,6 @@
 #include <boost/bind/bind.hpp>
 #include <boost/foreach.hpp>
 #include <string>
-#include <vector>
 
 #include "track_builder.h"
 

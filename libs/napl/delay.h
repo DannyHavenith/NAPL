@@ -1,3 +1,4 @@
+#include "samplebl.h"
 #include <algorithm>
 struct delay_base : public block_mutator, protected block_owner
 {
@@ -113,7 +114,7 @@ struct delay_base : public block_mutator, protected block_owner
 			init_block( block);
 		}
 
-		block.m_end = block.buffer_begin() + block.buffer_size();
+		block.m_end = block.m_start + m_samplesize * (block.buffer_size() / m_samplesize);
 
 		const size_t samples_in_block = block.buffer_size() / m_samplesize;
 		while (num_samples > samples_in_block)
@@ -124,7 +125,7 @@ struct delay_base : public block_mutator, protected block_owner
 
 		if (num_samples)
 		{
-			block.m_end = block.buffer_begin() + (num_samples * m_samplesize);
+			block.m_end = block.m_start + (num_samples * m_samplesize);
 			consumer.ReceiveBlock( block);
 		}
 	}

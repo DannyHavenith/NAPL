@@ -6,6 +6,7 @@
 #ifndef _SIMPOPS_H_
 #define _SIMPOPS_H_
 
+#include "debugprint.h"
 #include "samplebl.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -196,6 +197,7 @@ public:
 
 	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
 	{
+        debugprint( "RequestBlock  paste_mutator (", (void*) this, ") (from ", (void*)&c, ") : start=", start, " num=", num);
 		// this is not quite thread-safe. This object keeps the requesting consumer in its
 		// state until the next call to RequestBlock
 		//
@@ -226,6 +228,7 @@ public:
 
 	virtual void ReceiveBlock( const sample_block &b)
 	{
+        assert(false);
 		// pass the block.
 		m_pConsumer->ReceiveBlock( b);
 	}

@@ -5,6 +5,7 @@
 #ifndef _SAMPLEBLOCK_H_
 #define _SAMPLEBLOCK_H_
 #include "architec.h"
+#include "debugprint.h"
 
 #include <boost/core/noncopyable.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -71,7 +72,7 @@ struct byte_buffer
         return m_ptr;
     }
 
-    size_t get_size()
+    size_t get_size() const
     {
         return m_size;
     }
@@ -171,7 +172,7 @@ struct sample_block
         return m_buffer_ptr->get_begin();
     }
 
-    size_t buffer_size()
+    size_t buffer_size() const
     {
         return m_buffer_ptr->get_size();
     }
@@ -221,23 +222,23 @@ public:
     //
     bool get_block( block_ptr_t &result)
     {
-        if (m_free_blocks.size())
-        {
-            result.swap( m_free_blocks.back());
-            m_free_blocks.pop_back();
-            result->Reset();
-            return true;
-        }
-        else
-        {
+        // if (m_free_blocks.size())
+        // {
+        //     result.swap( m_free_blocks.back());
+        //     m_free_blocks.pop_back();
+        //     result->Reset();
+        //     return true;
+        // }
+        // else
+        // {
             result.reset( new sample_block( m_block_size));
             return false;
-        }
+        // }
     }
 
     void release_block( block_ptr_t &block)
     {
-        m_free_blocks.push_back( block);
+        //m_free_blocks.push_back( block);
         block.reset();
     }
 
@@ -334,6 +335,11 @@ public:
     const_iterator begin() const
     {
         return (const_iterator)m_block.m_start;
+    }
+
+    iterator end()
+    {
+        return begin() + ((m_block.m_end - m_block.m_start)/sizeof( sample_type));
     }
 
     const_iterator end() const
@@ -934,6 +940,7 @@ private:
 class binary_block_processor: public block_producer, public block_multi_consumer
 {
 public:
+    virtual std::string GetName() const { return "unknown";};
 
     binary_block_processor()
         : m_left( *GetMcPtr(), 0), m_right( *GetMcPtr(), 1) {;}
@@ -969,15 +976,18 @@ public:
      */
     virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
     {
-        state_saver<block_consumer *> save( m_pConsumer);
-        m_pConsumer = &consumer;
+        debugprint( "RequestBlock binary_block_processor (", this->GetName(), ", ", (void*) this, ") (from ", (void*)&consumer, ") , start = ", start, ", num = ", num);
 
+        state_saver<block_consumer *> save( m_pConsumer);
+        state_saver<sampleno> save2( m_currentLeft);
+        m_pConsumer = &consumer;
         m_currentLeft = start;
         return m_left.RequestBlock( start, num);
     }
 
     virtual void Seek( sampleno start)
     {
+        assert( false);
         m_currentLeft = start;
         m_left.GetProducer()->Seek( start);
         m_right.GetProducer()->Seek( start);
@@ -992,6 +1002,7 @@ public:
      */
     virtual void ReceiveBlock( const sample_block &b, short channel)
     {
+        debugprint( "ReceiveBlock binary_block_processor (", (void*) this, "), channel = ", channel, ", b.m_start = ", (void *)b.m_start, ", size = ", b.m_end - b.m_start, " block size = ", b.buffer_size());
         // if we receive a block from our zero channel, it's time to request the corresponding
         // data from our one channel.
         if (0 == channel)
@@ -1033,7 +1044,10 @@ protected:
     block_connector m_left;
     block_connector m_right;
 };
-
+/**
+ *
+ *
+ */
 class owning_binary_block_processor : public block_producer, public block_multi_consumer
 {
 public:
@@ -1134,6 +1148,10 @@ template< typename symmetric_mutator>
 struct binary_block_mutator :
     public asymmetric_binary_block_mutator< symmetric_mutator_adapter< symmetric_mutator> >
 {
+    std::string GetName() const override
+    {
+        return MakeName( (const symmetric_mutator *)nullptr);
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1175,6 +1193,17 @@ public:
     }
 };
 
+template< typename T>
+std::string MakeName( const T *)
+{
+    return "unknown";
+}
+
+template <typename T>
+std::string MakeName( const mut_add<T> *)
+{
+    return "mut_add";
+}
 template<>
 class mut_add<double>
 {

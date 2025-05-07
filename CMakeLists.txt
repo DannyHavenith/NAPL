@@ -7,7 +7,7 @@
 ## This is the main CMakeLists file for the napl project.
 
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.28)
 
 project(napl)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
@@ -21,10 +21,10 @@ target_compile_features(
 
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREAD ON)
-FIND_PACKAGE( Boost)
+FIND_PACKAGE( Boost CONFIG)
 
 IF(${Boost_MINOR_VERSION} GREATER 34 AND NOT WIN32)
-	FIND_PACKAGE( Boost COMPONENTS python serialization system filesystem)
+	FIND_PACKAGE( Boost CONFIG COMPONENTS python serialization system filesystem)
 ENDIF (${Boost_MINOR_VERSION} GREATER 34 AND NOT WIN32)
 
 include_directories( ${napl_SOURCE_DIR}/include)

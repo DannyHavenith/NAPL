@@ -51,6 +51,67 @@ struct track
     bars_vector bars;
 };
 
+inline std::ostream &print(std::ostream &os, const note &n)
+{
+    os << n.name << "(" << n.seconds << ")";
+    return os;
+}
+
+inline std::ostream &print(std::ostream &os, const note_vector &nv)
+{
+    for (const auto &n : nv)
+    {
+        print(os, n) << " ";
+    }
+    return os;
+}
+
+inline std::ostream &print(std::ostream &os, const measure &m)
+{
+    os << "MEASURE:\n";
+    os << "ANACRUSIS: " << m.anacrusis_index << "\n";
+    print(os, m.notes);
+    os << "\n";
+    return os;
+}
+
+inline std::ostream &print(std::ostream &os, const repeated_measure &rm)
+{
+    os << "REPEATED MEASURE:\n";
+    os << "REPEAT: " << rm.repeat_count << "\n";
+    print(os, static_cast<const measure &>(rm));
+    return os;
+}
+
+inline std::ostream &print(std::ostream &os, const bar &b)
+{
+    os << "BAR: " << b.bar_name << "\n";
+    os << "INSTRUMENT: " << b.instrument_name << "\n";
+    for (const auto &rm : b.measures)
+    {
+        print(os, rm);
+    }
+    return os;
+}
+
+inline std::ostream &print(std::ostream &os, const bars_vector &bv)
+{
+    for (const auto &b : bv)
+    {
+        print(os, b);
+    }
+    return os;
+}
+
+inline std::ostream &print(std::ostream &os, const track &t)
+{
+    os << "TRACK: " << t.name << "\n";
+    os << "SECTION: " << t.section << "\n";
+    os << "COMMENT: " << t.comment << "\n";
+    print(os, t.bars);
+    return os;
+}
+
 class track_builder
 {
 public:
