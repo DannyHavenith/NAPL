@@ -158,9 +158,6 @@ namespace
             compressed_notes.push_back( last_note);
         }
 
-        std::cout << "Compressed Notes:" << std::endl;
-        print( std::cout, compressed_notes) << std::endl;
-
         std::transform( compressed_notes.begin(), compressed_notes.end(), std::back_inserter( sounds),
             [&instrument]( const note &note)
             {
@@ -354,8 +351,6 @@ void track_builder::end_track()
 
     if (not current_track.bars.empty())
     {
-        print( std::cout, current_track);
-        std::cout << std::endl;
         write_track( current_track, instruments);
         current_track = {};
     }
