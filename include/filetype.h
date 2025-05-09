@@ -23,12 +23,12 @@
 class file_block_producer : public creative_block_producer
 {
 public:
-	virtual void GetStreamHeader( stream_header &h)
+	void GetStreamHeader( stream_header &h) override
 	{
 		h = m_stStreamHeader;
 	}
 
-        file_block_producer( FILE *fp, const stream_header &h, unsigned long offset) :
+    file_block_producer( FILE *fp, const stream_header &h, unsigned long offset) :
 		m_pFile( fp), m_stStreamHeader( h)
 	{
 		m_nBytesPerSample = (short)(h.get_sample_size() / 8 * h.numchannels);
@@ -45,12 +45,12 @@ protected:
 	//
 	// hot spots that fill in the real functionality of this particular class
 	//
-	virtual void Seek( sampleno start)
+	void Seek( sampleno start) override
 	{
 		fseek( m_pFile, m_nFileOffset + start * m_nBytesPerSample, SEEK_SET);
 	}
 
-	virtual sampleno FillBlock( sample_block &b, sampleno count)
+	sampleno FillBlock( sample_block &b, sampleno count) override
 	{
 		if (count * m_nBytesPerSample > b.buffer_size())
 		{

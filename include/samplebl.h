@@ -5,10 +5,10 @@
 #ifndef _SAMPLEBLOCK_H_
 #define _SAMPLEBLOCK_H_
 #include "architec.h"
-#include "debugprint.h"
 
+#include <algorithm>
 #include <boost/core/noncopyable.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <cassert>
 #include <memory>
 #include <stddef.h>
 #include <vector>
@@ -139,28 +139,47 @@ public:
 struct sample_block
 {
     typedef byte_buffer::byte_type byte_type;
-    typedef boost::shared_ptr< byte_buffer> buffer_ptr_type;
+    typedef std::shared_ptr< byte_buffer> buffer_ptr_type;
 
 
-    inline sample_block(){};
+    sample_block(){};
+    sample_block( buffer_ptr_type buffer)
+    :    m_buffer_ptr( std::move( buffer))
+    {
+        Reset();
+    }
 
-    inline sample_block( size_t size)
+    sample_block( size_t size)
     {
         Init( buffer_ptr_type( buffer_allocator::get_instance().create_buffer( size)));
     }
 
-    inline sample_block( buffer_ptr_type buffer)
+    void Init( buffer_ptr_type buffer)
     {
-        Init( buffer);
-    }
-
-    inline void Init( buffer_ptr_type buffer)
-    {
-        m_buffer_ptr =  buffer;
+        m_buffer_ptr =  std::move( buffer);
         Reset();
     }
 
-    inline void Reset()
+    /**
+     * Ensure that the size of the block is at most the given size.
+     *
+     * The block size could be smaller if it was smaller to begin with.
+     */
+    void Truncate( size_t size)
+    {
+        m_end = m_start + std::min( size, m_buffer_ptr->get_size());
+    }
+
+    /**
+     * return the amount of bytes in the block.
+     *
+     */
+    std::size_t size() const
+    {
+        return m_end - m_start;
+    }
+
+    void Reset()
     {
         m_start = m_buffer_ptr->get_begin();
         m_end = m_start + m_buffer_ptr->get_size();
@@ -206,8 +225,7 @@ struct sample_block
 class block_manager
 {
 public:
-    typedef boost::shared_ptr<sample_block> block_ptr_t;
-    typedef std::vector< block_ptr_t> block_list_t;
+
 
     block_manager( size_t size)
         : m_block_size( size)
@@ -220,26 +238,20 @@ public:
     // returns false if the block is new (un-initialized) and true
     // if it is a re-used block.
     //
-    bool get_block( block_ptr_t &result)
+    sample_block get_block()
     {
-        // if (m_free_blocks.size())
-        // {
-        //     result.swap( m_free_blocks.back());
-        //     m_free_blocks.pop_back();
-        //     result->Reset();
-        //     return true;
-        // }
-        // else
-        // {
-            result.reset( new sample_block( m_block_size));
-            return false;
-        // }
-    }
+        std::shared_ptr<byte_buffer> buffer;
+        if (m_free_buffers.size())
+        {
+            buffer.swap( m_free_buffers.back());
+            m_free_buffers.pop_back();
+        }
+        else
+        {
+            buffer = std::make_shared< byte_buffer>( m_block_size);
+        }
 
-    void release_block( block_ptr_t &block)
-    {
-        //m_free_blocks.push_back( block);
-        block.reset();
+        return {buffer};
     }
 
     size_t get_block_size() const
@@ -248,54 +260,12 @@ public:
     }
 
 private:
-    block_list_t m_free_blocks;
+    using buffer_list_t = std::vector< std::shared_ptr<byte_buffer>>;
+    buffer_list_t m_free_buffers;
     size_t m_block_size;
-
 };
 
 
-/**
- * \ingroup Napl
- * block handles obtain a block from a block manager and
- * return that block when their lifetime is over.
- *
- * \version 1.0
- * first version
- *
- * \date 12-21-2004
- *
- * \author Danny
- *
- *
- */
-class block_handle : public boost::noncopyable
-{
-    block_manager *m_manager_ptr;
-    block_manager::block_ptr_t m_current_block;
-    bool m_initialized;
-
-public:
-    block_handle( block_manager *manager)
-        : m_manager_ptr( manager)
-    {
-        m_initialized = manager->get_block( m_current_block);
-    }
-
-    ~block_handle()
-    {
-        m_manager_ptr->release_block( m_current_block);
-    }
-
-    sample_block &get_block()
-    {
-        return *m_current_block;
-    }
-
-    bool is_initialized()
-    {
-        return false;
-    }
-};
 
 /**
  * \ingroup Napl
@@ -345,6 +315,11 @@ public:
     const_iterator end() const
     {
         return begin() + ((m_block.m_end - m_block.m_start)/sizeof( sample_type));
+    }
+
+    std::size_t size() const
+    {
+        return end() - begin();
     }
 };
 
@@ -461,16 +436,13 @@ class block_producer
 public:
     /**
      * Request samples from the producer.
-     * Normally, a producer should react on this request by calling the consumers
-     * ReceiveBlock-method with the requested sample data.
-     * It is left to the producers discretion to divide the sample data over more than
-     * one block and call the consumers ReceiveBlock method consecutively.
-     * \param &consumer [in] The consumer in which to call ReceiveBlock
-     * \param start [in] zero-based index of first sample
-     * \param num  [in] number of samples to retreive.
-     * \return Either returns BLOCK_ERROR when something failed, or zero if successfull
+     *
+     * The producer will return a block that
+     * contains at least the sample at index 'start' and that may contain less
+     * than 'num' samples, but not more. It is up to the caller to repeatedly
+     * call this function until all samples are received.
      */
-    virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num) = 0;
+    virtual sample_block RequestBlock( sampleno start, unsigned long num) = 0;
 
     /**
      * Get the stream metadata, such as samplerate, samplesize, etc.
@@ -478,33 +450,15 @@ public:
      */
     virtual void GetStreamHeader( stream_header &h) = 0;
 
+    virtual ~block_producer() = default;
 
-    /**
-     * DEPRECATED: Seek to a sample offset.
-     * \param start offset
-     */
-    virtual void Seek( sampleno start) = 0;
-
-    /**
-     * Notify a producer that it should be expecting calls from this consumer.
-     * Please note that this is a hint only. One producer may have multiple consumers.
-     * Do not rely on the m_pConsumer member to point to the one and only consumer.
-     * \param *pC [in] The consumer to which this producer is linked.
-     */
-    virtual void LinkToConsumer( block_consumer *pC)
-    {
-        m_pConsumer = pC;
-    }
-
-    virtual ~block_producer(){};
-
-protected:
-    block_consumer *m_pConsumer;
 };
+
+using block_producer_ptr = std::shared_ptr<block_producer>;
 
 
 // forward declaration of a function that is defined in objfact.cpp
-extern block_producer *GlobalGetEndianConverter( const stream_header &h, block_producer *pP);
+extern block_producer_ptr GlobalGetEndianConverter( const stream_header &h, block_producer_ptr pP);
 
 
 /**
@@ -524,19 +478,22 @@ extern block_producer *GlobalGetEndianConverter( const stream_header &h, block_p
 class block_consumer
 {
 public:
+
     /**
      * normal c'tor, nothing fancy
      */
     block_consumer()
     {};
 
+    virtual ~block_consumer() = default;
+
     /**
      * construct and link to a producer
      * \param *p [in] producer to link to
      */
-    block_consumer( block_producer *p)
+    block_consumer( block_producer_ptr p)
     {
-        LinkTo( p);
+        LinkTo( std::move( p));
     }
 
     /**
@@ -545,31 +502,13 @@ public:
      * of the producer and add an endian-converter if needed.
      * \param *p [in] producer to link to
      */
-    virtual void LinkTo( block_producer *p)
+    virtual void LinkTo( block_producer_ptr p)
     {
-        m_pProducer = CheckArchitecture( p);
-        NotifyProducer();
+        m_pProducer = CheckArchitecture( std::move(p));
     }
 
-    /**
-     * Receive a block of sample data.
-     * Producers will react on a RequestBlock-call by calling the consumers
-     * ReceiveBlock a number of times with blocks of data.
-     * Implement this function for your specific producer implementation.
-     * \param &b [in] a block of data.
-     */
-    virtual void ReceiveBlock( const sample_block &b) = 0;
 
-    /**
-     * Notify a producer that it was linked to this consumer
-     */
-    virtual void NotifyProducer()
-    {
-        if (m_pProducer)
-            m_pProducer->LinkToConsumer( this);
-    }
 
-    virtual ~block_consumer(){};
 protected:
     //
     // the architecture of this consumer is the architecture of the local machine
@@ -583,7 +522,7 @@ protected:
      * \return eiter the original producer pointer, or a pointer to an endian-converter that
      * has been linked to the producer.
      */
-    virtual block_producer *CheckArchitecture( block_producer *pP)
+    virtual block_producer_ptr CheckArchitecture( block_producer_ptr pP)
     {
         stream_header h;
         if (pP)
@@ -599,8 +538,15 @@ protected:
             else return pP;
         }
         return pP;
+
     }
-    block_producer *m_pProducer;
+
+    block_producer &GetProducer()
+    {
+        return *m_pProducer;
+    }
+
+    block_producer_ptr m_pProducer;
 
 };
 
@@ -623,10 +569,41 @@ protected:
 class block_sink : public block_consumer
 {
 public:
+
+    virtual void Start() = 0;
+
+protected:
+
     /**
      * Start retrieving data from a producer.
      */
-    virtual void Start() = 0;
+     void FetchAll()
+     {
+         if (m_pProducer)
+         {
+             stream_header h;
+             m_pProducer->GetStreamHeader( h);
+
+             sampleno framesLeft = h.numframes;
+             sampleno currentOffset = 0;
+             while (framesLeft > 0)
+             {
+                 const auto block = m_pProducer->RequestBlock( currentOffset, framesLeft);
+                 ReceiveBlock( block);
+                 const auto frame_count = SampleCount( block, h);
+                 currentOffset += frame_count;
+                 framesLeft -= frame_count;
+             }
+         }
+     }
+
+     virtual void ReceiveBlock( const sample_block &b) = 0;
+
+private:
+    static sampleno SampleCount( const sample_block &b, const stream_header &h)
+    {
+        return (b.size()) / h.frame_size();
+    }
 };
 
 
@@ -680,53 +657,43 @@ public:
         // nop
     }
 
+
     /**
-     * Request a block of data.
-     * This implementation of the RequestBlock method will call the 'FillBlock' virtual function,
-     * which enables derived classes to fill the blocks with actual sample data.
+    * Request a block of data.
+    * This implementation of the RequestBlock method will call the 'FillBlock' virtual function,
+    * which enables derived classes to fill the blocks with actual sample data.
      * \param &consumer
      * \param start
      * \param num
      * \return
      */
-    virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
-    {
+     sample_block RequestBlock( sampleno start, unsigned long num) override
+     {
 
-        unsigned long nToGo = num;
-        unsigned long nReceived;
+         unsigned long nReceived;
 
-        Seek( start);
+         Seek( start);
 
-        block_handle h( this); // releases the block on exit
-        sample_block &block( h.get_block());
-        if (!h.is_initialized())
-        {
-            InitBlock( block);
-        }
+         sample_block block{ get_block()};
+         InitBlock( block);
 
-
-        while ( nToGo && (nReceived = FillBlock( block, nToGo)))
-        {
-            nToGo -= nReceived;
-            consumer.ReceiveBlock( block);
-        }
-
-        if (!nToGo) return 0;
-        else return BLOCK_ERROR;
+         nReceived = FillBlock( block, num);
+        return block;
     }
 
 protected:
 
-    /**
-     * Fill a block with new sample data.
-     * Implement this virtual method in a concrete creative block producer.
-     *
-     * \param &b [out] block to fill with data
-     * \param count requested sampledata
-     * \return
-     */
-    virtual sampleno FillBlock( sample_block &b, sampleno count) = 0;
+        /**
+        * Fill a block with new sample data.
+        * Implement this virtual method in a concrete creative block producer.
+        *
+        * \param &b [out] block to fill with data
+        * \param count requested sampledata
+        * \return
+        */
+        virtual sampleno FillBlock( sample_block &b, sampleno count) = 0;
 
+        virtual void Seek( sampleno start) = 0;
 
     /**
      * Initialize a newly created block.
@@ -740,38 +707,6 @@ protected:
     block_result m_result;
 };
 
-/**
- * \ingroup Napl
- * helper class that can save the state of some member during
- * a function call and restore that state after the function call*
- *
- * \version 1.0
- * first version
- *
- * \date 12-22-2004
- *
- * \author Danny
- *
- *
- */
-template<typename T>
-struct state_saver
-{
-    T value;
-    T &reference;
-
-    state_saver( T &origin_)
-        : reference( origin_),
-        value( origin_)
-    {
-        // nop
-    }
-
-    ~state_saver()
-    {
-        reference = value;
-    }
-};
 
 /**
  * \ingroup Napl
@@ -788,14 +723,9 @@ struct state_saver
  *
  */
 template< class sample_mutator, class interface_type = block_mutator>
-class uniform_block_mutator: public interface_type
+class uniform_block_mutator: public interface_type, private block_owner
 {
 public:
-
-    virtual void Seek( sampleno start)
-    {
-        interface_type::m_pProducer->Seek( start);
-    }
 
     // just relay the header request to our producer.
     virtual void GetStreamHeader( stream_header &h)
@@ -812,31 +742,20 @@ public:
      * \param num
      * \return
      */
-    virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
+    sample_block RequestBlock( sampleno start, unsigned long num) override
     {
-        // this is not quite thread-safe. This object keeps the requesting consumer in it's
-        // state until the next call to RequestBlock
-        //
-        // each thread should have it's own mutator...
-        state_saver<block_consumer *> save( interface_type::m_pConsumer);
-        interface_type::m_pConsumer = &c;
+        using sample_type = typename sample_mutator::sample_type;
 
-        // relay the block request
-        return interface_type::m_pProducer->RequestBlock( *this, start, num);
-    }
+        auto destination_block = get_block();
+        sample_container<sample_type> destination{ destination_block};
 
-    virtual void ReceiveBlock( const sample_block &b)
-    {
-        typedef typename sample_mutator::sample_type sample_type;
-        sample_type
-            *pSample = reinterpret_cast<sample_type *>( b.m_start);
+        const auto source_block = interface_type::m_pProducer->RequestBlock( start, std::min( std::size( destination), num));
+        const sample_container< sample_type> source{ source_block};
+        destination_block.Truncate( source_block.size());
 
-        // give our mutator the opportunity to change each sample
-        while (pSample < reinterpret_cast<sample_type *>( b.m_end))
-            m_sample_mutator.Mutate( pSample++);
+        std::transform( source.begin(), source.end(), destination.begin(), m_sample_mutator);
 
-        // pass the changed block.
-        interface_type::m_pConsumer->ReceiveBlock( b);
+        return destination_block;
     }
 
 protected:
@@ -860,65 +779,6 @@ protected:
  *
  *
  */
-class block_multi_consumer
-{
-public:
-    /**
-     * The multi-consumer variant of the ReceiveBlock method has one
-     * extra parameter: the 'channel'. This channel identifies the source
-     * of the data.
-     * \param &b the parameter block, see also block_consumer
-     * \param channel the channel, see also block_connector
-     */
-    virtual void ReceiveBlock( const sample_block &b, short channel) = 0;
-
-protected:
-    //
-    // The GetMcPtr() - function enables derived classes to use a pointer to
-    // 'this' in their base member initialisation.
-    inline block_multi_consumer *GetMcPtr() { return this;}
-};
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//
-//
-/**
- * \ingroup Napl
- * block_connectors provide a standard block_consumer interface for each input
- * of a block_multi_consumer.
- *
- * \version 1.0
- * first version
- *
- * \date 12-24-2004
- *
- * \author Danny
- *
- *
- */
-class block_connector: public block_consumer
-{
-public:
-    block_connector( block_multi_consumer &parent, int channel)
-        :m_parent( parent), m_channel( channel) {};
-
-    virtual void ReceiveBlock( const sample_block &b)
-    {
-        m_parent.ReceiveBlock( b, m_channel);
-    }
-
-    block_result RequestBlock( sampleno start, unsigned long num)
-    {
-        return m_pProducer->RequestBlock( *this, start, num);
-    }
-
-    block_producer *GetProducer() { return m_pProducer;}
-
-private:
-    const short m_channel;
-    block_multi_consumer &m_parent;
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -937,21 +797,16 @@ private:
  *
  *
  */
-class binary_block_processor: public block_producer, public block_multi_consumer
+class binary_block_processor: public block_producer
 {
 public:
-    virtual std::string GetName() const { return "unknown";};
-
-    binary_block_processor()
-        : m_left( *GetMcPtr(), 0), m_right( *GetMcPtr(), 1) {;}
-
-    virtual void GetStreamHeader( stream_header &h)
+    void GetStreamHeader( stream_header &h) override
     {
 
         stream_header h1;
         stream_header h2;
-        m_left.GetProducer()->GetStreamHeader( h1);
-        m_right.GetProducer()->GetStreamHeader( h2);
+        m_left->GetStreamHeader( h1);
+        m_right->GetStreamHeader( h2);
 
         h = h2;
         if (h1.numframes < h2.numframes) h.numframes = h1.numframes;
@@ -974,129 +829,46 @@ public:
      * \param num
      * \return
      */
-    virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
+    sample_block RequestBlock( sampleno start, unsigned long num) override
     {
-        debugprint( "RequestBlock binary_block_processor (", this->GetName(), ", ", (void*) this, ") (from ", (void*)&consumer, ") , start = ", start, ", num = ", num);
+        assert( m_left && m_right);
 
-        state_saver<block_consumer *> save( m_pConsumer);
-        state_saver<sampleno> save2( m_currentLeft);
-        m_pConsumer = &consumer;
-        m_currentLeft = start;
-        return m_left.RequestBlock( start, num);
+        auto block_left = m_left->RequestBlock( start, num);
+        const std::size_t left_frame_count = block_left.size() / m_leftFrameSize;
+        auto block_right = m_right->RequestBlock( start, std::min( num, left_frame_count));
+
+        // make sure that the left block is the same size as the right block in the number of frames
+        block_left.Truncate( (block_right.size() / m_rightFrameSize) * m_leftFrameSize);
+
+        return ProcessBlocks( block_left, block_right);
+
     }
 
-    virtual void Seek( sampleno start)
+    virtual void LinkTo( block_producer_ptr pLeft, block_producer_ptr pRight)
     {
-        assert( false);
-        m_currentLeft = start;
-        m_left.GetProducer()->Seek( start);
-        m_right.GetProducer()->Seek( start);
-    };
-
-    /**
-     * If the block comes from the left-producer (channel 0), this function requests the corresponding
-     * block from the right-producer. If the block comes from the right-producer (channel 1) both
-     * the left- and the right block will be offered to the ProcessBlocks virtual function.
-     * \param &b
-     * \param channel
-     */
-    virtual void ReceiveBlock( const sample_block &b, short channel)
-    {
-        debugprint( "ReceiveBlock binary_block_processor (", (void*) this, "), channel = ", channel, ", b.m_start = ", (void *)b.m_start, ", size = ", b.m_end - b.m_start, " block size = ", b.buffer_size());
-        // if we receive a block from our zero channel, it's time to request the corresponding
-        // data from our one channel.
-        if (0 == channel)
-        {
-            m_leftBlock = b;
-//			if (b.m_end == b.m_start)
-//			{
-//				m_leftBlock = b;
-//			}
-            sampleno sample_count = (sampleno)((b.m_end - b.m_start) / m_leftFrameSize);
-            m_right.RequestBlock(
-                m_currentLeft,
-                sample_count);
-            m_currentLeft += sample_count;
-        }
-        else
-        {
-            assert( (m_leftBlock.m_end - m_leftBlock.m_start) / m_leftFrameSize >= (b.m_end - b.m_start )/m_rightFrameSize);
-//			m_leftBlock.m_end = m_leftBlock.m_start + (b.m_end - b.m_start);
-            ProcessBlocks( m_pConsumer, m_leftBlock, b);
-            m_leftBlock.m_start += ((b.m_end - b.m_start)/m_rightFrameSize) * m_leftFrameSize;
-        }
-    }
-
-    virtual void LinkTo( block_producer *pLeft, block_producer *pRight)
-    {
-        m_left.LinkTo( pLeft);
-        m_right.LinkTo( pRight);
+        m_left = std::move( pLeft);
+        m_right = std::move( pRight);
     }
 
 
 protected:
-    virtual void ProcessBlocks( block_consumer *pC, const sample_block &left, const sample_block &right) = 0;
+    /**
+     * Process the left and right input blocks and return the result in a new block.
+     *
+     * The left and right blocks are guaranteed to contain the same number of frames.
+     */
+    virtual sample_block ProcessBlocks( const sample_block &left, const sample_block &right) = 0;
 
-    sample_block m_leftBlock;
-    unsigned short m_leftFrameSize;
-    unsigned short m_rightFrameSize;
-    sampleno m_currentLeft;
-    block_connector m_left;
-    block_connector m_right;
+    unsigned short m_leftFrameSize{1};
+    unsigned short m_rightFrameSize{1};
+    block_producer_ptr m_left;
+    block_producer_ptr m_right;
 };
-/**
- *
- *
- */
-class owning_binary_block_processor : public block_producer, public block_multi_consumer
-{
-public:
-    using block_producer_ptr = std::shared_ptr<block_producer>;
-
-    owning_binary_block_processor( std::unique_ptr<binary_block_processor> p)
-        :processor( std::move( p))
-    {
-        // nop
-    }
-
-    void ReceiveBlock( const sample_block &b, short channel) override
-    {
-        processor->ReceiveBlock( b, channel);
-    }
-
-    void GetStreamHeader( stream_header &h) override
-    {
-        processor->GetStreamHeader( h);
-    }
-
-    block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num) override
-    {
-        return processor->RequestBlock( c, start, num);
-    }
-
-    void Seek( sampleno start) override
-    {
-        processor->Seek( start);
-    }
-
-    void LinkTo( block_producer_ptr pLeft, block_producer_ptr pRight)
-    {
-        processor->LinkTo( pLeft.get(), pRight.get());
-
-        producers[0] = std::move(pLeft);
-        producers[1] = std::move(pRight);
-    }
-
-private:
-    std::unique_ptr<binary_block_processor> processor;
-    std::array<block_producer_ptr, 2>       producers;
-};
-
 
 /**
  * \ingroup Napl
  * A binary_block_mutator is a binary_block_processor that delegates real
- * processing to a 'mutator' object that is given as a template parameter.
+ * processing to a 'mutator' objct that is given as a template parameter.
  * \version 1.0
  * first version
  *
@@ -1107,27 +879,35 @@ private:
  *
  */
 template <typename mutator>
-class asymmetric_binary_block_mutator : public binary_block_processor
+class asymmetric_binary_block_mutator : public binary_block_processor, private block_owner
 {
 public:
     typedef typename mutator::sample_type sample_type;
     typedef typename mutator::left_type left_type;
 
 protected:
-    virtual void ProcessBlocks( block_consumer *pConsumer, const sample_block &left, const sample_block &right)
+    sample_block ProcessBlocks( const sample_block &left, const sample_block &right) override
     {
+
+        auto result = get_block();
+        const auto samples = std::min( left.size() / sizeof( left_type), right.size() / sizeof( sample_type));
+        result.Truncate( samples * sizeof( sample_type));
+
+        sample_container< sample_type> result_samples{ result};
+
+
         left_type *pLeft = reinterpret_cast< left_type *>(left.m_start);
         sample_type *pRight = reinterpret_cast< sample_type *>(right.m_start);
-        sample_type *pEnd = reinterpret_cast< sample_type *>(right.m_end);
 
-        while (pRight != pEnd)
+        for ( auto resultValue = result_samples.begin(); resultValue != result_samples.end();)
         {
-            *pRight = m_mutator.Mutate( *pLeft, *pRight);
+            *resultValue = m_mutator.Mutate( *pLeft, *pRight);
+            ++resultValue;
             ++pRight;
             ++pLeft;
         }
 
-        pConsumer->ReceiveBlock( right);
+        return result;
     }
 
     virtual void MutateHeader( stream_header &result, const stream_header &left, const stream_header &right)
@@ -1148,10 +928,7 @@ template< typename symmetric_mutator>
 struct binary_block_mutator :
     public asymmetric_binary_block_mutator< symmetric_mutator_adapter< symmetric_mutator> >
 {
-    std::string GetName() const override
-    {
-        return MakeName( (const symmetric_mutator *)nullptr);
-    }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1193,17 +970,6 @@ public:
     }
 };
 
-template< typename T>
-std::string MakeName( const T *)
-{
-    return "unknown";
-}
-
-template <typename T>
-std::string MakeName( const mut_add<T> *)
-{
-    return "mut_add";
-}
 template<>
 class mut_add<double>
 {

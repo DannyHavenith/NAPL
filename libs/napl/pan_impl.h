@@ -1,3 +1,10 @@
+#ifndef NAPL_PAN_IMPL_H
+#define NAPL_PAN_IMPL_H
+
+#include "samplebl.h"
+#include "smputils.h"
+#include "samplety.h"
+
 //////////////////////////////////////////////
 // stereo panning
 // A stereo pan object receives stereo samples and performs panning
@@ -27,19 +34,17 @@ public:
 		// nop
 	}
 
-	inline void Mutate( sample_type *p_s)
+	sample_type operator()( const sample_type &input) const
 	{
 		if (m_pan_value< 0)
 		{
-			p_s->m_right = fixed_damp( 32768 + m_pan_value, p_s->m_right);
+            return { input.left(), fixed_damp( 32768 + m_pan_value, input.right())};
 		}
 		else
 		{
-			p_s->m_left = fixed_damp( 32767 - m_pan_value, p_s->m_left);
+            return { fixed_damp( 32767 - m_pan_value, input.left()), input.right()};
 		}
 	}
-
-	inline int GetResult() {return 0;}
 
 private:
 	short m_pan_value;
@@ -55,3 +60,5 @@ public:
 			m_sample_mutator.set_pan( pan_value);
 	};
 };
+
+#endif

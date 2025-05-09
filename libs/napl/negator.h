@@ -12,12 +12,11 @@ public:
 	}
 
 	// negate the sample value.
-	inline void Mutate( sample_type *p)
+	sample_type operator()( const sample_type &p) const
 	{
-		*p = sampletraits<sample_type>::negate( *p);
+		return sampletraits<sample_type>::negate( p);
 	}
 
-	inline int GetResult() { return 0;}
 };
 
 template< typename sampletype>

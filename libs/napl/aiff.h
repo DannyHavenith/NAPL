@@ -177,13 +177,13 @@ public:
 	{
 		m_pFile = file;
 	}
-	virtual void Start();
-	virtual void ReceiveBlock( const sample_block &b);
+	void Start() override;
+	void ReceiveBlock( const sample_block &b) override;
 
 	virtual ~aiff_block_sink();
 
 protected:
-	virtual unsigned long GetArchitecture();
+	unsigned long GetArchitecture() override;
 	FILE *m_pFile;
 	 AIFFFile * const m_FileObj;
 };

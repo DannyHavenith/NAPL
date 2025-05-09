@@ -1,3 +1,4 @@
+#include "samplebl.h"
 #if !defined( PROGRESS_H)
 #define PROGRESS_H
 
@@ -31,10 +32,8 @@ struct progress_monitor : public block_mutator
 	progress_monitor();
 
 	void Register( progress *progress_ptr);
-	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num);
-	virtual void GetStreamHeader( stream_header &h);
-	virtual void Seek( sampleno start);
-	virtual void ReceiveBlock( const sample_block &b);
+	sample_block RequestBlock( sampleno start, unsigned long num) override;
+	void GetStreamHeader( stream_header &h) override;
 
 private:
 	void broadcast_step( float step);

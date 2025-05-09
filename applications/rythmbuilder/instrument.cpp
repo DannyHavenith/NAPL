@@ -66,7 +66,7 @@ instrument::block_producer_ptr instrument::create_note( const std::string &name,
         if (needed_frames < h.numframes)
         {
             cut_mutator *cutter = new cut_mutator();
-            cutter->LinkTo( original.get());
+            cutter->LinkTo( original);
             cutter->SetCut( 0, needed_frames);
             new_note = block_producer_ptr( cutter);
         }
@@ -74,7 +74,7 @@ instrument::block_producer_ptr instrument::create_note( const std::string &name,
         {
             double original_seconds = (double( h.numframes)/h.samplerate);
             block_mutator *delay = factory_factory::GetSampleFactory( h)->GetDelay( 0, seconds - original_seconds);
-            delay->LinkTo( original.get());
+            delay->LinkTo( original);
             new_note = block_producer_ptr(  delay);
         }
         else

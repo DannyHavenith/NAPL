@@ -1,3 +1,6 @@
+#ifndef MEMORY_PRODUCER_H
+#define MEMORY_PRODUCER_H
+
 class memory_producer : public block_producer
 {
 private:
@@ -6,10 +9,10 @@ private:
 
 public:
 	memory_producer( const stream_header &h, unsigned char *memory);
-	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num);
-	virtual void GetStreamHeader( stream_header &h);
-
-	virtual void Seek( sampleno /*ignore*/){};
-
+	sample_block RequestBlock( sampleno start, unsigned long num) override;
+	void GetStreamHeader( stream_header &h) override;
 
 };
+
+#endif // MEMORY_PRODUCER_H
+

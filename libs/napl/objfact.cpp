@@ -6,6 +6,7 @@
 #include "general_resampler.h"
 #include "objfact.h"
 #include "convendi.h"
+#include "samplebl.h"
 #include "samplety.h"
 //#include "truncate.h"
 #include "uniform_block_converter.h"
@@ -152,7 +153,7 @@ sample_object_factory *factory_factory::GetSampleFactory( const stream_header &h
 }
 
 
-block_producer *GlobalGetEndianConverter( const stream_header &h, block_producer *pP)
+std::shared_ptr< block_producer> GlobalGetEndianConverter( const stream_header &h, std::shared_ptr< block_producer> pP)
 {
 	block_mutator *endianConverter;
 
@@ -162,5 +163,5 @@ block_producer *GlobalGetEndianConverter( const stream_header &h, block_producer
 
 	delete sof;
 
-	return endianConverter;
+	return std::shared_ptr< block_producer>{endianConverter};
 }

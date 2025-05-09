@@ -2,19 +2,18 @@
 //
 // Wav.cpp - definition of WAV-file functions
 //
-#include "stdafx.h"
 #include "wav.h"
 
 bool WAVHeader::Stream( FILE *file, const direction &d)
 {
 
-	return le_stream( file, ckID, d) && 
+	return le_stream( file, ckID, d) &&
 		le_stream( file, ckSize, d);
 };
 
 bool FormatChunk::Stream( FILE *file, const direction &d)
 {
-	bool bResult = 
+	bool bResult =
 		le_stream( file, header, d) &&
 		le_stream( file, format, d) &&
 		le_stream( file, nChannels, d) &&
@@ -37,7 +36,7 @@ bool WAVDataChunk::Stream( FILE *file, const direction &d)
 
 		// create a more flexible read:
 		// if the data chunk size is zero, it might be that some writing program crashed before it
-		// could write the chunk length to the file. To handle this type of data, we assume that the 
+		// could write the chunk length to the file. To handle this type of data, we assume that the
 		// rest of the file is the data chunk, but only IF the ckSize is zero...
 		if ( header.ckSize == 0)
 		{
@@ -86,9 +85,8 @@ void wav_block_sink::Start()
 		m_FileObj->Stream( m_pFile, streamable::output());
 
 		fseek( m_pFile, m_FileObj->dataChunk.GetDataOffset(), SEEK_SET);
-
-		m_pProducer->RequestBlock( *this, 0, h.numframes);
-	};
+        FetchAll();
+	}
 }
 
 

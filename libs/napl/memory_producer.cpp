@@ -10,15 +10,12 @@ memory_producer::memory_producer( const stream_header &h, unsigned char *memory)
 	// nop
 }
 
-block_result memory_producer::RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
+sample_block memory_producer::RequestBlock( sampleno start, unsigned long num)
 {
 	sample_block b( buffer_ptr);
 	b.m_start += (start * m_header.frame_size());
 	b.m_end = b.m_start + num * m_header.frame_size();
-
-	consumer.ReceiveBlock( b);
-
-	return 0;
+    return b;
 }
 
 void memory_producer::GetStreamHeader( stream_header &h)

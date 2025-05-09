@@ -134,14 +134,14 @@ public:
 	{
 		m_pFile = file;
 	}
-	virtual void Start();
-	virtual void ReceiveBlock( const sample_block &b);
+	void Start() override;
+	void ReceiveBlock( const sample_block &b) override;
 
-	virtual ~wav_block_sink();
+	~wav_block_sink() override;
 
 protected:
 	FILE *m_pFile;
-	 WAVFile * const m_FileObj;
+	WAVFile * const m_FileObj;
 };
 
 

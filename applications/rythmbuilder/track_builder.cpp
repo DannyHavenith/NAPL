@@ -22,7 +22,7 @@ namespace
 
     block_producer_ptr Concatenate( block_producer_ptr left, block_producer_ptr right)
     {
-        auto paster = std::make_shared<owning_paste_mutator>( std::make_unique<paste_mutator>());
+        auto paster = std::make_shared<paste_mutator>();
 
         paster->LinkTo( left, 0);
         paster->LinkTo( right, 1);
@@ -35,10 +35,10 @@ namespace
             stream_header h;
             left->GetStreamHeader( h);
             std::unique_ptr<sample_object_factory> factory_ptr{ factory_factory::GetSampleFactory( h)};
-            auto adder = std::make_shared<owning_binary_block_processor>(std::unique_ptr<binary_block_processor>{factory_ptr->GetAdder()});
+            auto adder = factory_ptr->GetAdder();
             adder->LinkTo( left, right);
 
-            return adder;
+            return block_producer_ptr{adder};
     }
 
     //
@@ -92,7 +92,7 @@ namespace
             for (iterator_t current = begin; current != end; ++current)
             {
                 std::shared_ptr<block_mutator> panner{ factory_ptr->GetPan( pan_position)};
-                panner->LinkTo( current->get());
+                panner->LinkTo( *current);
                 *destination++ = panner;
                 pan_position += step;
             }
@@ -213,7 +213,7 @@ namespace
         return notes;
     }
 
-    void write_file( const std::string &filename, block_producer *p)
+    void write_file( const std::string &filename, block_producer_ptr p)
     {
         std::unique_ptr<block_sink> file_writer{ filefactory::GetBlockSink( filename.c_str())};
 
@@ -248,13 +248,7 @@ namespace
             filename = track.section;
         }
 
-        int counter = 0;
-        for ( auto &bar : stereo_bars)
-        {
-            write_file( filename + "_" + std::to_string( ++counter) + ".wav", bar.get());
-        }
-
-        write_file( filename + ".wav", track_sounds.get());
+        write_file( filename + ".wav", track_sounds);
     }
 
 } // namespace

@@ -7,7 +7,7 @@
 
 bool ChunkHeader::Stream( FILE *file, const direction &d)
 {
-	return be_stream( file, ckID, d) && 
+	return be_stream( file, ckID, d) &&
 		be_stream( file, ckSize, d);
 };
 
@@ -56,8 +56,8 @@ void aiff_block_sink::Start()
 
 		fseek( m_pFile, m_FileObj->soundDataChunk.GetDataOffset(), SEEK_SET);
 
-		m_pProducer->RequestBlock( *this, 0, h.numframes);
-	};
+		FetchAll();
+	}
 }
 
 void aiff_block_sink::ReceiveBlock( const sample_block &b)
@@ -70,8 +70,8 @@ aiff_block_sink::~aiff_block_sink()
 	fclose( m_pFile);
 }
 
-unsigned long aiff_block_sink::GetArchitecture() 
-{ 
+unsigned long aiff_block_sink::GetArchitecture()
+{
 	return ARCHITECTURE_AIFF;
 }
 

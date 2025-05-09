@@ -16,7 +16,7 @@ progress_monitor::progress_monitor()
 {
 }
 
-// does not actually mutate blocks but just monitors the progress in 
+// does not actually mutate blocks but just monitors the progress in
 // the chain.
 void progress_monitor::Register( progress *progress_ptr)
 {
@@ -52,32 +52,29 @@ void progress_monitor::set_current_position( sampleno pos)
 }
 
 /**
- * block producer interface. 
+ * block producer interface.
  * delegate the request to the producer, but also note our current position.
  * \param &consumer - the requesting consumer
- * \param start 
- * \param num 
- * \return 
+ * \param start
+ * \param num
+ * \return
  */
-block_result progress_monitor::RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
+sample_block progress_monitor::RequestBlock( sampleno start, unsigned long num)
 {
-	state_saver< block_consumer *> saver( m_pConsumer);
-
-	m_pConsumer = &consumer;
 	m_current_position = start;
-	if (m_pProducer) 
+	if (m_pProducer)
 	{
 		set_current_position( start);
-		return m_pProducer->RequestBlock( *this, start, num);
+		return m_pProducer->RequestBlock( start, num);
 	}
-	return BLOCK_ERROR;
+	return {};
 }
 
 /**
  * block producer interface.
  * progress monitor will delegate this call to the real producer but eavesdrop
  * the number of frames.
- * \param &h 
+ * \param &h
  */
 void progress_monitor::GetStreamHeader( stream_header &h)
 {
@@ -86,33 +83,14 @@ void progress_monitor::GetStreamHeader( stream_header &h)
 	m_framesize = h.frame_size();
 }
 
-void progress_monitor::Seek( sampleno start)
-{
-	m_pProducer->Seek( start);
-}
-
-/**
- * receive a block, calculate the current position and 
- * broadcast progress.
- * \param &b 
- */
-void progress_monitor::ReceiveBlock( const sample_block &b)
-{
-	m_current_position += (b.m_end - b.m_start) / m_framesize;
-	set_current_position( m_current_position);
-	m_pConsumer->ReceiveBlock( b);
-}
-
-
-
 /**
  * the text-based progress bar is initially hidden.
  * Only if real 'progress' is detected, the progress bar will
  * show.
- * \param &text 
- * \param &strm 
- * \param size 
- * \return 
+ * \param &text
+ * \param &strm
+ * \param size
+ * \return
  */
 text_based_progress_bar::text_based_progress_bar( const std::string &text, std::ostream &strm, int size)
 :m_stream( strm), m_size( size), m_text( text), m_hidden( true)
@@ -122,9 +100,9 @@ text_based_progress_bar::text_based_progress_bar( const std::string &text, std::
 
 /**
  *	this function is called by a progress monitor when there is progress
- * to report. 
+ * to report.
  * the text based bar will show  a row of '*'-characters to indicate progress.
- * \param progress 
+ * \param progress
  */
 void text_based_progress_bar::step( float progress)
 {

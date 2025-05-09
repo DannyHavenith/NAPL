@@ -20,9 +20,5 @@
 #include <assert.h>
 
 
-// TODO: reference additional headers your program requires here
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 #endif // !defined(AFX_STDAFX_H__AD04CB03_D1B3_11D3_BD7D_0020185370F1__INCLUDED_)

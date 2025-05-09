@@ -1,3 +1,4 @@
+#include "samplebl.h"
 #if !defined( REINTERPRET_H)
 #define REINTERPRET_H
 
@@ -17,32 +18,23 @@ public:
 	{
 	}
 
-	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
+	sample_block RequestBlock( sampleno start, unsigned long num) override
 	{
-		return m_pProducer->RequestBlock( consumer, translate( start), translate( num));
+		return m_pProducer->RequestBlock( translate( start), translate( num));
 	};
 
-	virtual void GetStreamHeader( stream_header &h)
+	void GetStreamHeader( stream_header &h) override
 	{
 		h = m_header;
 	}
 
-	virtual void Seek( sampleno start)
+	void LinkTo( block_producer_ptr p) override
 	{
-		m_pProducer->Seek( translate( start));
-	}
-
-	virtual void LinkTo( block_producer *p)
-	{
-		m_pProducer = p;
+		block_consumer::LinkTo( std::move( p));
 		p->GetStreamHeader( m_original_header);
 		size_t total_length = m_original_header.frame_size() * m_original_header.numframes;
 		m_header.numframes = sampleno (total_length / m_header.frame_size());
-		NotifyProducer();
 	}
 
-	virtual void ReceiveBlock( const sample_block &b)
-	{
-	};
 };
 #endif //REINTERPRET_H

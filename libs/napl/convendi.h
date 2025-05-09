@@ -25,11 +25,11 @@ public:
 	}
 
 	// swap all byte positions.
-	inline void Mutate( sample_type *p_sample)
+	sample_type operator()( const sample_type &input_sample)
 	{
-
+        sample_type sample = input_sample;
 		char c;
-		char *p = (char *) p_sample;
+		char *p = (char *) &sample;
 		char *q = p + sizeof(sampletype) - 1;
 
 		//
@@ -41,10 +41,7 @@ public:
 			*p++ = *q;
 			*q-- = c;
 		}
-	}
-	inline int GetResult()
-	{
-		return 0;
+        return sample;
 	}
 };
 
@@ -62,11 +59,10 @@ public:
 	}
 
 	// swap all byte positions.
-	inline void Mutate( unsigned char *p)
+	sampletype_m8 operator()( sampletype_m8 p)
 	{
-		*p = ((short)(char)*p) + 128;
+		return ((short)(char)p) + 128;
 	}
-	inline int GetResult() {return 0;}
 };
 
 template< typename sampletype>

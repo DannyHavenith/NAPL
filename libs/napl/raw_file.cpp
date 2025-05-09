@@ -1,6 +1,4 @@
-#include "stdafx.h"
 #include "samplebl.h"
-#include "filetype.h"
 #include "raw_file.h"
 
 #include <fstream>
@@ -12,20 +10,14 @@ class raw_file_sink : public block_sink
 public:
 	raw_file_sink( const char *filename)
 		:file_(filename, std::ios::binary)
-	{
-	}
+	{}
 
-	virtual void Start()
-	{
-		if (m_pProducer)
-		{
-			stream_header h;
-			m_pProducer->GetStreamHeader( h);
-			m_pProducer->RequestBlock( *this, 0, h.numframes); 
-		}
-	};
+    void Start() override
+    {
+        FetchAll();
+    }
 
-	virtual void ReceiveBlock( const sample_block &b)
+	void ReceiveBlock( const sample_block &b) override
 	{
 		file_.write( reinterpret_cast< const char *>(b.m_start), b.m_end - b.m_start);
 	};

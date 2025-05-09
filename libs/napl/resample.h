@@ -38,11 +38,6 @@ public:
 		m_lieAboutSampleRate = lie;
 	}
 
-	virtual void Seek( sampleno start)
-	{
-		m_pProducer->Seek( start);
-	}
-
 	// when asked for a header give that of our producer, but alter the
 	// samplerate first
 	//
@@ -59,52 +54,47 @@ public:
 		h.numframes = (unsigned long)(((int64bit)h.numframes * m_outfreq) / (int64bit)m_infreq);
 	}
 
-	virtual inline block_result RequestBlock( block_consumer &c, sampleno start, unsigned long num)
+	sample_block RequestBlock( sampleno start, unsigned long num) override
 	{
+        return get_block();
 
+        // TODO: implement resampler again
 
-		state_saver<request_related_state> save( m_state);
-		state_saver<block_consumer *> save2( m_pConsumer);
-		m_state = request_related_state();
+        /*
+		sample_state = request_related_state();
 
-		block_handle h( this); // releases the block on exit
-		sample_block &block( h.get_block());
+		sample_block destination_block( get_block());
 
-		InitSendBlock( block);
-		m_pConsumer = &c;
+		InitSendBlock( destination_block);
 
-		m_state.m_inputAdvance = 1;
-		m_state.m_accumulator = (((unsigned long) start) * m_infreq) % m_outfreq;
+		sample_state.m_inputAdvance = 1;
+		sample_state.m_accumulator = (((unsigned long) start) * m_infreq) % m_outfreq;
 
 		// calculate the first and last sample that we need
 		sampleno input_start = static_cast<sampleno>((int64bit( start) * m_infreq) / int64bit( m_outfreq));
 		sampleno input_last = static_cast<sampleno>((int64bit( start + num -1) * m_infreq +  m_outfreq - 1)/ m_outfreq);
 
-		m_state.m_requestedSamples = input_last - input_start + 1;
-		m_state.m_outputSamples = num;
-		m_state.m_block_ptr = &block;
+		sample_state.m_requestedSamples = input_last - input_start + 1;
+		sample_state.m_outputSamples = num;
 
 		// relay the block request
-		return m_pProducer->RequestBlock( *this, input_start, m_state.m_requestedSamples);
-	}
+		const auto source_block =  m_pProducer->RequestBlock( *this, input_start, sample_state.m_requestedSamples);
 
-	virtual void ReceiveBlock( const sample_block &b)
-	{
 		// receiving a new block. copy relevant information into local variables.
 
 		// pCurrentSample always points to the rightmost sample (= the newest sample)
 		// that is of influence on the output-sample.
 		sampletype *pCurrentSample =
-			reinterpret_cast< sampletype *>( b.m_start);
+			reinterpret_cast< sampletype *>( source_block.m_start);
 		sampletype *pEnd=
-			reinterpret_cast< sampletype *>( b.m_end);
+			reinterpret_cast< sampletype *>( source_block.m_end);
 
-		m_state.m_requestedSamples -= (pEnd - pCurrentSample);
+		sample_state.m_requestedSamples -= (pEnd - pCurrentSample);
 
 		// return to the state we had at the end of the last block
-		unsigned long accumulator = m_state.m_accumulator;
-		unsigned long inputAdvance = m_state.m_inputAdvance;
-		sampletype previousSample = m_state.m_previousSample;
+		unsigned long accumulator = sample_state.m_accumulator;
+		unsigned long inputAdvance = sample_state.m_inputAdvance;
+		sampletype previousSample = sample_state.m_previousSample;
 
 		while (true)
 		{
@@ -118,19 +108,19 @@ public:
 					// if so, we need to store the last sample for calculations in the next
 					// block.
 					if (pCurrentSample == pEnd)
-						m_state.m_previousSample = *(pEnd - 1);
+						sample_state.m_previousSample = *(pEnd - 1);
 
-					if (m_state.m_requestedSamples)
+					if (sample_state.m_requestedSamples)
 					{
 						// there's, still samples to go. now store our state.
-						m_state.m_inputAdvance = pCurrentSample - pEnd;
-						m_state.m_accumulator = accumulator;
+						sample_state.m_inputAdvance = pCurrentSample - pEnd;
+						sample_state.m_accumulator = accumulator;
 					}
 					else
 					{
 						// send the last block
 						//
-						while (m_state.m_outputSamples)
+						while (sample_state.m_outputSamples)
 						{
 							EmitSample( *(pEnd - 1));
 						}
@@ -147,31 +137,33 @@ public:
 			inputAdvance = accumulator / m_outfreq;
 			accumulator %= m_outfreq;
 		}
+        */
 	}
 
 
 private:
+/*
 	inline void EmitSample( const sampletype &s)
 	{
-		if (m_state.m_outputSamples)
+		if (sample_state.m_outputSamples)
 		{
-		    *m_state.m_pOutputSample++ = s;
-			if (m_state.m_pOutputSample >= m_state.m_pEndOutput)
+		    *sample_state.m_pOutputSample++ = s;
+			if (sample_state.m_pOutputSample >= sample_state.m_pEndOutput)
 			{
 				// our block is full, send it
 				SendBlock();
-				m_state.m_pOutputSample = reinterpret_cast<sampletype *>(m_state.m_block_ptr->m_start);
+				sample_state.m_pOutputSample = reinterpret_cast<sampletype *>(sample_state.m_block_ptr->m_start);
 
 			}
-			--m_state.m_outputSamples;
+			--sample_state.m_outputSamples;
 		}
 	}
 
 	inline void SendBlock()
 	{
-		m_state.m_block_ptr->m_end = (unsigned char *)m_state.m_pOutputSample;
-		m_state.m_pOutputSample = (sampletype *)m_state.m_block_ptr->m_start;
-		if (m_state.m_block_ptr->m_end - m_state.m_block_ptr->m_start)
+		sample_state.m_block_ptr->m_end = (unsigned char *)sample_state.m_pOutputSample;
+		sample_state.m_pOutputSample = (sampletype *)sample_state.m_block_ptr->m_start;
+		if (sample_state.m_block_ptr->m_end - sample_state.m_block_ptr->m_start)
 		{
 			m_pConsumer->ReceiveBlock( *m_state.m_block_ptr);
 		}
@@ -180,12 +172,11 @@ private:
 
 	inline void InitSendBlock( sample_block &block)
 	{
-
 		block.m_buffer_ptr->m_size = (block.buffer_size()/sizeof( sampletype)) * sizeof( sampletype);
-		m_state.m_pEndOutput = (sampletype *)(block.m_end = block.buffer_begin() + block.buffer_size());
-		m_state.m_pOutputSample = (sampletype *)block.m_start;
+		sample_state.m_pEndOutput = (sampletype *)(block.m_end = block.buffer_begin() + block.buffer_size());
+		sample_state.m_pOutputSample = (sampletype *)block.m_start;
 	}
-
+*/
 	unsigned long m_infreq;
 	unsigned long m_outfreq;
 	bool m_lieAboutSampleRate;
@@ -213,7 +204,7 @@ private:
 		sample_block *m_block_ptr;
 	};
 
-	request_related_state m_state;
+	request_related_state sample_state;
 };
 
 #endif
