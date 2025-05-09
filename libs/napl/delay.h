@@ -1,3 +1,5 @@
+#ifndef DELAY
+#define DELAY
 #include "samplebl.h"
 #include <algorithm>
 struct delay_base : public block_mutator, protected block_owner
@@ -104,3 +106,6 @@ struct delay: public delay_base
     };
 
 };
+
+
+#endif /* DELAY */

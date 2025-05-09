@@ -1,3 +1,6 @@
+#ifndef UNIFORM_BLOCK_CONVERTER
+#define UNIFORM_BLOCK_CONVERTER
+
 #include "samplebl.h"
 template<typename type>
 struct size_code_converter
@@ -155,3 +158,5 @@ public:
 private:
 
 };
+
+#endif /* UNIFORM_BLOCK_CONVERTER */

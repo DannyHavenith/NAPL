@@ -1,5 +1,5 @@
-#ifndef STEREOMAKER_H
-#define STEREOMAKER_H
+#ifndef STEREOMAKER
+#define STEREOMAKER
 #include "samplebl.h"
 #include "samplety.h"
 
@@ -46,4 +46,4 @@ protected:
     }
 };
 
-#endif // STEREOMAKER_H
+#endif /* STEREOMAKER */

@@ -3,10 +3,13 @@
 
 
 ***********************************************************************************/
+
+#ifndef FOURIER
+#define FOURIER
 #define nsp_UsesAll
 #include "nsp.h"
 
-namespace 
+namespace
 {
 	//
 	// a crude but effective enough power of two...
@@ -21,9 +24,9 @@ namespace
 		}
 		return result;
 	}
-	
+
 	//
-	// All of these overloaded functions translate a signal of 2 ^ order real values into 
+	// All of these overloaded functions translate a signal of 2 ^ order real values into
 	// the FFT in an array of 2^order complex values.
 	//
 	inline void RealFFT( float *sample_ptr, size_t order, unsigned char *output_ptr)
@@ -31,13 +34,13 @@ namespace
 		nspsRealFftlNip( sample_ptr, (float *) output_ptr, order, NSP_Forw | NSP_OutRCPack); /* real values, single precision */
 		nspcbConjExtend1( (SCplx *) output_ptr , power2( order - 1) + 1); /* complex values; single precision */
 	}
-	
+
 	inline void RealFFT( double *sample_ptr, size_t order, unsigned char *output_ptr)
 	{
 		nspdRealFftlNip( sample_ptr, (double *) output_ptr, order, NSP_Forw | NSP_OutRCPack); /* real values, single precision */
 		nspzbConjExtend1( (DCplx *) output_ptr , power2( order - 1) + 1); /* complex values; single precision */
 	}
-	
+
 	inline void RealFFT( short *sample_ptr, size_t order, unsigned char *output_ptr)
 	{
 		int scale;
@@ -64,7 +67,7 @@ struct fft : public block_mutator, private block_owner
 		assert( false);
 	}
 
-	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num) 
+	virtual block_result RequestBlock( block_consumer &consumer, sampleno start, unsigned long num)
 	{
 		return m_pProducer->RequestBlock( *this, start, num);
 	}
@@ -78,7 +81,7 @@ struct fft : public block_mutator, private block_owner
 		h.architecture |= ARCHITECTURE_FREQUENCY_DOMAIN;
 	}
 
-	virtual void ReceiveBlock( const sample_block &b) 
+	virtual void ReceiveBlock( const sample_block &b)
 	{
 		sample_container< sample_type> container( b);
 		sample_container< sample_type>::iterator first_sample_it = container.begin();
@@ -94,10 +97,13 @@ struct fft : public block_mutator, private block_owner
 
 protected:
 	size_t m_order;
-	virtual unsigned long GetArchitecture() 
-	{ 
+	virtual unsigned long GetArchitecture()
+	{
 		return LOCAL_ARCHITECTURE | ARCHITECTURE_FREQUENCY_DOMAIN;
 	}
 private:
 };
 
+
+
+#endif /* FOURIER */
